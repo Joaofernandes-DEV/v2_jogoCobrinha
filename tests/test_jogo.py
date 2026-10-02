@@ -77,3 +77,16 @@ def test_opcao_nivel_comeca_direto_no_nivel():
         assert jogo.progresso.maior_nivel_liberado == 3
     finally:
         pygame.quit()
+
+
+def test_trocar_de_tela_comeca_com_fade(jogo):
+    jogo.trocar_estado(EstadoMenuPrincipal(jogo))
+    assert jogo.opacidade_fade == 1.0
+    jogo._desenhar()  # desenha com a camada de fade sem erro
+
+
+def test_tecla_m_silencia_em_qualquer_tela(jogo):
+    jogo.trocar_estado(EstadoMenuPrincipal(jogo))
+    pygame.event.post(pygame.Event(pygame.KEYDOWN, key=pygame.K_m))
+    jogo._processar_eventos()
+    assert jogo.audio.mudo

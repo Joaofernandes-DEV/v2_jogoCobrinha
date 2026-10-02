@@ -216,9 +216,9 @@ A conversão é `pixel = (coluna * 25, 50 + linha * 25)`, e a lógica nunca trab
 - **Sprites em 25 × 25 px nativos** (escala 1:1, sem `transform.scale`) e **paleta limitada** (até 16 cores, definida em `config.py` e usada também pela UI).
 - **Peças da cobra:** cabeça, corpo reto, corpo em curva, cauda e língua/olhos opcionais. As 4 direções são geradas por rotação de 90° (`pygame.transform.rotate`), que não distorce pixel art.
 - **Fundo, paredes e HUD desenhados por código** com a paleta (xadrez de grama em dois tons, I5), sem imagens de tela cheia.
-- **Fonte pixel** com licença livre (ex.: *Press Start 2P*, SIL OFL) em `assets/fontes/`.
+- **Fonte pixel** com licença livre em `assets/fontes/`: **VT323** (SIL OFL). A *Press Start 2P*, testada primeiro, foi descartada porque desenha as maiúsculas acentuadas encolhidas (Í parece "í") e Ó/Ô/Õ iguais às minúsculas, o que é inaceitável num jogo em português. Há um teste de regressão para isso.
 - **Tela cheia** via `pygame.SCALED`, que escala a imagem inteira mantendo os pixels nítidos.
-- **Ferramentas sugeridas:** LibreSprite ou Piskel (gratuitos) para os sprites e jsfxr para os efeitos sonoros no mesmo estilo retrô.
+- **Como os assets foram feitos:** sprites e sons são gerados por código (`ferramentas/gerar_sprites.py` e `ferramentas/gerar_sons.py`, determinísticos). Os PNGs/WAVs resultantes são os assets oficiais e podem ser retocados no LibreSprite/Piskel ou trocados por sons do jsfxr.
 - Créditos de fonte e sons listados no README.
 
 ### 8.4 Escopo de conteúdo da V2
@@ -253,7 +253,7 @@ Cada fase deixa o jogo **jogável** ao final.
 | **0. Fundação** ✅ | Esqueleto do projeto | E3, E5, E7, E1 (mínimo), paleta e grade (8.2) | `python -m cobrinha` abre a janela 800 × 600 com HUD e grade 32 × 22 desenhados e fecha sem erro; lint e CI passando. |
 | **1. Núcleo do jogo** ✅ | Domínio + estados | E1, E2, E4, E6, E8, D1–D5, J1, regra de vitória do J7 | Snake jogável com formas simples no lugar dos sprites, sem nenhum dos bugs B1–B7, com testes do domínio passando. |
 | **2. Jogabilidade essencial** ✅ | Fluxo da partida | J2, J3, J10, `--nivel` (E8) + menu inicial simples | Pausa, níveis com progressão sem interrupção, contagem 3‑2‑1 e menu para começar. |
-| **3. Interface** | Pixel art e som | I1–I8, D6 | Menus navegáveis, HUD em faixa, sprites pixel art com curvas, sons. |
+| **3. Interface** ✅ | Pixel art e som | I1–I8, D6 + tela de créditos | Menus navegáveis, HUD em faixa, sprites pixel art com curvas, sons. |
 | **4. Conteúdo** | Variedade | J4, J5, J6, J8, J9, I9, I10 | Níveis distintos, recordes salvos, opções persistentes. |
 | **5. Entrega** | Portfólio | Seção 7, I11 | README com GIF, CI verde, executável na *release* `v2.0.0`, LOG completo. |
 

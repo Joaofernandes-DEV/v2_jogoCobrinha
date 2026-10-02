@@ -7,13 +7,14 @@ múltiplos de 90°, a partir das 4 imagens-base geradas por ferramentas/gerar_sp
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from enum import Enum
 
 import pygame
 
 from cobrinha import recursos
+from cobrinha.config import ALTURA_HUD, TAMANHO_CELULA
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.ui.campo import celula_para_pixel
@@ -45,6 +46,9 @@ LADOS_CURVA_BASE = frozenset({Direcao.ESQUERDA, Direcao.BAIXO})
 
 # Comida "flutuando": sobe e desce 1 px.
 VELOCIDADE_FLUTUACAO = 4.0
+# A fruta dourada pisca quando está para sumir.
+AVISO_FRUTA_SUMINDO = 1.5  # segundos restantes
+PISCADAS_POR_SEGUNDO = 8
 
 
 @dataclass(frozen=True)
@@ -112,6 +116,8 @@ class Sprites:
             for angulo in (0, 90, 180, 270)
         }
         self.comida = recursos.imagem("comida")
+        self.comida_dourada = recursos.imagem("comida_dourada")
+        self.parede = recursos.imagem("parede")
 
     def desenhar_cobra(self, superficie: pygame.Surface, cobra: Cobra) -> None:
         # Da cauda para a cabeça, para a cabeça ficar sempre por cima.
@@ -119,6 +125,27 @@ class Sprites:
             superficie.blit(self._pecas[peca.tipo, peca.angulo], celula_para_pixel(peca.posicao))
 
     def desenhar_comida(self, superficie: pygame.Surface, posicao: Posicao, tempo: float) -> None:
+        self._desenhar_flutuando(superficie, self.comida, posicao, tempo)
+
+    def desenhar_fruta_dourada(
+        self, superficie: pygame.Surface, posicao: Posicao, tempo: float, tempo_restante: float
+    ) -> None:
+        sumindo = tempo_restante < AVISO_FRUTA_SUMINDO
+        if sumindo and int(tempo * PISCADAS_POR_SEGUNDO) % 2:
+            return
+        self._desenhar_flutuando(superficie, self.comida_dourada, posicao, tempo)
+
+    def desenhar_obstaculos(
+        self, superficie: pygame.Surface, obstaculos: Iterable[Posicao], topo: int = ALTURA_HUD
+    ) -> None:
+        """Pedras do nível. `topo` = 0 desenha numa superfície que é só o campo, sem o HUD."""
+        for posicao in obstaculos:
+            x = posicao.coluna * TAMANHO_CELULA
+            superficie.blit(self.parede, (x, topo + posicao.linha * TAMANHO_CELULA))
+
+    def _desenhar_flutuando(
+        self, superficie: pygame.Surface, imagem: pygame.Surface, posicao: Posicao, tempo: float
+    ) -> None:
         x, y = celula_para_pixel(posicao)
         deslocamento = round(math.sin(tempo * VELOCIDADE_FLUTUACAO))
-        superficie.blit(self.comida, (x, y + deslocamento))
+        superficie.blit(imagem, (x, y + deslocamento))

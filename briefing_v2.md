@@ -255,6 +255,6 @@ Cada fase deixa o jogo **jogável** ao final.
 | **2. Jogabilidade essencial** ✅ | Fluxo da partida | J2, J3, J10, `--nivel` (E8) + menu inicial simples | Pausa, níveis com progressão sem interrupção, contagem 3‑2‑1 e menu para começar. |
 | **3. Interface** ✅ | Pixel art e som | I1–I8, D6 + tela de créditos | Menus navegáveis, HUD em faixa, sprites pixel art com curvas, sons. |
 | **4. Conteúdo** ✅ | Variedade | J4, J5, J6, J8, J9, I9, I10, I11 (parcial) | Níveis distintos, recordes salvos, opções persistentes. |
-| **5. Entrega** | Portfólio | Seção 7, I11 | README com GIF, CI verde, executável na *release* `v2.0.0`, LOG completo. |
+| **5. Entrega** ✅ | Portfólio | Seção 7, I11 | README com GIF, CI verde, executável na *release* `v2.0.0`, LOG completo. |
 
 **Prioridade se o tempo apertar:** Fases 0–2 são o mínimo para a V2 valer como nova versão (como a V2 é reescrita do zero, os bugs B1–B7 são eliminados pelo próprio desenho da Fase 1); a Fase 3 é o que mais muda a percepção de qualidade; a Fase 4 pode ser cortada item a item.

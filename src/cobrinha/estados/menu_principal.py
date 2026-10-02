@@ -1,4 +1,4 @@
-"""Menu principal: jogar, escolher o nível inicial (entre os liberados), créditos e sair."""
+"""Menu principal: jogar, nível inicial (entre os liberados), modo, recordes, opções e créditos."""
 
 from __future__ import annotations
 
@@ -55,6 +55,9 @@ class EstadoMenuPrincipal(Estado):
             [
                 ItemMenu("JOGAR", acao=self._jogar),
                 ItemMenu(self._rotulo_nivel, acao=self._jogar, ajustar=self._mudar_nivel),
+                ItemMenu(self._rotulo_modo, acao=self._alternar_modo, ajustar=self._ajustar_modo),
+                ItemMenu("RECORDES", acao=lambda: navegacao.abrir_recordes(jogo)),
+                ItemMenu("OPÇÕES", acao=lambda: navegacao.abrir_opcoes(jogo)),
                 ItemMenu("CRÉDITOS", acao=lambda: navegacao.abrir_creditos(jogo)),
                 ItemMenu("SAIR", acao=jogo.sair),
             ],
@@ -74,6 +77,16 @@ class EstadoMenuPrincipal(Estado):
     def _mudar_nivel(self, delta: int) -> None:
         # Circula só entre os níveis já alcançados (J3).
         self.nivel_escolhido = (self.nivel_escolhido - 1 + delta) % self.niveis_liberados + 1
+
+    def _rotulo_modo(self) -> str:
+        return f"MODO: < {self.jogo.opcoes.modo_de_jogo.value.upper()} >"
+
+    def _alternar_modo(self) -> None:
+        # Só há dois modos: avançar ou voltar dá no mesmo. É salvo ao começar a partida.
+        self.jogo.opcoes.alternar_modo()
+
+    def _ajustar_modo(self, _delta: int) -> None:
+        self._alternar_modo()
 
     def _jogar(self) -> None:
         navegacao.iniciar_campanha(self.jogo, self.nivel_escolhido)
@@ -101,17 +114,18 @@ class EstadoMenuPrincipal(Estado):
             [
                 ("JOGO DA", TamanhoFonte.GRANDE, Paleta.BRANCO),
                 ("COBRINHA", TamanhoFonte.ENORME, Paleta.VERDE_CLARO),
-                ("V2", TamanhoFonte.MEDIO, Paleta.AMARELO),
+                ("V2", TamanhoFonte.PEQUENO, Paleta.AMARELO),
             ],
-            topo=36,
-            espaco=6,
+            topo=18,
+            espaco=2,
         )
-        self.menu.desenhar(superficie, topo=y + 16, espaco=14)
+        self.menu.desenhar(superficie, topo=y + 8, espaco=8)
 
         rodape = []
-        if self.jogo.progresso.recorde:
+        modo = self.jogo.opcoes.modo_de_jogo
+        if recorde := self.jogo.progresso.recorde(modo.name):
             rodape.append(
-                (f"RECORDE {self.jogo.progresso.recorde}", TamanhoFonte.PEQUENO, Paleta.AMARELO)
+                (f"RECORDE ({modo.value}): {recorde}", TamanhoFonte.PEQUENO, Paleta.AMARELO)
             )
         rodape.append(
             (

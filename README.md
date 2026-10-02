@@ -1,10 +1,17 @@
 # Jogo da Cobrinha — V2 🐍
 
 [![CI](https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/actions/workflows/ci.yml/badge.svg)](https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Joaofernandes-DEV/v2_jogoCobrinha)](https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/latest)
 
 Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-DEV/Py_JogoDaCobrinha), feito em Python + Pygame na disciplina de Computação Gráfica (UNIP).
 
-> **Status:** Fase 4 concluída. 3 níveis com obstáculos, fruta dourada, dois modos de jogo, recordes salvos e tela de opções. Falta a Fase 5 (entrega: executável e GIF). Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
+![Demonstração: menu, contagem do nível 2, partida com a maçã dourada e fim de jogo](docs/demo.gif)
+
+## Baixar e jogar (Windows)
+
+1. Baixe o **`Cobrinha.exe`** da [última release](https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/latest).
+2. Dê dois cliques. Não precisa instalar Python.
+3. Se o Windows mostrar "O Windows protegeu o computador" (SmartScreen), clique em **Mais informações → Executar assim mesmo**. O aviso aparece porque o executável não tem assinatura digital paga.
 
 ## O que muda na V2
 
@@ -13,7 +20,7 @@ Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-D
 - Menus navegáveis por teclado e mouse, pausa, recordes, sons e dois modos de jogo.
 - Correção dos bugs da V1 (fechamento com erro, grade desalinhada, meia-volta suicida etc.).
 
-## Como executar
+## Rodar pelo código-fonte
 
 Pré-requisito: [Python 3.11+](https://www.python.org/downloads/).
 
@@ -69,6 +76,7 @@ Os dados ficam em `%APPDATA%\Cobrinha\dados.json` no Windows (ou `~/.local/share
 python -m cobrinha --debug        # mostra FPS e tamanho da cobra
 python -m cobrinha --semente 42   # repete exatamente a mesma sequência de comidas
 python -m cobrinha --nivel 3      # pula o menu e começa direto no nível 3
+python -m cobrinha --fechar-em 5  # fecha sozinho depois de 5 s (teste automático)
 ```
 
 ## Desenvolvimento
@@ -85,6 +93,15 @@ Sprites e sons são gerados por código. Para recriá-los (o resultado é sempre
 python ferramentas/gerar_sprites.py   # PNGs 25 × 25 em src/cobrinha/assets/imagens/
 python ferramentas/gerar_sons.py      # WAVs em src/cobrinha/assets/sons/
 ```
+
+Executável e GIF de demonstração (precisam de `pip install -e ".[ferramentas]"`):
+
+```bash
+python ferramentas/empacotar.py       # dist/Cobrinha.exe, já testado ao final
+python ferramentas/gravar_demo.py     # docs/demo.gif, jogado por um piloto automático
+```
+
+**Publicar uma versão:** basta criar e enviar uma tag (ex.: `git tag v2.0.1 && git push origin v2.0.1`). O workflow `release.yml` roda os testes no Windows, gera e testa o executável e cria a release com ele anexado.
 
 O GitHub Actions roda lint e testes a cada push (Linux com Python 3.11–3.13 e Windows com 3.11).
 
@@ -110,7 +127,8 @@ src/cobrinha/
 ├── estados/         # telas: menu, recordes, opções, créditos, contagem, jogo, pausa, fim
 │   └── navegacao.py #   mapa de todas as trocas de tela
 └── ui/              # HUD, campo, sprites, menu, painéis, efeitos e texto
-ferramentas/         # geradores dos sprites e dos sons
+ferramentas/         # geradores de sprites e sons, empacotador e gravador do GIF
+docs/                # GIF de demonstração e notas das releases
 tests/               # pytest
 ```
 

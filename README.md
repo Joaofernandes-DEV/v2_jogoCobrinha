@@ -59,6 +59,7 @@ Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os p
 - **Modos de jogo** (escolha no menu): **Clássico**, em que bater na borda perde, e **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado. Pedras e o próprio corpo continuam valendo.
 - **Recordes:** os 5 melhores de cada modo ficam salvos, e os níveis alcançados ficam liberados no menu.
 - **Opções:** volume dos efeitos e da música, tela cheia e efeitos visuais (desligue para tirar o pisca-pisca e os textos de pontos).
+- **Música:** o menu tem a própria música, e cada fase tem uma diferente (dó maior alegre, ré menor sincopada, mi menor rápida). Ao bater, a música para na hora e só volta no menu.
 
 Os dados ficam em `%APPDATA%\Cobrinha\dados.json` no Windows (ou `~/.local/share/cobrinha/` no Linux/macOS).
 

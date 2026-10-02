@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from cobrinha.config import ALTURA_JANELA, Paleta
+from cobrinha.config import ALTURA_JANELA, Paleta, TamanhoFonte
 from cobrinha.dominio.niveis import proximo_nivel
 from cobrinha.estados import navegacao
 from cobrinha.estados.base import Estado
@@ -36,7 +36,8 @@ class EstadoNivelConcluido(Estado):
             [
                 ItemMenu("PRÓXIMO NÍVEL", acao=self._avancar),
                 ItemMenu("MENU PRINCIPAL", acao=self._ir_para_menu),
-            ]
+            ],
+            tocar=jogo.audio.tocar,
         )
 
     def tratar_evento(self, evento: pygame.Event) -> None:
@@ -56,15 +57,20 @@ class EstadoNivelConcluido(Estado):
         y = desenhar_linhas(
             superficie,
             [
-                (f"NÍVEL {self.nivel} CONCLUÍDO!", 56, Paleta.AMARELO),
-                (f"PONTOS {self.pontos}", 36, Paleta.BRANCO),
+                (f"NÍVEL {self.nivel} CONCLUÍDO!", TamanhoFonte.GRANDE, Paleta.AMARELO),
+                (f"PONTOS {self.pontos}", TamanhoFonte.MEDIO, Paleta.BRANCO),
                 (
-                    f"Próximo: nível {self.proximo.numero}, mais rápido "
-                    f"e com meta de {self.proximo.meta_comidas} comidas",
-                    22,
+                    f"Próximo: nível {self.proximo.numero}, mais rápido",
+                    TamanhoFonte.PEQUENO,
+                    Paleta.CINZA_CLARO,
+                ),
+                (
+                    f"Meta: {self.proximo.meta_comidas} comidas",
+                    TamanhoFonte.PEQUENO,
                     Paleta.CINZA_CLARO,
                 ),
             ],
-            ALTURA_JANELA // 2 - 150,
+            ALTURA_JANELA // 2 - 170,
+            espaco=22,
         )
-        self.menu.desenhar(superficie, topo=y + 20)
+        self.menu.desenhar(superficie, topo=y + 24)

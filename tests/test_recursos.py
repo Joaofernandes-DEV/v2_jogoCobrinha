@@ -10,7 +10,7 @@ from cobrinha.audio import ARQUIVO_MUSICA, Som
 from cobrinha.config import FREQUENCIA_AUDIO, TAMANHO_CELULA
 from cobrinha.ui.pecas import TipoPeca
 
-SPRITES = [tipo.value for tipo in TipoPeca] + ["comida"]
+SPRITES = [tipo.value for tipo in TipoPeca] + ["comida", "comida_dourada", "parede"]
 MAIUSCULAS_ACENTUADAS = "ÁÀÂÃÉÊÍÓÔÕÚÇ"
 
 
@@ -49,3 +49,37 @@ def test_fonte_tem_maiusculas_acentuadas_de_verdade(jogo):
     assert all(m is not None for m in fonte.metrics(MAIUSCULAS_ACENTUADAS))
     for maiuscula in MAIUSCULAS_ACENTUADAS:
         assert _glifo(fonte, maiuscula) != _glifo(fonte, maiuscula.lower()), maiuscula
+
+
+def _caracteres_exibidos() -> set[str]:
+    """Caracteres de todos os textos das telas e da interface (sem docstrings)."""
+    import ast
+    from pathlib import Path
+
+    pacote = Path(recursos.__file__).parent
+    caracteres: set[str] = set()
+    for arquivo in [*(pacote / "estados").glob("*.py"), *(pacote / "ui").glob("*.py")]:
+        arvore = ast.parse(arquivo.read_text(encoding="utf-8"))
+        docstrings = {
+            id(no.value)
+            for no in ast.walk(arvore)
+            if isinstance(no, ast.Expr) and isinstance(no.value, ast.Constant)
+        }
+        for no in ast.walk(arvore):
+            eh_texto = isinstance(no, ast.Constant) and isinstance(no.value, str)
+            if eh_texto and id(no) not in docstrings:
+                caracteres.update(no.value)
+    return {c for c in caracteres if not c.isspace()}
+
+
+def test_todo_caractere_exibido_tem_desenho_na_fonte(jogo):
+    """Regressão: as setas ← → tinham métricas na VT323, mas saíam em branco."""
+    fonte = recursos.fonte(32)
+    vazios = []
+    for caractere in sorted(_caracteres_exibidos()):
+        imagem = fonte.render(caractere, False, (255, 255, 255), (0, 0, 0))
+        largura, altura = imagem.get_size()
+        acesos = any(imagem.get_at((x, y))[0] for x in range(largura) for y in range(altura))
+        if not acesos:
+            vazios.append(caractere)
+    assert vazios == []

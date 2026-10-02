@@ -9,7 +9,17 @@ os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 import pygame  # noqa: E402 - precisa vir depois das variáveis de ambiente
 
+from cobrinha import recursos  # noqa: E402
 from cobrinha.jogo import Jogo  # noqa: E402
+from cobrinha.ui import texto  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def limpar_caches_do_pygame():
+    """Fontes e textos em cache pertencem ao pygame encerrado no fim de cada teste."""
+    yield
+    recursos.fonte.cache_clear()
+    texto.renderizar.cache_clear()
 
 
 @pytest.fixture

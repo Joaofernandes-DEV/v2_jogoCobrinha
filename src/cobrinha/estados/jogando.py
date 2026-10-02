@@ -2,7 +2,7 @@
 
 import pygame
 
-from cobrinha.audio import Som
+from cobrinha.audio import Som, musica_da_fase
 from cobrinha.config import (
     ALTURA_HUD,
     ALTURA_JANELA,
@@ -63,7 +63,8 @@ class EstadoJogando(Estado):
         self.tempo = 0.0  # para animações (comida flutuando)
         self.efeitos = Efeitos()
         self.tempo_ate_encerrar: float | None = None
-        jogo.audio.tocar_musica()
+        # A música muda ao sair do menu e a cada troca de fase.
+        jogo.audio.tocar_musica(musica_da_fase(self.partida.nivel.numero))
 
     def tratar_evento(self, evento: pygame.Event) -> None:
         if self.tempo_ate_encerrar is not None:
@@ -89,6 +90,9 @@ class EstadoJogando(Estado):
         comida_antes = self.partida.comida
         dourada_antes = self.partida.fruta_dourada
         for evento in self.partida.atualizar(dt):
+            if evento in (Evento.BATEU, Evento.VENCEU):
+                # Fim de jogo: a música para na hora e só volta no menu.
+                self.jogo.audio.parar_musica()
             if evento in SOM_DO_EVENTO:
                 self.jogo.audio.tocar(SOM_DO_EVENTO[evento])
             if evento is Evento.COMEU_DOURADA and dourada_antes:

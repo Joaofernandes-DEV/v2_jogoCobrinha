@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
+from cobrinha.audio import Musica
 from cobrinha.config import ALTURA_JANELA, Paleta, TamanhoFonte
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import GRADE_PADRAO, Direcao, Posicao
@@ -63,7 +64,7 @@ class EstadoMenuPrincipal(Estado):
             ],
             tocar=jogo.audio.tocar,
         )
-        jogo.audio.tocar_musica()
+        jogo.audio.tocar_musica(Musica.MENU)
 
     @property
     def niveis_liberados(self) -> int:

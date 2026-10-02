@@ -53,7 +53,7 @@ class EstadoPausa(Estado):
 
     def _reiniciar(self) -> None:
         self._deixar_pausa()
-        self.jogo.progresso.registrar_pontuacao(self.jogando.partida.pontos)
+        navegacao.registrar_resultado(self.jogo, self.jogando.partida)
         navegacao.iniciar_campanha(self.jogo, self.jogando.nivel_inicial)
 
     def _ir_para_menu(self) -> None:
@@ -61,7 +61,7 @@ class EstadoPausa(Estado):
         navegacao.abandonar_partida(self.jogo, self.jogando)
 
     def _sair(self) -> None:
-        self.jogo.progresso.registrar_pontuacao(self.jogando.partida.pontos)
+        navegacao.registrar_resultado(self.jogo, self.jogando.partida)
         self.jogo.sair()
 
     def desenhar(self, superficie: pygame.Surface) -> None:

@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from cobrinha.config import ALTURA_JANELA, Paleta
+from cobrinha.audio import Som
+from cobrinha.config import ALTURA_JANELA, Paleta, TamanhoFonte
 from cobrinha.estados import navegacao
 from cobrinha.estados.base import Estado
-from cobrinha.ui.menu import TECLAS_CONFIRMAR
+from cobrinha.ui.menu import BOTAO_ESQUERDO, TECLAS_CONFIRMAR
 from cobrinha.ui.painel import criar_veu, desenhar_linhas
 
 if TYPE_CHECKING:
@@ -28,24 +29,40 @@ class EstadoContagem(Estado):
         self.titulo = titulo
         self.tempo = 0.0
         self.veu = criar_veu(OPACIDADE_VEU)
+        self._ultima_etapa_tocada = -1
+        self._tocar_etapa()
+
+    @property
+    def indice_etapa(self) -> int:
+        return min(int(self.tempo / DURACAO_ETAPA), len(SEQUENCIA) - 1)
 
     @property
     def etapa_atual(self) -> str:
-        indice = min(int(self.tempo / DURACAO_ETAPA), len(SEQUENCIA) - 1)
-        return SEQUENCIA[indice]
+        return SEQUENCIA[self.indice_etapa]
 
     def tratar_evento(self, evento: pygame.Event) -> None:
         if evento.type == pygame.WINDOWFOCUSLOST:
             # Sem foco, a contagem não pode terminar e soltar a cobra: vira pausa.
             self.jogo.desempilhar()
             navegacao.pausar(self.jogo, self.jogando)
-        elif evento.type == pygame.KEYDOWN and evento.key in TECLAS_CONFIRMAR:
+        elif (evento.type == pygame.KEYDOWN and evento.key in TECLAS_CONFIRMAR) or (
+            evento.type == pygame.MOUSEBUTTONDOWN and evento.button == BOTAO_ESQUERDO
+        ):
             self._terminar()
 
     def atualizar(self, dt: float) -> None:
         self.tempo += dt
         if self.tempo >= DURACAO_ETAPA * len(SEQUENCIA):
             self._terminar()
+        else:
+            self._tocar_etapa()
+
+    def _tocar_etapa(self) -> None:
+        """Um bipe por número e um mais agudo no "JÁ!"."""
+        if self.indice_etapa != self._ultima_etapa_tocada:
+            self._ultima_etapa_tocada = self.indice_etapa
+            ultimo = self.indice_etapa == len(SEQUENCIA) - 1
+            self.jogo.audio.tocar(Som.CONTAGEM_JA if ultimo else Som.CONTAGEM)
 
     def _terminar(self) -> None:
         self.jogo.desempilhar()
@@ -54,7 +71,7 @@ class EstadoContagem(Estado):
         superficie.blit(self.veu, (0, 0))
         linhas = []
         if self.titulo:
-            linhas.append((self.titulo, 48, Paleta.BRANCO))
-        linhas.append((self.etapa_atual, 120, Paleta.AMARELO))
-        linhas.append(("ENTER: começar já", 22, Paleta.CINZA_CLARO))
-        desenhar_linhas(superficie, linhas, topo=ALTURA_JANELA // 2 - 130)
+            linhas.append((self.titulo, TamanhoFonte.TITULO, Paleta.BRANCO))
+        linhas.append((self.etapa_atual, TamanhoFonte.GIGANTE, Paleta.AMARELO))
+        linhas.append(("ENTER: começar já", TamanhoFonte.PEQUENO, Paleta.CINZA_CLARO))
+        desenhar_linhas(superficie, linhas, topo=ALTURA_JANELA // 2 - 130, espaco=28)

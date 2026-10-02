@@ -19,14 +19,21 @@ if TYPE_CHECKING:
 
 SEQUENCIA = ("3", "2", "1", "JÁ!")
 DURACAO_ETAPA = 0.6  # segundos por número
-OPACIDADE_VEU = 110
+OPACIDADE_VEU = 150
 
 
 class EstadoContagem(Estado):
-    def __init__(self, jogo: Jogo, jogando: EstadoJogando, titulo: str | None = None) -> None:
+    def __init__(
+        self,
+        jogo: Jogo,
+        jogando: EstadoJogando,
+        titulo: str | None = None,
+        subtitulo: str | None = None,
+    ) -> None:
         super().__init__(jogo)
         self.jogando = jogando
         self.titulo = titulo
+        self.subtitulo = subtitulo
         self.tempo = 0.0
         self.veu = criar_veu(OPACIDADE_VEU)
         self._ultima_etapa_tocada = -1
@@ -72,6 +79,8 @@ class EstadoContagem(Estado):
         linhas = []
         if self.titulo:
             linhas.append((self.titulo, TamanhoFonte.TITULO, Paleta.BRANCO))
+        if self.subtitulo:
+            linhas.append((self.subtitulo, TamanhoFonte.MEDIO, Paleta.VERDE_CLARO))
         linhas.append((self.etapa_atual, TamanhoFonte.GIGANTE, Paleta.AMARELO))
         linhas.append(("ENTER: começar já", TamanhoFonte.PEQUENO, Paleta.CINZA_CLARO))
-        desenhar_linhas(superficie, linhas, topo=ALTURA_JANELA // 2 - 130, espaco=28)
+        desenhar_linhas(superficie, linhas, topo=ALTURA_JANELA // 2 - 150, espaco=20)

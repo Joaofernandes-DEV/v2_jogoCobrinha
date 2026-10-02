@@ -194,3 +194,32 @@ Modelo:
 - **Remapeamento de teclas** (parte do I11) continua no backlog da V3, como definido na seção 8.4.
 - **Verificado localmente:** ruff sem apontamentos, 171 testes, jogo aberto com `-X dev` (menu e `--nivel 3 --debug`) usando uma pasta de dados temporária (nada foi gravado na pasta real do João) e capturas de todas as telas novas conferidas.
 - Próximo passo: **Fase 5** (entrega: executável Windows com PyInstaller, GIF de demonstração no README e release `v2.0.0`).
+
+### 2026-10-02 11:32 — Novo sistema de música (uma faixa por momento do jogo)
+
+**Feito** (pedido do João: música menos repetitiva):
+- **4 músicas** geradas por código em `ferramentas/gerar_sons.py`, cada uma com tom, andamento e timbre próprios. O gerador ganhou um "compositor" (`Faixa` + `compor`) no lugar da função única:
+
+  | Arquivo | Momento | Tom | Andamento | Duração do loop |
+  |---------|---------|-----|-----------|-----------------|
+  | `musica_menu.wav` | Menu, recordes, opções, créditos | lá menor (Am–F–C–G), calma | 140 bpm | 13,7 s |
+  | `musica_fase1.wav` | Fase 1, Campo aberto | dó maior (C–G–Am–F), alegre | 150 bpm | 12,8 s |
+  | `musica_fase2.wav` | Fase 2, Pedras no caminho | ré menor (Dm–B♭–F–C), sincopada | 160 bpm | 12,0 s |
+  | `musica_fase3.wav` | Fase 3, Labirinto | mi menor (Em–C–D–B), rápida e tensa | 172 bpm | 11,2 s |
+
+  A música do menu é **byte a byte idêntica** à antiga `musica.wav` (mesmo hash), que foi removida do repositório.
+- **Regras da música de fundo** (`src/cobrinha/audio.py`):
+  1. **Menu e telas ligadas a ele** tocam a música do menu (`Musica.MENU`).
+  2. **Ao sair do menu e a partida começar de fato**, a música muda para a da fase (`EstadoJogando` chama `tocar_musica(musica_da_fase(n))`).
+  3. **A cada troca de fase** a música alterna: fase 1 → 2 → 3. `musica_da_fase` reveza as faixas se um dia houver mais fases que músicas.
+  4. **Ao bater (game over)** a música **para na hora**, no mesmo passo da batida e antes da animação e da tela de fim (`parar_musica()`). O jogo fica em silêncio até voltar ao menu, onde a música do menu volta.
+  5. **Na pausa** a música pausa e continua de onde parou.
+- **API nova do `Audio`:** enum `Musica`; `tocar_musica(musica)` troca de faixa e não reinicia se ela já for a atual; `parar_musica()`; atributo `musica_atual` (None = silêncio), que segue correto mesmo sem saída de áudio. Saiu a constante `ARQUIVO_MUSICA`.
+- **Testes:** de 171 para **188**. Novo `tests/test_musica.py` (10, cobrindo a música em cada momento do jogo, inclusive "parou já na batida, antes da tela de fim"), `tests/test_audio.py` reescrito (6) e `tests/test_recursos.py` checando os 4 WAVs e que as músicas são diferentes entre si.
+
+**Arquivos:** `ferramentas/gerar_sons.py`, `src/cobrinha/assets/sons/musica.wav` (removido), `src/cobrinha/assets/sons/musica_menu.wav`, `musica_fase1.wav`, `musica_fase2.wav`, `musica_fase3.wav` (novos), `src/cobrinha/audio.py`, `src/cobrinha/estados/menu_principal.py`, `src/cobrinha/estados/jogando.py`, `tests/test_audio.py`, `tests/test_musica.py` (novo), `tests/test_recursos.py`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- **Interpretações** (o pedido não cobria esses casos): "Jogar de novo" direto da tela de fim **é** um começo de partida, então toca a música da fase (o silêncio vale para a tela de fim). A **vitória** também para a música, para a fanfarra de vitória soar sozinha.
+- **Nível medido no Windows** (pycaw, fora do projeto): as 4 músicas chegam com pico de 0,40 a 0,41 (nenhuma fase mais alta que outra) e, depois de `parar_musica()`, o pico vai a 0,00.
+- O `musica.wav` antigo saiu do repositório com `git rm --cached`, porque o jogo do João estava aberto e o Windows travava o arquivo. A cópia local pode ser apagada depois de fechar o jogo; ela não é mais usada.

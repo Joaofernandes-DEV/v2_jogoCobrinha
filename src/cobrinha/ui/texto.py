@@ -40,3 +40,8 @@ def desenhar_centralizado(
     superficie.blit(imagem, retangulo)
     altura_linha = recursos.fonte(tamanho).get_height()
     return pygame.Rect(retangulo.left, topo, retangulo.width, altura_linha)
+
+
+def limpar_cache() -> None:
+    renderizar.cache_clear()
+    _excesso_acima.cache_clear()

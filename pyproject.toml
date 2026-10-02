@@ -22,6 +22,9 @@ cobrinha = "cobrinha.__main__:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+cobrinha = ["assets/fontes/*", "assets/imagens/*.png", "assets/sons/*.wav"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

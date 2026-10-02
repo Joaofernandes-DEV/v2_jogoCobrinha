@@ -135,3 +135,27 @@ Modelo:
 - **Decisões de design:** a cobra volta ao tamanho inicial a cada nível (como no Snake clássico); "Jogar de novo" recomeça do nível escolhido no início da campanha, e não do nível em que o jogador morreu.
 - **Verificado localmente:** ruff sem apontamentos, 82 testes passando, jogo aberto de verdade (`python -m cobrinha` e `--nivel 3 --debug`) e capturas de todas as telas novas conferidas.
 - Próximo passo: **Fase 3** (pixel art, fonte pixel, menus com mouse, sons). Ela vai exigir baixar uma fonte de licença livre e criar ou baixar sons; vou pedir autorização antes de qualquer download.
+
+### 2026-10-02 09:41 — Fase 3 (pixel art, fonte, sons e menus com mouse)
+
+**Feito:**
+- **Sprites em pixel art (I3, I4):** `ferramentas/gerar_sprites.py` desenha pixel a pixel, com a paleta do jogo, os PNGs de 25 × 25: cabeça (olhos, narinas e língua), corpo reto (com escamas em "V"), curva, cauda e maçã (brilho, cabinho e folha). O jogo gera as 4 direções por rotação de 90° (16 superfícies preparadas uma vez).
+- **Peças da cobra:** `ui/pecas.py` escolhe, em função pura e testável, a peça e a rotação de cada segmento (cabeça, reto horizontal/vertical, as 4 curvas, cauda). Também trata vizinhos do outro lado do campo, já preparando o modo sem bordas da Fase 4. A comida "flutua" 1 px.
+- **Fonte pixel (I6): VT323** (SIL OFL), com a licença no pacote. Escala de tamanhos em `TamanhoFonte` (`config.py`), escolhida medindo a espessura dos traços.
+- **Sons (I8):** `ferramentas/gerar_sons.py` sintetiza, só com a biblioteca padrão, 9 efeitos chiptune (comer, nível, bater, vitória, navegar/confirmar no menu, bipes da contagem, pausa) e uma música em loop de 13,7 s (Am–F–C–G, 140 bpm). A saída é determinística (conferi o hash após regerar). Novo `audio.py`: toca efeitos e música, pausa a música na pausa, **M silencia em qualquer tela** e, sem dispositivo de áudio, o jogo segue em silêncio.
+- **HUD novo (I2):** rótulos e valores de PONTOS/RECORDE, NÍVEL com **barra de progresso** da meta e aviso "MUDO (M)".
+- **Menus com mouse (I1):** passar o mouse seleciona; clique confirma; nos itens ajustáveis, clicar nas pontas muda o valor. Sons de navegação e confirmação.
+- **Transições (I7):** fade de entrada (0,25 s) a cada troca de tela; a contagem também pode ser pulada com clique.
+- **Tela de créditos** (nova, no menu): autores da V2 e da V1, fonte (atribuição pedida pela OFL) e origem de sprites e sons.
+- **Menu principal** redesenhado: título em pixel art e uma cobra decorativa feita com os próprios sprites.
+- **Empacotamento (D6):** os assets entram no pacote (`package-data`); conferi que o wheel leva os 17 arquivos. Ícone da janela = a maçã.
+- **Testes:** de 82 para **122**. Novos: `test_pecas.py` (11), `test_recursos.py` (17: tamanhos e transparência dos sprites, formato dos WAVs e regressão das maiúsculas acentuadas), `test_audio.py` (3, incluindo o jogo sem saída de áudio), mouse e sons no menu, fade, tecla M, créditos e sons da contagem e de comer.
+
+**Arquivos:** `ferramentas/gerar_sprites.py` (novo), `ferramentas/gerar_sons.py` (novo), `src/cobrinha/assets/` (novos: 2 da fonte, 5 sprites, 10 sons), `pyproject.toml`, `src/cobrinha/config.py`, `src/cobrinha/recursos.py`, `src/cobrinha/audio.py` (novo), `src/cobrinha/jogo.py`, `src/cobrinha/ui/texto.py`, `src/cobrinha/ui/pecas.py`, `src/cobrinha/ui/hud.py`, `src/cobrinha/ui/menu.py`, `src/cobrinha/estados/navegacao.py`, `src/cobrinha/estados/jogando.py`, `src/cobrinha/estados/contagem.py`, `src/cobrinha/estados/pausa.py`, `src/cobrinha/estados/nivel_concluido.py`, `src/cobrinha/estados/fim_de_partida.py`, `src/cobrinha/estados/menu_principal.py`, `src/cobrinha/estados/creditos.py` (novo), `tests/conftest.py`, `tests/test_pecas.py` (novo), `tests/test_recursos.py` (novo), `tests/test_audio.py` (novo), `tests/test_menu.py`, `tests/test_jogo.py`, `tests/test_estados.py`, `briefing_v2.md`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- **Troca de fonte: Press Start 2P → VT323.** A Press Start 2P (baixada primeiro) encaixa tudo em 8 × 8 px. Nas maiúsculas acentuadas, a letra encolhe e "NÍVEL"/"CRÉDITOS" aparecem como "NíVEL"/"CRéDITOS"; Ó, Ô e Õ são idênticos às minúsculas (verificado comparando os bitmaps). Comparei três alternativas OFL lado a lado: a Silkscreen tem o mesmo problema; a Pixelify Sans fica com traços irregulares abaixo de 32 px; a **VT323** tem as maiúsculas acentuadas corretas e traços consistentes. A Press Start 2P não foi commitada. O teste `test_fonte_tem_maiusculas_acentuadas_de_verdade` impede a volta do problema.
+- **Ajustes feitos a partir das capturas de tela:** escamas removidas da curva (ficavam distorcidas no arco), cobra decorativa do menu afastada do item "SAIR" e título do nível no HUD afastado da barra de progresso.
+- **Downloads** (autorizados pelo João): fontes do repositório oficial `google/fonts` (Press Start 2P, Pixelify Sans, Silkscreen e VT323, só para comparação; apenas a VT323 e a licença dela ficaram no projeto). Nenhum som foi baixado; todos foram gerados por código.
+- **Verificado localmente:** ruff sem apontamentos, 122 testes, jogo aberto com áudio real e `python -X dev` (sem avisos), capturas de todas as telas conferidas. Não dá para ouvir os sons por aqui: vale o João testar o volume e o gosto da música.
+- Próximo passo: **Fase 4** (obstáculos nos níveis 2 e 3, fruta dourada, recordes salvos em disco, modos Clássico/Sem bordas, opções e efeitos visuais).

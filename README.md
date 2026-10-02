@@ -4,7 +4,7 @@
 
 Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-DEV/Py_JogoDaCobrinha), feito em Python + Pygame na disciplina de Computação Gráfica (UNIP).
 
-> **Status:** Fase 2 concluída. Jogo completo em 3 níveis, com menu, pausa e contagem 3-2-1, ainda com formas simples no lugar dos sprites (a pixel art chega na Fase 3). Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
+> **Status:** Fase 3 concluída. Jogo completo em 3 níveis, em pixel art, com música, efeitos sonoros e menus por teclado e mouse. Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
 
 ## O que muda na V2
 
@@ -36,8 +36,10 @@ python -m cobrinha
 |-------|------|
 | Setas ou `W` `A` `S` `D` | Mover a cobra; navegar nos menus |
 | `←` `→` | Escolher o nível inicial no menu |
-| `Enter` / `Espaço` | Confirmar; pular a contagem 3-2-1 |
+| `Enter` / `Espaço` / clique | Confirmar; pular a contagem 3-2-1 |
+| Mouse | Escolher e clicar nas opções dos menus |
 | `Esc` ou `P` | Pausar / continuar |
+| `M` | Ligar / desligar o som |
 | `Esc` no menu principal | Sair |
 
 O jogo também pausa sozinho quando a janela perde o foco.
@@ -62,6 +64,13 @@ ruff format .           # formatação
 pytest                  # testes (rodam sem abrir janela)
 ```
 
+Sprites e sons são gerados por código. Para recriá-los (o resultado é sempre o mesmo):
+
+```bash
+python ferramentas/gerar_sprites.py   # PNGs 25 × 25 em src/cobrinha/assets/imagens/
+python ferramentas/gerar_sons.py      # WAVs em src/cobrinha/assets/sons/
+```
+
 O GitHub Actions roda lint e testes a cada push (Linux com Python 3.11–3.13 e Windows com 3.11).
 
 ## Estrutura
@@ -71,7 +80,9 @@ src/cobrinha/
 ├── __main__.py      # ponto de entrada (python -m cobrinha)
 ├── config.py        # grade, janela, FPS e paleta de cores
 ├── jogo.py          # loop principal e pilha de estados (telas)
-├── recursos.py      # caminhos de assets e fontes com cache
+├── recursos.py      # carregamento único de fontes e imagens
+├── audio.py         # efeitos, música e mudo
+├── assets/          # fonte, sprites (PNG) e sons (WAV)
 ├── dominio/         # regras puras, sem pygame (testáveis)
 │   ├── grade.py     #   Posicao, Direcao e Grade
 │   ├── cobra.py     #   corpo, movimento, crescimento e fila de direções
@@ -79,9 +90,10 @@ src/cobrinha/
 │   ├── niveis.py    #   níveis como dados (velocidade e meta)
 │   ├── progresso.py #   recorde e níveis liberados
 │   └── partida.py   #   passo fixo, colisões, pontuação, níveis, vitória e derrota
-├── estados/         # telas: menu, contagem, jogando, pausa, nível concluído, fim
+├── estados/         # telas: menu, créditos, contagem, jogando, pausa, nível concluído, fim
 │   └── navegacao.py #   mapa de todas as trocas de tela
-└── ui/              # HUD, campo, peças, menu, painéis e texto
+└── ui/              # HUD, campo, sprites da cobra, menu, painéis e texto
+ferramentas/         # geradores dos sprites e dos sons
 tests/               # pytest
 ```
 
@@ -96,6 +108,13 @@ tests/               # pytest
 
 Python 3.11+ · [pygame-ce](https://pyga.me/) · pytest · ruff · GitHub Actions
 
+## Créditos
+
+- **V2:** João Vitor Fernandes.
+- **V1 (2025), Computação Gráfica:** João Vitor Fernandes, João Pedro Sinhorini Silva, Vitor Barssoti de Souza e Alex Barbosa Lourenço.
+- **Fonte:** [VT323](https://fonts.google.com/specimen/VT323), de Peter Hull, sob a [SIL Open Font License 1.1](src/cobrinha/assets/fontes/OFL.txt).
+- **Sprites e sons:** gerados por código neste repositório.
+
 ## Licença
 
-[MIT](LICENSE) © João Vitor Fernandes
+Código sob a [MIT](LICENSE) © João Vitor Fernandes. A fonte VT323 mantém a própria licença (SIL OFL 1.1).

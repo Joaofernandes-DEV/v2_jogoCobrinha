@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from cobrinha.config import ALTURA_JANELA, Paleta
+from cobrinha.config import ALTURA_JANELA, Paleta, TamanhoFonte
 from cobrinha.dominio.partida import Situacao
 from cobrinha.estados import navegacao
 from cobrinha.estados.base import Estado
@@ -33,7 +33,8 @@ class EstadoFimDePartida(Estado):
                 ItemMenu("JOGAR DE NOVO", acao=self._jogar_de_novo),
                 ItemMenu("MENU PRINCIPAL", acao=lambda: navegacao.abrir_menu(jogo)),
                 ItemMenu("SAIR DO JOGO", acao=jogo.sair),
-            ]
+            ],
+            tocar=jogo.audio.tocar,
         )
 
     def tratar_evento(self, evento: pygame.Event) -> None:
@@ -48,11 +49,11 @@ class EstadoFimDePartida(Estado):
     def desenhar(self, superficie: pygame.Surface) -> None:
         superficie.blit(self.veu, (0, 0))
         if self.vitoria:
-            linhas = [("VOCÊ VENCEU!", 64, Paleta.AMARELO)]
+            linhas = [("VOCÊ VENCEU!", TamanhoFonte.TITULO, Paleta.AMARELO)]
         else:
-            linhas = [("FIM DE JOGO", 64, Paleta.VERMELHO)]
-        linhas.append((f"PONTOS {self.pontos}", 36, Paleta.BRANCO))
+            linhas = [("FIM DE JOGO", TamanhoFonte.TITULO, Paleta.VERMELHO)]
+        linhas.append((f"PONTOS {self.pontos}", TamanhoFonte.MEDIO, Paleta.BRANCO))
         if self.novo_recorde:
-            linhas.append(("NOVO RECORDE!", 32, Paleta.AMARELO))
-        y = desenhar_linhas(superficie, linhas, ALTURA_JANELA // 2 - 170)
-        self.menu.desenhar(superficie, topo=y + 10)
+            linhas.append(("NOVO RECORDE!", TamanhoFonte.MEDIO, Paleta.AMARELO))
+        y = desenhar_linhas(superficie, linhas, ALTURA_JANELA // 2 - 170, espaco=24)
+        self.menu.desenhar(superficie, topo=y + 20)

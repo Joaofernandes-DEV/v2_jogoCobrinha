@@ -48,6 +48,11 @@ class Cobra:
         """Tamanho que a cobra terá depois de terminar de crescer."""
         return len(self.segmentos) + self._crescimento_pendente
 
+    @property
+    def tem_comandos_pendentes(self) -> bool:
+        """Há curvas na fila esperando o próximo passo?"""
+        return bool(self._fila_direcoes)
+
     def __contains__(self, posicao: object) -> bool:
         """`posicao in cobra`: a posição está ocupada por algum segmento?"""
         return posicao in self._ocupadas

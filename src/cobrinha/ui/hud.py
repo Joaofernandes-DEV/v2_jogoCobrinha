@@ -1,4 +1,4 @@
-"""Faixa de HUD no topo da janela: pontuação, nível e recorde."""
+"""Faixa de HUD no topo da janela: pontuação, nível (com progresso da meta) e recorde."""
 
 import pygame
 
@@ -10,7 +10,14 @@ MARGEM = 16
 ESPESSURA_BORDA = 3
 
 
-def desenhar_hud(superficie: pygame.Surface, pontos: int, nivel: int, recorde: int) -> None:
+def desenhar_hud(
+    superficie: pygame.Surface,
+    pontos: int,
+    nivel: int,
+    recorde: int,
+    comidas: int,
+    meta: int,
+) -> None:
     faixa = pygame.Rect(0, 0, LARGURA_JANELA, ALTURA_HUD)
     superficie.fill(Paleta.CINZA_ESCURO, faixa)
     superficie.fill(
@@ -21,7 +28,7 @@ def desenhar_hud(superficie: pygame.Surface, pontos: int, nivel: int, recorde: i
     centro_y = (ALTURA_HUD - ESPESSURA_BORDA) // 2
     itens = [
         (f"PONTOS {pontos:03d}", Paleta.BRANCO, "esquerda"),
-        (f"NÍVEL {nivel}", Paleta.AMARELO, "centro"),
+        (f"NÍVEL {nivel}   {comidas}/{meta}", Paleta.AMARELO, "centro"),
         (f"RECORDE {recorde:03d}", Paleta.CINZA_CLARO, "direita"),
     ]
     for conteudo, cor, alinhamento in itens:

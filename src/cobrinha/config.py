@@ -37,6 +37,14 @@ LIMITE_FILA_DIRECOES: Final = 2
 # depois de um travamento (ex.: arrastar a janela).
 MAX_PASSOS_POR_QUADRO: Final = 3
 
+# Fruta dourada (J5): aparece às vezes depois de comer, vale mais e some rápido.
+CHANCE_FRUTA_DOURADA: Final = 0.10
+DURACAO_FRUTA_DOURADA: Final = 5.0  # segundos de jogo
+PONTOS_FRUTA_DOURADA: Final = 5
+
+# Recordes (J6)
+TAMANHO_RANKING: Final = 5
+
 
 class TamanhoFonte:
     """Tamanhos da fonte pixel (VT323), escolhidos entre os que deixam os traços uniformes."""

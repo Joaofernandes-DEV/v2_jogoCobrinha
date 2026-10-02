@@ -15,6 +15,14 @@ from cobrinha.ui import texto  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
+def pasta_de_dados_temporaria(tmp_path, monkeypatch):
+    """Cada teste salva recordes e opções numa pasta própria, nunca nos dados reais."""
+    pasta = tmp_path / "dados"
+    monkeypatch.setenv("COBRINHA_DADOS", str(pasta))
+    return pasta
+
+
+@pytest.fixture(autouse=True)
 def limpar_caches_do_pygame():
     """Fontes, imagens e textos em cache pertencem ao pygame encerrado no fim de cada teste."""
     yield

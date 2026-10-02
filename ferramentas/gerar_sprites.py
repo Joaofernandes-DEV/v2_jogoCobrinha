@@ -160,8 +160,8 @@ def cauda() -> pygame.Surface:
     return superficie
 
 
-def comida() -> pygame.Surface:
-    """Maçã: corpo vermelho com brilho, cabinho e folha."""
+def comida(cor: Cor = Paleta.VERMELHO, sombra_cor: Cor = Paleta.MARROM) -> pygame.Surface:
+    """Maçã: corpo com sombra, brilho, cabinho e folha."""
     superficie = nova_superficie()
     centro_x, centro_y, raio = 12.5, 14.5, 8.5
 
@@ -173,7 +173,7 @@ def comida() -> pygame.Surface:
             if dentro(x, y):
                 # Sombra no lado de baixo/direita, para dar volume.
                 sombra = (x + 0.5 - centro_x) + (y + 0.5 - centro_y) > raio * 0.9
-                superficie.set_at((x, y), Paleta.MARROM if sombra else Paleta.VERMELHO)
+                superficie.set_at((x, y), sombra_cor if sombra else cor)
     contornar(superficie, dentro, abertos=set())
     for x, y in ((8, 10), (9, 10), (8, 11)):
         superficie.set_at((x, y), Paleta.BRANCO)
@@ -186,12 +186,51 @@ def comida() -> pygame.Surface:
     return superficie
 
 
+def comida_dourada() -> pygame.Surface:
+    """Maçã dourada (J5): mesma forma, em amarelo e laranja, com dois brilhos."""
+    superficie = comida(Paleta.AMARELO, Paleta.LARANJA)
+    for x, y in ((17, 12), (18, 13), (17, 14), (16, 13)):
+        superficie.set_at((x, y), Paleta.BRANCO)
+    return superficie
+
+
+def parede() -> pygame.Surface:
+    """Pedra dos obstáculos (J4): bloco cinza com luz em cima/esquerda e sombra embaixo/direita."""
+    superficie = nova_superficie()
+    margem = 1
+
+    def dentro(x: int, y: int) -> bool:
+        if not (margem <= x < T - margem and margem <= y < T - margem):
+            return False
+        # Cantos arredondados (2 px).
+        cantos_x = min(x - margem, T - margem - 1 - x)
+        cantos_y = min(y - margem, T - margem - 1 - y)
+        return not (cantos_x + cantos_y < 2)
+
+    for y in range(T):
+        for x in range(T):
+            if dentro(x, y):
+                cor = Paleta.CINZA
+                if x <= margem + 2 or y <= margem + 2:
+                    cor = Paleta.CINZA_CLARO
+                elif x >= T - margem - 3 or y >= T - margem - 3:
+                    cor = Paleta.CINZA_ESCURO
+                superficie.set_at((x, y), cor)
+    contornar(superficie, dentro, abertos=set())
+    # Rachaduras para dar textura.
+    for x, y in ((8, 9), (9, 10), (10, 10), (11, 11), (15, 15), (16, 15), (16, 16), (6, 17)):
+        superficie.set_at((x, y), Paleta.CINZA_ESCURO)
+    return superficie
+
+
 SPRITES: dict[str, Callable[[], pygame.Surface]] = {
     "cabeca": cabeca,
     "corpo_reto": corpo_reto,
     "corpo_curva": corpo_curva,
     "cauda": cauda,
     "comida": comida,
+    "comida_dourada": comida_dourada,
+    "parede": parede,
 }
 
 

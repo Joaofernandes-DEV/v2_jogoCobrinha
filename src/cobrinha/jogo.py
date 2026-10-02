@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import pygame
 
 from cobrinha.config import ALTURA_JANELA, FPS, LARGURA_JANELA, TITULO, Paleta
+from cobrinha.dominio.progresso import Progresso
 
 if TYPE_CHECKING:
     from cobrinha.estados.base import Estado
@@ -25,6 +26,7 @@ class Jogo:
         self.debug = debug
         # Gerador único de aleatoriedade; com semente, as partidas são reproduzíveis.
         self.rng = random.Random(semente)
+        self.progresso = Progresso()
         pygame.init()
         pygame.display.set_caption(TITULO)
         # SCALED permite ampliar a janela e usar tela cheia sem borrar a pixel art.

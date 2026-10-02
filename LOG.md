@@ -83,3 +83,26 @@ Modelo:
 - `assets/` fica dentro do pacote para funcionar tanto com `pip install` quanto com o PyInstaller (Fase 5).
 - A partir daqui, **cada arquivo vai em um commit próprio** (regra nova do João). O commit anterior, `a49bde2`, tinha 4 arquivos porque foi feito antes da regra.
 - Próximo passo: **Fase 1** (núcleo do jogo: cobra, comida, colisões e buffer de direção, com testes).
+
+### 2026-10-02 09:07 — Fase 1 (núcleo do jogo) e actions do CI atualizadas
+
+**Feito:**
+- **CI:** `actions/checkout` v4 → v7 e `actions/setup-python` v5 → v7 (Node 24), eliminando o aviso de Node 20 obsoleto. Conferi as notas da v7: a única remoção é o input `pip-install`, que o workflow não usa.
+- **Domínio (E2, E4), tudo sem pygame:**
+  - `grade.py`: `Direcao` (Enum com deslocamento e `oposta`), `Posicao.vizinha` e `Grade` com dimensões injetáveis (os testes usam grades pequenas). `todas_as_posicoes()` virou `Grade.todas`.
+  - `cobra.py`: corpo em `deque` + `set` de células ocupadas (D4), crescimento pendente, colisão que trata a cauda como livre quando a cobra não está crescendo, e **fila de direções com limite 2 (J1)**: cada comando é validado contra o último enfileirado. Isso corrige a meia-volta suicida (B3).
+  - `comida.py`: sorteio direto entre as células livres, que devolve `None` com o campo cheio (B7, D5).
+  - `partida.py`: **passo fixo** independente do FPS (D1), com teto de 3 passos por quadro para a cobra não "teleportar" após um travamento; colisões com parede e corpo; pontuação; vitória; eventos (`MOVEU`, `COMEU`, `BATEU`, `VENCEU`) para efeitos e sons futuros.
+- **Telas:** `EstadoJogando` com partida real (setas **e** WASD) e novo `EstadoFimDePartida` sobre o campo congelado: derrota ou vitória, pontos, "NOVO RECORDE!", Enter/Espaço para jogar de novo e Esc para sair. O recorde vale para a sessão; a gravação em disco é da Fase 4 (J6).
+- **Desenho provisório** (`ui/pecas.py`): cobra em blocos com listras e cabeça com olhos na direção do movimento; fruta vermelha com folha. Será trocado pela pixel art na Fase 3.
+- **Depuração explícita (E8):** `python -m cobrinha --debug` mostra FPS e tamanho da cobra; `--semente N` repete a mesma sequência de comidas. `Jogo` ganhou `debug` e um `rng` único.
+- **Testes:** de 10 para **49**. Novos: `test_cobra.py` (14), `test_comida.py` (3) e `test_partida.py` (16, incluindo 5 partidas aleatórias de 500 passos conferindo os invariantes a cada passo). `test_grade.py` e `test_jogo.py` foram ampliados (fluxo de fim de partida, WASD, argumentos).
+- Briefing: J1 e a regra de vitória do J7 entraram na Fase 1; Fase 2 redefinida (pausa, níveis, 3-2-1 e menu simples); Fases 0 e 1 marcadas ✅. README com controles e opções de linha de comando.
+
+**Arquivos:** `.github/workflows/ci.yml`, `src/cobrinha/config.py`, `src/cobrinha/dominio/grade.py`, `src/cobrinha/dominio/cobra.py` (novo), `src/cobrinha/dominio/comida.py` (novo), `src/cobrinha/dominio/partida.py` (novo), `src/cobrinha/ui/campo.py`, `src/cobrinha/ui/pecas.py` (novo), `src/cobrinha/jogo.py`, `src/cobrinha/estados/fim_de_partida.py` (novo), `src/cobrinha/estados/jogando.py`, `src/cobrinha/__main__.py`, `tests/test_grade.py`, `tests/test_cobra.py` (novo), `tests/test_comida.py` (novo), `tests/test_partida.py` (novo), `tests/test_jogo.py`, `briefing_v2.md`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- **Regra de vitória ajustada durante a implementação:** no passo em que a cobra come, a cauda ainda sai (o crescimento aparece no passo seguinte), então sempre sobra uma célula livre e "vitória quando não há célula livre" nunca dispararia. Agora a vitória é declarada quando o tamanho final da cobra (atual + crescimento pendente) preenche o campo. O `None` do sorteio continua como proteção contra laço infinito.
+- **Bugs da V1 cobertos por testes:** B1 e B5 (saída limpa), B2 (cobra nasce alinhada à grade), B3 (curva rápida), B6 (caminhos, desde a Fase 0) e B7 (campo cheio). B4 (comando escondido) deixou de existir: virou o `--debug`; o atalho de nível volta como `--nivel` na Fase 2, quando existirem níveis.
+- **Verificado localmente:** ruff sem apontamentos, 49 testes passando, jogo aberto de verdade com `--debug` e capturas de tela da partida e do fim de jogo conferidas.
+- Próximo passo: **Fase 2** (pausa, níveis com progressão, contagem 3-2-1, menu inicial).

@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cobrinha"
+version = "2.0.0.dev0"
+description = "Jogo da Cobrinha V2: Snake em pixel art com pygame-ce"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "João Vitor Fernandes" }]
+dependencies = ["pygame-ce>=2.5,<3"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.gui-scripts]
+cobrinha = "cobrinha.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "N"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    # Aviso esperado do driver de vídeo "dummy" usado nos testes sem janela.
+    "ignore:no fast renderer available",
+]

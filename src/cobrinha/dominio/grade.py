@@ -1,8 +1,27 @@
-"""Posições na grade lógica do jogo, medidas em células e não em pixels."""
+"""Grade lógica do jogo: posições e direções medidas em células, nunca em pixels."""
 
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum
+from functools import cached_property
 from typing import NamedTuple
 
 from cobrinha.config import COLUNAS, LINHAS
+
+
+class Direcao(Enum):
+    """Direções de movimento; o valor é o deslocamento (colunas, linhas)."""
+
+    CIMA = (0, -1)
+    BAIXO = (0, 1)
+    ESQUERDA = (-1, 0)
+    DIREITA = (1, 0)
+
+    @property
+    def oposta(self) -> Direcao:
+        dx, dy = self.value
+        return Direcao((-dx, -dy))
 
 
 class Posicao(NamedTuple):
@@ -11,10 +30,31 @@ class Posicao(NamedTuple):
     coluna: int
     linha: int
 
-    def dentro_da_grade(self) -> bool:
-        return 0 <= self.coluna < COLUNAS and 0 <= self.linha < LINHAS
+    def vizinha(self, direcao: Direcao) -> Posicao:
+        dx, dy = direcao.value
+        return Posicao(self.coluna + dx, self.linha + dy)
 
 
-def todas_as_posicoes() -> list[Posicao]:
-    """Todas as células do campo, linha por linha."""
-    return [Posicao(coluna, linha) for linha in range(LINHAS) for coluna in range(COLUNAS)]
+@dataclass(frozen=True)
+class Grade:
+    """Dimensões do campo. Os testes usam grades pequenas; o jogo usa `GRADE_PADRAO`."""
+
+    colunas: int
+    linhas: int
+
+    @property
+    def total_celulas(self) -> int:
+        return self.colunas * self.linhas
+
+    def contem(self, posicao: Posicao) -> bool:
+        return 0 <= posicao.coluna < self.colunas and 0 <= posicao.linha < self.linhas
+
+    @cached_property
+    def todas(self) -> tuple[Posicao, ...]:
+        """Todas as células, linha por linha (calculado uma vez por grade)."""
+        return tuple(
+            Posicao(coluna, linha) for linha in range(self.linhas) for coluna in range(self.colunas)
+        )
+
+
+GRADE_PADRAO = Grade(COLUNAS, LINHAS)

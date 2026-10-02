@@ -30,7 +30,7 @@ class EstadoNivelConcluido(Estado):
         seguinte = proximo_nivel(partida.nivel)
         assert seguinte is not None  # o último nível termina em vitória, não aqui
         self.proximo = seguinte
-        jogo.progresso.liberar_nivel(seguinte.numero)
+        navegacao.concluir_nivel(jogo, seguinte.numero)
         self.veu = criar_veu(OPACIDADE_VEU)
         self.menu = Menu(
             [
@@ -60,12 +60,12 @@ class EstadoNivelConcluido(Estado):
                 (f"NÍVEL {self.nivel} CONCLUÍDO!", TamanhoFonte.GRANDE, Paleta.AMARELO),
                 (f"PONTOS {self.pontos}", TamanhoFonte.MEDIO, Paleta.BRANCO),
                 (
-                    f"Próximo: nível {self.proximo.numero}, mais rápido",
+                    f"Próximo: nível {self.proximo.numero} - {self.proximo.nome}",
                     TamanhoFonte.PEQUENO,
-                    Paleta.CINZA_CLARO,
+                    Paleta.VERDE_CLARO,
                 ),
                 (
-                    f"Meta: {self.proximo.meta_comidas} comidas",
+                    f"Mais rápido, meta de {self.proximo.meta_comidas} comidas",
                     TamanhoFonte.PEQUENO,
                     Paleta.CINZA_CLARO,
                 ),

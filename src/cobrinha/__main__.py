@@ -1,7 +1,9 @@
-"""Ponto de entrada: `python -m cobrinha [--debug] [--semente N] [--nivel N]`."""
+"""Ponto de entrada: `python -m cobrinha [--debug] [--semente N] [--nivel N] [--fechar-em S]`."""
 
 import argparse
 from collections.abc import Sequence
+
+import pygame
 
 from cobrinha.dominio.niveis import NIVEIS
 from cobrinha.estados import navegacao
@@ -28,6 +30,13 @@ def analisar_argumentos(argumentos: Sequence[str] | None = None) -> argparse.Nam
         default=None,
         help="pula o menu e começa direto neste nível (para testes)",
     )
+    parser.add_argument(
+        "--fechar-em",
+        type=float,
+        default=None,
+        metavar="SEGUNDOS",
+        help="fecha o jogo sozinho depois desse tempo (teste automático do executável)",
+    )
     return parser.parse_args(argumentos)
 
 
@@ -37,6 +46,9 @@ def preparar_jogo(opcoes: argparse.Namespace) -> Jogo:
         navegacao.iniciar_campanha(jogo, opcoes.nivel)
     else:
         navegacao.abrir_menu(jogo)
+    if opcoes.fechar_em is not None:
+        # Um evento QUIT agendado: o jogo encerra pelo caminho normal, como se a janela fechasse.
+        pygame.time.set_timer(pygame.Event(pygame.QUIT), round(opcoes.fechar_em * 1000), loops=1)
     return jogo
 
 

@@ -228,3 +228,47 @@ def test_fim_de_partida_menu_e_sair(jogo):
     jogo.rodando = True
     enviar(jogo, pygame.K_UP, pygame.K_RETURN)  # sobe do 1º item para o último: SAIR
     assert not jogo.rodando
+
+
+# Créditos e sons
+
+
+def test_creditos_abrem_pelo_menu_e_voltam(jogo):
+    from cobrinha.estados.creditos import EstadoCreditos
+
+    navegacao.abrir_menu(jogo)
+    enviar(jogo, pygame.K_DOWN, pygame.K_DOWN, pygame.K_RETURN)
+    assert isinstance(jogo.estado_atual, EstadoCreditos)
+    desenhar_tudo(jogo)
+    enviar(jogo, pygame.K_ESCAPE)
+    assert isinstance(jogo.estado_atual, EstadoMenuPrincipal)
+
+
+def test_comer_toca_o_som(jogo, monkeypatch):
+    from cobrinha.audio import Som
+
+    tocados = []
+    monkeypatch.setattr(jogo.audio, "tocar", tocados.append)
+    jogando = jogo_em_andamento(jogo)
+    partida = jogando.partida
+    partida.comida = partida.cobra.cabeca.vizinha(partida.cobra.direcao)
+    jogando.atualizar(partida.intervalo_passo)
+    assert Som.COMER in tocados
+
+
+def test_contagem_bipa_a_cada_numero(jogo, monkeypatch):
+    from cobrinha.audio import Som
+
+    tocados = []
+    monkeypatch.setattr(jogo.audio, "tocar", tocados.append)
+    navegacao.iniciar_campanha(jogo)
+    contagem = jogo.estado_atual
+    for _ in range(len(SEQUENCIA) - 1):
+        contagem.atualizar(DURACAO_ETAPA)
+    assert tocados == [Som.CONTAGEM] * 3 + [Som.CONTAGEM_JA]
+
+
+def test_clique_pula_a_contagem(jogo):
+    navegacao.iniciar_campanha(jogo)
+    jogo.estado_atual.tratar_evento(pygame.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(1, 1)))
+    assert isinstance(jogo.estado_atual, EstadoJogando)

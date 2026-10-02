@@ -4,7 +4,7 @@
 
 Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-DEV/Py_JogoDaCobrinha), feito em Python + Pygame na disciplina de Computação Gráfica (UNIP).
 
-> **Status:** Fase 3 concluída. Jogo completo em 3 níveis, em pixel art, com música, efeitos sonoros e menus por teclado e mouse. Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
+> **Status:** Fase 4 concluída. 3 níveis com obstáculos, fruta dourada, dois modos de jogo, recordes salvos e tela de opções. Falta a Fase 5 (entrega: executável e GIF). Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
 
 ## O que muda na V2
 
@@ -46,7 +46,21 @@ O jogo também pausa sozinho quando a janela perde o foco.
 
 ### Como jogar
 
-São 3 níveis, cada um mais rápido que o anterior. Coma a quantidade de comidas da meta (mostrada no HUD, ex.: `NÍVEL 1  4/10`) para concluir o nível. Os pontos se acumulam entre os níveis, e zerar o nível 3 (ou encher o campo) vence o jogo. Os níveis alcançados ficam liberados no menu para começar direto neles. Por enquanto, o recorde e os níveis liberados valem só enquanto o jogo está aberto; a gravação em disco chega na Fase 4.
+Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os pontos se acumulam entre os níveis, e zerar o nível 3 (ou encher o campo) vence o jogo.
+
+| Nível | Nome | Novidade |
+|-------|------|----------|
+| 1 | Campo aberto | Sem obstáculos |
+| 2 | Pedras no caminho | Pedras espalhadas pelo campo |
+| 3 | Labirinto | Paredes formando corredores |
+
+- **A cobra acelera** um pouco a cada maçã, e cada nível começa mais rápido que o anterior.
+- **Maçã dourada:** às vezes aparece depois de comer. Vale **+5 pontos**, faz crescer, não conta para a meta e **some em 5 segundos** (pisca antes de sumir).
+- **Modos de jogo** (escolha no menu): **Clássico**, em que bater na borda perde, e **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado. Pedras e o próprio corpo continuam valendo.
+- **Recordes:** os 5 melhores de cada modo ficam salvos, e os níveis alcançados ficam liberados no menu.
+- **Opções:** volume dos efeitos e da música, tela cheia e efeitos visuais (desligue para tirar o pisca-pisca e os textos de pontos).
+
+Os dados ficam em `%APPDATA%\Cobrinha\dados.json` no Windows (ou `~/.local/share/cobrinha/` no Linux/macOS).
 
 ### Opções de linha de comando
 
@@ -87,12 +101,14 @@ src/cobrinha/
 │   ├── grade.py     #   Posicao, Direcao e Grade
 │   ├── cobra.py     #   corpo, movimento, crescimento e fila de direções
 │   ├── comida.py    #   sorteio entre as células livres
-│   ├── niveis.py    #   níveis como dados (velocidade e meta)
-│   ├── progresso.py #   recorde e níveis liberados
-│   └── partida.py   #   passo fixo, colisões, pontuação, níveis, vitória e derrota
-├── estados/         # telas: menu, créditos, contagem, jogando, pausa, nível concluído, fim
+│   ├── niveis.py    #   níveis como dados (velocidade, meta e mapa de pedras)
+│   ├── progresso.py #   ranking por modo e níveis liberados
+│   └── partida.py   #   passo fixo, modos, colisões, fruta dourada, vitória e derrota
+├── opcoes.py        # preferências do jogador
+├── persistencia.py  # leitura/gravação do JSON de dados
+├── estados/         # telas: menu, recordes, opções, créditos, contagem, jogo, pausa, fim
 │   └── navegacao.py #   mapa de todas as trocas de tela
-└── ui/              # HUD, campo, sprites da cobra, menu, painéis e texto
+└── ui/              # HUD, campo, sprites, menu, painéis, efeitos e texto
 ferramentas/         # geradores dos sprites e dos sons
 tests/               # pytest
 ```

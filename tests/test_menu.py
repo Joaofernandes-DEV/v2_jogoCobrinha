@@ -59,14 +59,72 @@ def test_menu_vazio_e_recusado():
         Menu([])
 
 
-def test_texto_acentuado_fica_na_mesma_linha_de_base(jogo):
+def _base_do_texto(rotulo: str) -> int:
+    """Desenha o rótulo e devolve a última linha com pixels acesos (a base das letras)."""
     from cobrinha.ui import texto
 
     superficie = pygame.Surface((400, 100))
-    caixas = [
-        texto.desenhar_centralizado(superficie, rotulo, 32, (255, 255, 255), 200, 10)
-        for rotulo in ("NIVEL", "NÍVEL")
-    ]
-    assert caixas[0].top == caixas[1].top == 10
-    assert caixas[0].height == caixas[1].height
-    assert texto._excesso_acima("NÍVEL", 32) > texto._excesso_acima("NIVEL", 32) == 0
+    superficie.fill((0, 0, 0))
+    texto.desenhar_centralizado(superficie, rotulo, 32, (255, 255, 255), 200, 10)
+    return max(y for y in range(100) if any(superficie.get_at((x, y))[0] for x in range(400)))
+
+
+def test_texto_acentuado_fica_na_mesma_linha_de_base(jogo):
+    assert _base_do_texto("NIVEL") == _base_do_texto("NÍVEL") == _base_do_texto("NÓS")
+
+
+def _menu_desenhado(registro, sons):
+    menu = Menu(
+        [
+            ItemMenu("JOGAR", acao=lambda: registro.append("jogar")),
+            ItemMenu("NÍVEL < 1 >", acao=lambda: registro.append("nivel"), ajustar=registro.append),
+            ItemMenu("SAIR", acao=lambda: registro.append("sair")),
+        ],
+        tocar=sons.append,
+    )
+    menu.desenhar(pygame.Surface((800, 600)), topo=100)
+    return menu
+
+
+def test_passar_o_mouse_seleciona_o_item(jogo):
+    from cobrinha.audio import Som
+
+    registro, sons = [], []
+    menu = _menu_desenhado(registro, sons)
+    centro_sair = menu._areas[2].center
+    assert menu.tratar_evento(pygame.Event(pygame.MOUSEMOTION, pos=centro_sair))
+    assert menu.selecionado == 2
+    assert sons == [Som.MENU_MOVER]
+    assert not menu.tratar_evento(pygame.Event(pygame.MOUSEMOTION, pos=(5, 5)))
+    assert menu.selecionado == 2
+
+
+def test_clique_confirma_e_nas_pontas_ajusta(jogo):
+    from cobrinha.audio import Som
+
+    registro, sons = [], []
+    menu = _menu_desenhado(registro, sons)
+
+    def clicar(x, y):
+        return menu.tratar_evento(pygame.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(x, y)))
+
+    area = menu._areas[1]
+    assert clicar(area.left + 2, area.centery)
+    assert clicar(area.right - 2, area.centery)
+    assert clicar(*area.center)
+    assert registro == [-1, +1, "nivel"]
+    assert sons[-1] is Som.MENU_CONFIRMAR
+    assert not clicar(5, 5)
+    # Botão direito não faz nada.
+    menu.tratar_evento(pygame.Event(pygame.MOUSEBUTTONDOWN, button=3, pos=menu._areas[0].center))
+    assert registro == [-1, +1, "nivel"]
+
+
+def test_teclado_toca_sons_de_navegacao(jogo):
+    from cobrinha.audio import Som
+
+    registro, sons = [], []
+    menu = _menu_desenhado(registro, sons)
+    menu.tratar_evento(tecla(pygame.K_DOWN))
+    menu.tratar_evento(tecla(pygame.K_RETURN))
+    assert sons == [Som.MENU_MOVER, Som.MENU_CONFIRMAR]

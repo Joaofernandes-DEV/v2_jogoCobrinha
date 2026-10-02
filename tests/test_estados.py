@@ -1,6 +1,7 @@
 """Fluxo entre as telas: menu, contagem, jogo, pausa, nível concluído e fim de partida."""
 
 import pygame
+from auxiliares import desenhar_tudo, encerrar, enviar, jogo_em_andamento
 
 from cobrinha.dominio.partida import Situacao
 from cobrinha.estados import navegacao
@@ -10,30 +11,6 @@ from cobrinha.estados.jogando import EstadoJogando
 from cobrinha.estados.menu_principal import EstadoMenuPrincipal
 from cobrinha.estados.nivel_concluido import EstadoNivelConcluido
 from cobrinha.estados.pausa import EstadoPausa
-
-
-def tecla(codigo: int) -> pygame.Event:
-    return pygame.Event(pygame.KEYDOWN, key=codigo)
-
-
-def enviar(jogo, *codigos: int) -> None:
-    for codigo in codigos:
-        jogo.estado_atual.tratar_evento(tecla(codigo))
-
-
-def desenhar_tudo(jogo) -> None:
-    superficie = pygame.Surface(jogo.tela.get_size())
-    for estado in jogo.pilha:
-        estado.desenhar(superficie)
-
-
-def jogo_em_andamento(jogo, nivel: int = 1) -> EstadoJogando:
-    """Começa uma campanha e pula a contagem."""
-    navegacao.iniciar_campanha(jogo, nivel)
-    enviar(jogo, pygame.K_RETURN)
-    assert isinstance(jogo.estado_atual, EstadoJogando)
-    return jogo.estado_atual
-
 
 # Menu principal
 
@@ -131,7 +108,7 @@ def test_reiniciar_na_pausa_recomeca_do_nivel_inicial(jogo):
     novo = jogo.pilha[0]
     assert novo is not jogando
     assert (novo.partida.nivel.numero, novo.partida.pontos) == (2, 0)
-    assert jogo.progresso.recorde == 4
+    assert jogo.progresso.recorde("CLASSICO") == 4
 
 
 def test_menu_principal_na_pausa_guarda_o_recorde(jogo):
@@ -139,7 +116,7 @@ def test_menu_principal_na_pausa_guarda_o_recorde(jogo):
     jogando.partida.pontos = 6
     enviar(jogo, pygame.K_p, pygame.K_DOWN, pygame.K_DOWN, pygame.K_RETURN)
     assert isinstance(jogo.estado_atual, EstadoMenuPrincipal)
-    assert jogo.progresso.recorde == 6
+    assert jogo.progresso.recorde("CLASSICO") == 6
 
 
 def test_sair_na_pausa_encerra(jogo):
@@ -164,7 +141,7 @@ def test_concluir_nivel_abre_tela_e_libera_o_proximo(jogo):
     jogando = jogo_em_andamento(jogo)
     jogando.partida.pontos = 10
     jogando.partida.situacao = Situacao.NIVEL_CONCLUIDO
-    jogando.atualizar(0.016)
+    encerrar(jogando)
     assert isinstance(jogo.estado_atual, EstadoNivelConcluido)
     assert jogo.progresso.maior_nivel_liberado == 2
     desenhar_tudo(jogo)
@@ -181,10 +158,10 @@ def test_esc_no_nivel_concluido_volta_ao_menu(jogo):
     jogando = jogo_em_andamento(jogo)
     jogando.partida.pontos = 10
     jogando.partida.situacao = Situacao.NIVEL_CONCLUIDO
-    jogando.atualizar(0.016)
+    encerrar(jogando)
     enviar(jogo, pygame.K_ESCAPE)
     assert isinstance(jogo.estado_atual, EstadoMenuPrincipal)
-    assert jogo.progresso.recorde == 10
+    assert jogo.progresso.recorde("CLASSICO") == 10
 
 
 # Fim de partida
@@ -194,11 +171,11 @@ def test_derrota_registra_recorde_e_jogar_de_novo_recomeca(jogo):
     jogando = jogo_em_andamento(jogo, nivel=2)
     jogando.partida.pontos = 5
     jogando.partida.situacao = Situacao.DERROTA
-    jogando.atualizar(0.016)
+    encerrar(jogando)
     fim = jogo.estado_atual
     assert isinstance(fim, EstadoFimDePartida)
     assert fim.novo_recorde and not fim.vitoria
-    assert jogo.progresso.recorde == 5
+    assert jogo.progresso.recorde("CLASSICO") == 5
     desenhar_tudo(jogo)
 
     enviar(jogo, pygame.K_RETURN)
@@ -210,7 +187,7 @@ def test_derrota_registra_recorde_e_jogar_de_novo_recomeca(jogo):
 def test_vitoria_mostra_tela_de_vitoria(jogo):
     jogando = jogo_em_andamento(jogo, nivel=3)
     jogando.partida.situacao = Situacao.VITORIA
-    jogando.atualizar(0.016)
+    encerrar(jogando)
     assert jogo.estado_atual.vitoria
     desenhar_tudo(jogo)
 
@@ -218,13 +195,13 @@ def test_vitoria_mostra_tela_de_vitoria(jogo):
 def test_fim_de_partida_menu_e_sair(jogo):
     jogando = jogo_em_andamento(jogo)
     jogando.partida.situacao = Situacao.DERROTA
-    jogando.atualizar(0.016)
+    encerrar(jogando)
     enviar(jogo, pygame.K_ESCAPE)
     assert isinstance(jogo.estado_atual, EstadoMenuPrincipal)
 
     jogando = jogo_em_andamento(jogo)
     jogando.partida.situacao = Situacao.DERROTA
-    jogando.atualizar(0.016)
+    encerrar(jogando)
     jogo.rodando = True
     enviar(jogo, pygame.K_UP, pygame.K_RETURN)  # sobe do 1º item para o último: SAIR
     assert not jogo.rodando
@@ -237,7 +214,7 @@ def test_creditos_abrem_pelo_menu_e_voltam(jogo):
     from cobrinha.estados.creditos import EstadoCreditos
 
     navegacao.abrir_menu(jogo)
-    enviar(jogo, pygame.K_DOWN, pygame.K_DOWN, pygame.K_RETURN)
+    enviar(jogo, *[pygame.K_DOWN] * 5, pygame.K_RETURN)
     assert isinstance(jogo.estado_atual, EstadoCreditos)
     desenhar_tudo(jogo)
     enviar(jogo, pygame.K_ESCAPE)

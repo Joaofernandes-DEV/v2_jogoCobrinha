@@ -83,16 +83,16 @@ V2/
 ├── pyproject.toml            # dependências, versão do Python, ponto de entrada
 ├── README.md
 ├── LICENSE
-├── assets/
-│   ├── imagens/              # sprites e fundos otimizados
-│   ├── sons/
-│   └── fontes/               # fonte TTF embarcada (não depender de SysFont)
 ├── src/cobrinha/
+│   ├── assets/               # dentro do pacote: achado via pathlib e empacotável pelo PyInstaller
+│   │   ├── imagens/          # sprites pixel art 25 × 25
+│   │   ├── sons/
+│   │   └── fontes/           # fonte pixel TTF embarcada (não depender de SysFont)
 │   ├── __main__.py           # `python -m cobrinha`
 │   ├── config.py             # constantes: grade, cores, velocidades, teclas
 │   ├── jogo.py               # classe Jogo: loop principal + gerenciador de estados
 │   ├── dominio/              # SEM import de pygame → 100% testável
-│   │   ├── grade.py          # Posicao (dataclass), Direcao (Enum), dimensões
+│   │   ├── grade.py          # Posicao (NamedTuple), Direcao (Enum), dimensões
 │   │   ├── cobra.py          # movimento, crescimento, buffer de direção
 │   │   ├── comida.py         # sorteio entre células livres
 │   │   ├── niveis.py         # definição dos níveis (velocidade, meta, obstáculos)

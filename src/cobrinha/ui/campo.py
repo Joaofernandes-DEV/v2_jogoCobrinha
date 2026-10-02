@@ -9,7 +9,7 @@ from cobrinha.config import (
     TAMANHO_CELULA,
     Paleta,
 )
-from cobrinha.dominio.grade import Posicao, todas_as_posicoes
+from cobrinha.dominio.grade import GRADE_PADRAO, Posicao
 
 
 def celula_para_pixel(posicao: Posicao) -> tuple[int, int]:
@@ -20,7 +20,7 @@ def celula_para_pixel(posicao: Posicao) -> tuple[int, int]:
 def criar_fundo_campo() -> pygame.Surface:
     """Xadrez de grama em dois tons, desenhado uma vez e reaproveitado a cada quadro."""
     superficie = pygame.Surface((COLUNAS * TAMANHO_CELULA, LINHAS * TAMANHO_CELULA))
-    for posicao in todas_as_posicoes():
+    for posicao in GRADE_PADRAO.todas:
         clara = (posicao.coluna + posicao.linha) % 2 == 0
         cor = Paleta.GRAMA_CLARA if clara else Paleta.GRAMA_ESCURA
         x, y = posicao.coluna * TAMANHO_CELULA, posicao.linha * TAMANHO_CELULA

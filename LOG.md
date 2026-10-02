@@ -243,3 +243,17 @@ Modelo:
 - O teste de fumaça local abriu uma janela do jogo por ~3 s na tela do João; no CI ele roda com o driver de vídeo `dummy`.
 - O executável não tem assinatura digital (certificado pago), então o Windows SmartScreen pode avisar na primeira execução. Isso está explicado no README e nas notas da release.
 - A release `v2.0.0` é criada em seguida, pela tag; o resultado fica registrado na próxima entrada.
+
+### 2026-10-02 11:43 — Release v2.0.0 publicada
+
+**Feito:**
+- Tag `v2.0.0` criada sobre o commit `4997e12`, depois do CI verde nos 4 ambientes.
+- O workflow **Release** rodou no Windows do GitHub: dependências → 190 testes → executável gerado e testado → release publicada. Todas as etapas com sucesso.
+- **Release:** <https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/tag/v2.0.0>, com o anexo `Cobrinha.exe` (15,3 MB) e as notas de `docs/notas-v2.0.0.md`. Não é rascunho nem pré-lançamento.
+- **Conferência independente:** baixei o `Cobrinha.exe` publicado e rodei com `--fechar-em 2 --nivel 3` (driver de vídeo `dummy` e pasta de dados temporária): saída 0 e `dados.json` gravado.
+
+**Arquivos:** `LOG.md`.
+
+**Motivo / observações:**
+- **Roteiro da V2 concluído:** Fases 0 a 5 ✅. O que ficou para depois está na coluna "Fica para a V3" da seção 8.4 do briefing (remapeamento de teclas, power-ups extras, ranking online, partículas, movimento interpolado, versão web etc.).
+- **Para o João fazer:** apagar o arquivo local solto `src/cobrinha/assets/sons/musica.wav` depois de fechar o jogo (ele não está mais no repositório nem no executável), e testar o som do executável num PC sem Python.

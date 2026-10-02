@@ -49,6 +49,10 @@ class Grade:
     def contem(self, posicao: Posicao) -> bool:
         return 0 <= posicao.coluna < self.colunas and 0 <= posicao.linha < self.linhas
 
+    def envolver(self, posicao: Posicao) -> Posicao:
+        """Leva uma posição de fora do campo para o lado oposto (modo sem bordas)."""
+        return Posicao(posicao.coluna % self.colunas, posicao.linha % self.linhas)
+
     @cached_property
     def todas(self) -> tuple[Posicao, ...]:
         """Todas as células, linha por linha (calculado uma vez por grade)."""

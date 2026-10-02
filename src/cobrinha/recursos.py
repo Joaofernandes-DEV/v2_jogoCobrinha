@@ -1,7 +1,8 @@
-"""Localização e carregamento único de assets.
+"""Localização e carregamento único de assets (fontes, imagens e sons).
 
 Os caminhos são resolvidos a partir deste arquivo, então o jogo funciona
 independente da pasta de onde é executado (corrige o bug B6 da V1).
+Cada asset é carregado do disco uma única vez e reaproveitado (D6).
 """
 
 from functools import cache
@@ -11,9 +12,12 @@ import pygame
 
 PASTA_ASSETS = Path(__file__).resolve().parent / "assets"
 PASTA_FONTES = PASTA_ASSETS / "fontes"
+PASTA_IMAGENS = PASTA_ASSETS / "imagens"
+PASTA_SONS = PASTA_ASSETS / "sons"
 
-# Fonte pixel art definida na Fase 3. Até lá, usa-se a fonte padrão do pygame.
-ARQUIVO_FONTE = PASTA_FONTES / "fonte_pixel.ttf"
+# VT323 (SIL Open Font License; ver assets/fontes/OFL.txt). Escolhida por ter as
+# maiúsculas acentuadas corretas (Í, É, Ê, Ó, Ç...), essenciais num jogo em português.
+ARQUIVO_FONTE = PASTA_FONTES / "VT323-Regular.ttf"
 
 
 def caminho_asset(*partes: str) -> Path:
@@ -27,3 +31,15 @@ def fonte(tamanho: int) -> pygame.font.Font:
     if ARQUIVO_FONTE.is_file():
         return pygame.font.Font(ARQUIVO_FONTE, tamanho)
     return pygame.font.Font(None, tamanho)
+
+
+@cache
+def imagem(nome: str) -> pygame.Surface:
+    """Sprite PNG de `assets/imagens/`, convertido para o formato da tela (exige janela aberta)."""
+    return pygame.image.load(PASTA_IMAGENS / f"{nome}.png").convert_alpha()
+
+
+def limpar_cache() -> None:
+    """Descarta fontes e imagens carregadas (necessário ao reiniciar o pygame, ex.: nos testes)."""
+    fonte.cache_clear()
+    imagem.cache_clear()

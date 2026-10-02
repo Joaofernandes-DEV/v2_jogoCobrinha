@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cobrinha"
-version = "2.0.0.dev0"
+version = "2.0.0"
 description = "Jogo da Cobrinha V2: Snake em pixel art com pygame-ce"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -15,6 +15,8 @@ dependencies = ["pygame-ce>=2.5,<3"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
+# Gerar o executável (PyInstaller) e o GIF de demonstração (Pillow).
+ferramentas = ["pyinstaller>=6", "pillow>=10"]
 
 [project.gui-scripts]
 cobrinha = "cobrinha.__main__:main"

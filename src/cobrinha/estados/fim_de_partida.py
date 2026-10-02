@@ -26,7 +26,8 @@ class EstadoFimDePartida(Estado):
         self.nivel_inicial = jogando.nivel_inicial
         self.vitoria = jogando.partida.situacao is Situacao.VITORIA
         self.pontos = jogando.partida.pontos
-        self.novo_recorde = jogo.progresso.registrar_pontuacao(self.pontos)
+        # Colocação no ranking do modo (1 = novo recorde; None = fora do top 5).
+        self.colocacao = navegacao.registrar_resultado(jogo, jogando.partida)
         self.veu = criar_veu(OPACIDADE_VEU)
         self.menu = Menu(
             [
@@ -43,6 +44,10 @@ class EstadoFimDePartida(Estado):
         else:
             self.menu.tratar_evento(evento)
 
+    @property
+    def novo_recorde(self) -> bool:
+        return self.colocacao == 1
+
     def _jogar_de_novo(self) -> None:
         navegacao.iniciar_campanha(self.jogo, self.nivel_inicial)
 
@@ -55,5 +60,9 @@ class EstadoFimDePartida(Estado):
         linhas.append((f"PONTOS {self.pontos}", TamanhoFonte.MEDIO, Paleta.BRANCO))
         if self.novo_recorde:
             linhas.append(("NOVO RECORDE!", TamanhoFonte.MEDIO, Paleta.AMARELO))
+        elif self.colocacao is not None:
+            linhas.append(
+                (f"TOP 5: {self.colocacao}º LUGAR", TamanhoFonte.MEDIO, Paleta.AZUL_CLARO)
+            )
         y = desenhar_linhas(superficie, linhas, ALTURA_JANELA // 2 - 170, espaco=24)
         self.menu.desenhar(superficie, topo=y + 20)

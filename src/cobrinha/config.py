@@ -26,8 +26,8 @@ DURACAO_FADE: Final = 0.25  # segundos do fade de entrada ao trocar de tela (I7)
 
 # Áudio (volumes de 0 a 1; ajustáveis na tela de opções da Fase 4)
 FREQUENCIA_AUDIO: Final = 22_050
-VOLUME_EFEITOS: Final = 0.6
-VOLUME_MUSICA: Final = 0.35
+VOLUME_EFEITOS: Final = 0.9
+VOLUME_MUSICA: Final = 0.5
 
 # Jogabilidade
 TAMANHO_INICIAL_COBRA: Final = 3

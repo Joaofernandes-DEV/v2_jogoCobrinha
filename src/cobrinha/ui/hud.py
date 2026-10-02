@@ -22,6 +22,7 @@ class DadosHud:
     nivel: int
     comidas: int
     meta: int
+    modo: str = ""
     mudo: bool = False
 
 
@@ -33,6 +34,9 @@ def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
     _desenhar_contador(superficie, "PONTOS", dados.pontos, Paleta.BRANCO, esquerda=True)
     _desenhar_contador(superficie, "RECORDE", dados.recorde, Paleta.CINZA_CLARO, esquerda=False)
     _desenhar_nivel(superficie, dados)
+    if dados.modo:
+        modo = texto.renderizar(dados.modo.upper(), TamanhoFonte.MINIMO, Paleta.AZUL_CLARO)
+        superficie.blit(modo, modo.get_rect(topleft=(MARGEM + 90, Y_ROTULO)))
     if dados.mudo:
         imagem = texto.renderizar("MUDO (M)", TamanhoFonte.MINIMO, Paleta.VERMELHO)
         superficie.blit(imagem, imagem.get_rect(topright=(LARGURA_JANELA - 160, Y_ROTULO)))

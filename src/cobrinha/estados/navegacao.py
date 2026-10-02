@@ -1,5 +1,6 @@
 """Mapa de navegação: todas as trocas de tela do jogo passam por aqui.
 
+    Menu ──Créditos──► Créditos ──► Menu
     Menu ──Jogar──► Contagem ─► Jogando ──Esc/P/perdeu foco──► Pausa ─► Contagem ─► Jogando
                                  │
                                  ├─ meta do nível ──► Nível concluído ─► Contagem (próximo nível)
@@ -25,6 +26,12 @@ def abrir_menu(jogo: Jogo) -> None:
     from cobrinha.estados.menu_principal import EstadoMenuPrincipal
 
     jogo.trocar_estado(EstadoMenuPrincipal(jogo))
+
+
+def abrir_creditos(jogo: Jogo) -> None:
+    from cobrinha.estados.creditos import EstadoCreditos
+
+    jogo.trocar_estado(EstadoCreditos(jogo))
 
 
 def iniciar_campanha(jogo: Jogo, numero_nivel: int = 1) -> None:

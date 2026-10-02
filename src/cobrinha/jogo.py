@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from cobrinha import recursos
+from cobrinha import persistencia, recursos
 from cobrinha.audio import Audio
 from cobrinha.config import (
     ALTURA_JANELA,
@@ -18,7 +18,6 @@ from cobrinha.config import (
     TITULO,
     Paleta,
 )
-from cobrinha.dominio.progresso import Progresso
 
 if TYPE_CHECKING:
     from cobrinha.estados.base import Estado
@@ -36,7 +35,8 @@ class Jogo:
         self.debug = debug
         # Gerador único de aleatoriedade; com semente, as partidas são reproduzíveis.
         self.rng = random.Random(semente)
-        self.progresso = Progresso()
+        # Recordes, níveis liberados e opções salvos de sessões anteriores (J6, I9).
+        self.progresso, self.opcoes = persistencia.carregar()
         # Mono, 16 bits, na mesma taxa dos WAVs gerados; buffer pequeno = som sem atraso.
         pygame.mixer.pre_init(FREQUENCIA_AUDIO, -16, 1, 512)
         pygame.init()
@@ -46,12 +46,26 @@ class Jogo:
         self.tela = pygame.display.set_mode((LARGURA_JANELA, ALTURA_JANELA), pygame.SCALED)
         self.relogio = pygame.time.Clock()
         self.audio = Audio()
+        self.aplicar_opcoes()
         self.pilha: list[Estado] = []
         self.rodando = False
         # Fade de entrada (I7): 1 = tela toda preta, 0 = sem fade.
         self.opacidade_fade = 0.0
         self._camada_fade = pygame.Surface((LARGURA_JANELA, ALTURA_JANELA))
         self._camada_fade.fill(Paleta.PRETO)
+
+    def aplicar_opcoes(self) -> None:
+        """Leva as opções atuais para o áudio e o modo de tela."""
+        self.audio.definir_volumes(self.opcoes.volume_efeitos, self.opcoes.volume_musica)
+        tela_cheia = bool(pygame.display.get_surface().get_flags() & pygame.FULLSCREEN)
+        if tela_cheia != self.opcoes.tela_cheia:
+            try:
+                pygame.display.toggle_fullscreen()
+            except pygame.error:
+                self.opcoes.tela_cheia = tela_cheia  # sem suporte (ex.: driver de testes)
+
+    def salvar(self) -> None:
+        persistencia.salvar(self.progresso, self.opcoes)
 
     @property
     def estado_atual(self) -> Estado | None:

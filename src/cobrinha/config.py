@@ -23,6 +23,15 @@ ALTURA_JANELA: Final = ALTURA_HUD + LINHAS * TAMANHO_CELULA
 # Tempo
 FPS: Final = 60
 
+# Jogabilidade
+TAMANHO_INICIAL_COBRA: Final = 3
+PASSOS_POR_SEGUNDO_INICIAL: Final = 8.0
+# Comandos de direção guardados à frente do movimento (buffer, J1 do briefing).
+LIMITE_FILA_DIRECOES: Final = 2
+# Teto de passos recuperados num único quadro, para a cobra não "teleportar"
+# depois de um travamento (ex.: arrastar a janela).
+MAX_PASSOS_POR_QUADRO: Final = 3
+
 
 class Paleta:
     """Paleta única do jogo (até 16 cores), usada pelos sprites e pela interface."""

@@ -106,3 +106,32 @@ Modelo:
 - **Bugs da V1 cobertos por testes:** B1 e B5 (saída limpa), B2 (cobra nasce alinhada à grade), B3 (curva rápida), B6 (caminhos, desde a Fase 0) e B7 (campo cheio). B4 (comando escondido) deixou de existir: virou o `--debug`; o atalho de nível volta como `--nivel` na Fase 2, quando existirem níveis.
 - **Verificado localmente:** ruff sem apontamentos, 49 testes passando, jogo aberto de verdade com `--debug` e capturas de tela da partida e do fim de jogo conferidas.
 - Próximo passo: **Fase 2** (pausa, níveis com progressão, contagem 3-2-1, menu inicial).
+
+### 2026-10-02 09:21 — Fase 2 (fluxo da partida: menu, níveis, pausa e contagem)
+
+**Feito:**
+- **Níveis como dados (J3):** `dominio/niveis.py` com 3 níveis: velocidade de 8, 11 e 14 passos/s e metas de 10, 12 e 15 comidas. A velocidade saiu do `config.py` e passou a ser do nível.
+- **Progressão sem interrupção (J3):** a `Partida` passou a representar um nível. Ao bater a meta, a situação vira `NIVEL_CONCLUIDO` e `proxima_fase()` cria o nível seguinte levando os pontos (a cobra recomeça com 3). Bater a meta do último nível é vitória. A pergunta Y/N no meio do jogo, da V1, deixou de existir.
+- **Progresso da sessão:** `dominio/progresso.py` guarda o recorde e o maior nível liberado. Ainda não é gravado em disco (J6, Fase 4).
+- **Telas novas:**
+  - **Menu principal:** Jogar, Nível inicial (← → circula só entre os níveis liberados) e Sair.
+  - **Contagem 3-2-1 (J10):** antes de cada nível e ao sair da pausa; Enter pula.
+  - **Pausa (J2):** Esc ou P. Opções: Continuar, Reiniciar, Menu principal e Sair. Também pausa sozinho quando a janela perde o foco, inclusive durante a contagem.
+  - **Nível concluído:** mostra pontos, a meta do próximo nível e as opções Próximo nível e Menu.
+- **Fim de partida** agora com menu: Jogar de novo (a partir do nível em que a campanha começou), Menu principal e Sair. Sair de uma partida pela pausa também conta para o recorde.
+- **Navegação centralizada:** `estados/navegacao.py` concentra todas as trocas de tela, com o diagrama do fluxo no topo, e evita importações circulares entre as telas.
+- **Componentes de UI:** `ui/menu.py` (menu navegável por setas/WASD, Enter, e ← → para itens ajustáveis) e `ui/painel.py` (véu escuro e textos centralizados).
+- **HUD:** mostra o progresso da meta (`NÍVEL 1   4/10`).
+- **`--nivel N` (E8):** pula o menu e começa no nível N, que é liberado. Fecha a pendência do antigo comando escondido (B4).
+- **Testes:** de 49 para **82**. Novos: `test_estados.py` (17, fluxo completo entre telas), `test_menu.py` (6), `test_niveis.py` (5) e +5 em `test_partida.py` (meta, último nível, próxima fase). O `conftest.py` limpa os caches de fonte e texto depois de cada teste.
+
+**Arquivos:** `src/cobrinha/config.py`, `src/cobrinha/dominio/niveis.py` (novo), `src/cobrinha/dominio/progresso.py` (novo), `src/cobrinha/dominio/partida.py`, `src/cobrinha/jogo.py`, `src/cobrinha/ui/texto.py`, `src/cobrinha/ui/hud.py`, `src/cobrinha/ui/painel.py` (novo), `src/cobrinha/ui/menu.py` (novo), `src/cobrinha/estados/navegacao.py` (novo), `src/cobrinha/estados/jogando.py`, `src/cobrinha/estados/contagem.py` (novo), `src/cobrinha/estados/pausa.py` (novo), `src/cobrinha/estados/nivel_concluido.py` (novo), `src/cobrinha/estados/fim_de_partida.py`, `src/cobrinha/estados/menu_principal.py` (novo), `src/cobrinha/__main__.py`, `tests/conftest.py`, `tests/test_partida.py`, `tests/test_niveis.py` (novo), `tests/test_menu.py` (novo), `tests/test_estados.py` (novo), `tests/test_jogo.py`, `briefing_v2.md`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- **Problemas visuais achados nas capturas e corrigidos:**
+  1. O marcador de seleção em texto (`> … <`) se misturava com as setas do seletor de nível. Virou dois triângulos desenhados.
+  2. Itens com maiúscula acentuada (Í, Ó) ficavam ~3 px mais baixos: o pygame aumenta a imagem por cima quando o acento passa do topo da fonte. Agora os textos são alinhados pela linha de base, usando as métricas da fonte (`texto.desenhar_centralizado`), e há teste para isso.
+  3. O menu tinha uma faixa vazia no lugar do HUD. Agora o xadrez cobre a janela inteira.
+- **Decisões de design:** a cobra volta ao tamanho inicial a cada nível (como no Snake clássico); "Jogar de novo" recomeça do nível escolhido no início da campanha, e não do nível em que o jogador morreu.
+- **Verificado localmente:** ruff sem apontamentos, 82 testes passando, jogo aberto de verdade (`python -m cobrinha` e `--nivel 3 --debug`) e capturas de todas as telas novas conferidas.
+- Próximo passo: **Fase 3** (pixel art, fonte pixel, menus com mouse, sons). Ela vai exigir baixar uma fonte de licença livre e criar ou baixar sons; vou pedir autorização antes de qualquer download.

@@ -5,17 +5,18 @@ import pytest
 from cobrinha.config import MAX_PASSOS_POR_QUADRO
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import GRADE_PADRAO, Direcao, Grade, Posicao
+from cobrinha.dominio.niveis import NIVEIS, Nivel
 from cobrinha.dominio.partida import Evento, Partida, Situacao
 
 P = Posicao
 
 
 def partida_controlada(**kwargs) -> Partida:
-    """Cobra de 3 em (5,5) andando para a direita, comida longe, 10 passos/s."""
+    """Cobra de 3 em (5,5) andando para a direita, comida longe, 10 passos/s, meta alta."""
     kwargs.setdefault("grade", Grade(10, 10))
     kwargs.setdefault("cobra", Cobra.nova(P(5, 5), Direcao.DIREITA, 3))
     kwargs.setdefault("comida", P(0, 9))
-    kwargs.setdefault("passos_por_segundo", 10)
+    kwargs.setdefault("nivel", Nivel(numero=1, passos_por_segundo=10, meta_comidas=100))
     kwargs.setdefault("rng", random.Random(0))
     return Partida(**kwargs)
 
@@ -126,3 +127,44 @@ def test_partidas_aleatorias_nunca_quebram_as_regras(semente):
         assert len(set(segmentos)) == len(segmentos)
         assert all(partida.grade.contem(segmento) for segmento in segmentos)
         assert partida.comida is None or partida.comida not in partida.cobra
+
+
+def test_comidas_no_nivel_e_pontos_somam_juntos():
+    partida = partida_controlada(comida=P(6, 5), pontos=7)
+    partida.passo()
+    assert (partida.pontos, partida.comidas_no_nivel) == (8, 1)
+
+
+def test_bater_a_meta_conclui_o_nivel():
+    nivel = Nivel(numero=1, passos_por_segundo=10, meta_comidas=1)
+    partida = partida_controlada(nivel=nivel, comida=P(6, 5))
+    assert partida.passo() is Evento.CONCLUIU_NIVEL
+    assert partida.situacao is Situacao.NIVEL_CONCLUIDO
+    assert partida.comida is None
+    assert partida.atualizar(1.0) == []
+
+
+def test_bater_a_meta_do_ultimo_nivel_e_vitoria():
+    ultimo = NIVEIS[-1]
+    nivel = Nivel(numero=ultimo.numero, passos_por_segundo=10, meta_comidas=1)
+    partida = partida_controlada(nivel=nivel, comida=P(6, 5))
+    assert partida.passo() is Evento.VENCEU
+    assert partida.situacao is Situacao.VITORIA
+
+
+def test_proxima_fase_leva_os_pontos_e_reinicia_a_cobra():
+    nivel = Nivel(numero=1, passos_por_segundo=10, meta_comidas=1)
+    partida = partida_controlada(grade=GRADE_PADRAO, nivel=nivel, comida=P(6, 5), pontos=4)
+    partida.passo()
+    seguinte = partida.proxima_fase()
+    assert seguinte.nivel == NIVEIS[1]
+    assert seguinte.passos_por_segundo == NIVEIS[1].passos_por_segundo
+    assert (seguinte.pontos, seguinte.comidas_no_nivel) == (5, 0)
+    assert len(seguinte.cobra) == 3
+    assert seguinte.em_andamento
+    assert seguinte.comida is not None
+
+
+def test_proxima_fase_exige_nivel_concluido():
+    with pytest.raises(RuntimeError):
+        partida_controlada().proxima_fase()

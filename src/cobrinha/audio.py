@@ -1,9 +1,16 @@
 """Efeitos sonoros e música (I8).
 
+Música de fundo:
+- telas do menu (menu, recordes, opções, créditos): música do menu;
+- partida: cada fase tem a própria música, que troca a cada fase (`musica_da_fase`);
+- ao bater ou vencer, a música para na hora e só volta no menu (ou numa nova partida);
+- na pausa, a música pausa e continua de onde parou.
+
 Se o computador não tiver saída de áudio, o jogo continua funcionando em silêncio.
 """
 
 from enum import Enum
+from pathlib import Path
 
 import pygame
 
@@ -26,7 +33,25 @@ class Som(Enum):
     PAUSA = "pausa"
 
 
-ARQUIVO_MUSICA = PASTA_SONS / "musica.wav"
+class Musica(Enum):
+    """Músicas de fundo; o valor é o nome do arquivo em assets/sons/."""
+
+    MENU = "musica_menu"
+    FASE_1 = "musica_fase1"
+    FASE_2 = "musica_fase2"
+    FASE_3 = "musica_fase3"
+
+    @property
+    def arquivo(self) -> Path:
+        return PASTA_SONS / f"{self.value}.wav"
+
+
+MUSICAS_DAS_FASES = (Musica.FASE_1, Musica.FASE_2, Musica.FASE_3)
+
+
+def musica_da_fase(numero: int) -> Musica:
+    """Música de uma fase. Se houver mais fases que músicas, elas se revezam."""
+    return MUSICAS_DAS_FASES[(numero - 1) % len(MUSICAS_DAS_FASES)]
 
 
 class Audio:
@@ -35,6 +60,8 @@ class Audio:
         self.volume_efeitos = VOLUME_EFEITOS
         self.volume_musica = VOLUME_MUSICA
         self._sons: dict[Som, pygame.mixer.Sound] = {}
+        # Música de fundo atual (None = em silêncio), mesmo sem saída de áudio.
+        self.musica_atual: Musica | None = None
         self.disponivel = self._iniciar_mixer()
         if self.disponivel:
             for som in Som:
@@ -54,11 +81,20 @@ class Audio:
         if self.disponivel:
             self._sons[som].play()
 
-    def tocar_musica(self) -> None:
-        """Começa a música em loop (se já estiver tocando, não reinicia)."""
-        if self.disponivel and not pygame.mixer.music.get_busy():
-            pygame.mixer.music.load(ARQUIVO_MUSICA)
+    def tocar_musica(self, musica: Musica) -> None:
+        """Troca a música de fundo, em loop. Se já for a atual, segue sem reiniciar."""
+        if musica is self.musica_atual:
+            return
+        self.musica_atual = musica
+        if self.disponivel:
+            pygame.mixer.music.load(musica.arquivo)
             pygame.mixer.music.play(loops=-1)
+
+    def parar_musica(self) -> None:
+        """Silencia a música de fundo na hora (ex.: ao bater)."""
+        self.musica_atual = None
+        if self.disponivel:
+            pygame.mixer.music.stop()
 
     def pausar_musica(self) -> None:
         if self.disponivel:

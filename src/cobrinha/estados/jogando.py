@@ -5,8 +5,8 @@ import pygame
 from cobrinha.config import ALTURA_HUD, ALTURA_JANELA, LARGURA_JANELA, Paleta
 from cobrinha.dominio.grade import Direcao
 from cobrinha.dominio.partida import Partida
+from cobrinha.estados import navegacao
 from cobrinha.estados.base import Estado
-from cobrinha.estados.fim_de_partida import EstadoFimDePartida
 from cobrinha.jogo import Jogo
 from cobrinha.ui import texto
 from cobrinha.ui.campo import criar_fundo_campo
@@ -24,37 +24,47 @@ TECLAS_DIRECAO = {
     pygame.K_RIGHT: Direcao.DIREITA,
     pygame.K_d: Direcao.DIREITA,
 }
+TECLAS_PAUSA = (pygame.K_ESCAPE, pygame.K_p)
 
 
 class EstadoJogando(Estado):
-    def __init__(self, jogo: Jogo, recorde: int = 0) -> None:
+    def __init__(self, jogo: Jogo, partida: Partida | None = None, nivel_inicial: int = 1) -> None:
         super().__init__(jogo)
         self.fundo_campo = criar_fundo_campo()
-        self.partida = Partida(rng=jogo.rng)
-        self.nivel = 1
-        self.recorde = recorde
+        self.partida = partida if partida is not None else Partida(rng=jogo.rng)
+        # Nível em que a campanha começou: "jogar de novo" volta para ele.
+        self.nivel_inicial = nivel_inicial
 
     def tratar_evento(self, evento: pygame.Event) -> None:
-        if evento.type != pygame.KEYDOWN:
-            return
-        if evento.key in TECLAS_DIRECAO:
-            self.partida.virar(TECLAS_DIRECAO[evento.key])
-        elif evento.key == pygame.K_ESCAPE:
-            # Na Fase 2, Esc passa a abrir a pausa.
-            self.jogo.sair()
+        if evento.type == pygame.WINDOWFOCUSLOST:
+            # Pausa automática ao trocar de janela (J2).
+            navegacao.pausar(self.jogo, self)
+        elif evento.type == pygame.KEYDOWN:
+            if evento.key in TECLAS_DIRECAO:
+                self.partida.virar(TECLAS_DIRECAO[evento.key])
+            elif evento.key in TECLAS_PAUSA:
+                navegacao.pausar(self.jogo, self)
 
     def atualizar(self, dt: float) -> None:
         self.partida.atualizar(dt)
         if not self.partida.em_andamento:
-            self.jogo.empilhar(EstadoFimDePartida(self.jogo, self.partida, self.recorde))
+            navegacao.encerrar_partida(self.jogo, self)
 
     def desenhar(self, superficie: pygame.Surface) -> None:
-        recorde = max(self.recorde, self.partida.pontos)
-        desenhar_hud(superficie, self.partida.pontos, self.nivel, recorde)
+        partida = self.partida
+        recorde = max(self.jogo.progresso.recorde, partida.pontos)
+        desenhar_hud(
+            superficie,
+            partida.pontos,
+            partida.nivel.numero,
+            recorde,
+            partida.comidas_no_nivel,
+            partida.nivel.meta_comidas,
+        )
         superficie.blit(self.fundo_campo, (0, ALTURA_HUD))
-        if self.partida.comida is not None:
-            desenhar_comida(superficie, self.partida.comida)
-        desenhar_cobra(superficie, self.partida.cobra)
+        if partida.comida is not None:
+            desenhar_comida(superficie, partida.comida)
+        desenhar_cobra(superficie, partida.cobra)
         if self.jogo.debug:
             self._desenhar_depuracao(superficie)
 

@@ -6,7 +6,7 @@ from cobrinha.config import MAX_PASSOS_POR_QUADRO
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import GRADE_PADRAO, Direcao, Grade, Posicao
 from cobrinha.dominio.niveis import NIVEIS, Nivel
-from cobrinha.dominio.partida import Evento, Partida, Situacao
+from cobrinha.dominio.partida import Evento, FrutaDourada, Partida, Situacao
 
 P = Posicao
 
@@ -16,7 +16,9 @@ def partida_controlada(**kwargs) -> Partida:
     kwargs.setdefault("grade", Grade(10, 10))
     kwargs.setdefault("cobra", Cobra.nova(P(5, 5), Direcao.DIREITA, 3))
     kwargs.setdefault("comida", P(0, 9))
-    kwargs.setdefault("nivel", Nivel(numero=1, passos_por_segundo=10, meta_comidas=100))
+    kwargs.setdefault(
+        "nivel", Nivel(nome="Teste", numero=1, passos_por_segundo=10, meta_comidas=100)
+    )
     kwargs.setdefault("rng", random.Random(0))
     return Partida(**kwargs)
 
@@ -136,7 +138,7 @@ def test_comidas_no_nivel_e_pontos_somam_juntos():
 
 
 def test_bater_a_meta_conclui_o_nivel():
-    nivel = Nivel(numero=1, passos_por_segundo=10, meta_comidas=1)
+    nivel = Nivel(nome="Teste", numero=1, passos_por_segundo=10, meta_comidas=1)
     partida = partida_controlada(nivel=nivel, comida=P(6, 5))
     assert partida.passo() is Evento.CONCLUIU_NIVEL
     assert partida.situacao is Situacao.NIVEL_CONCLUIDO
@@ -146,14 +148,14 @@ def test_bater_a_meta_conclui_o_nivel():
 
 def test_bater_a_meta_do_ultimo_nivel_e_vitoria():
     ultimo = NIVEIS[-1]
-    nivel = Nivel(numero=ultimo.numero, passos_por_segundo=10, meta_comidas=1)
+    nivel = Nivel(nome="Teste", numero=ultimo.numero, passos_por_segundo=10, meta_comidas=1)
     partida = partida_controlada(nivel=nivel, comida=P(6, 5))
     assert partida.passo() is Evento.VENCEU
     assert partida.situacao is Situacao.VITORIA
 
 
 def test_proxima_fase_leva_os_pontos_e_reinicia_a_cobra():
-    nivel = Nivel(numero=1, passos_por_segundo=10, meta_comidas=1)
+    nivel = Nivel(nome="Teste", numero=1, passos_por_segundo=10, meta_comidas=1)
     partida = partida_controlada(grade=GRADE_PADRAO, nivel=nivel, comida=P(6, 5), pontos=4)
     partida.passo()
     seguinte = partida.proxima_fase()
@@ -168,3 +170,124 @@ def test_proxima_fase_leva_os_pontos_e_reinicia_a_cobra():
 def test_proxima_fase_exige_nivel_concluido():
     with pytest.raises(RuntimeError):
         partida_controlada().proxima_fase()
+
+
+# Fase 4: obstáculos, modos, aceleração e fruta dourada
+
+from cobrinha.config import (  # noqa: E402
+    DURACAO_FRUTA_DOURADA,
+    PONTOS_FRUTA_DOURADA,
+)
+from cobrinha.dominio.partida import Modo  # noqa: E402
+
+
+def nivel_teste(**kwargs) -> Nivel:
+    kwargs.setdefault("nome", "Teste")
+    kwargs.setdefault("numero", 1)
+    kwargs.setdefault("passos_por_segundo", 10)
+    kwargs.setdefault("meta_comidas", 100)
+    return Nivel(**kwargs)
+
+
+def test_bater_em_pedra_encerra_a_partida():
+    partida = partida_controlada(nivel=nivel_teste(obstaculos=frozenset({P(6, 5)})))
+    assert partida.passo() is Evento.BATEU
+    assert partida.situacao is Situacao.DERROTA
+
+
+def test_comida_nunca_nasce_em_pedra():
+    for semente in range(30):
+        partida = Partida(nivel=NIVEIS[2], rng=random.Random(semente))
+        assert partida.comida not in partida.obstaculos
+
+
+def test_modo_classico_morre_na_borda_e_sem_bordas_atravessa():
+    for modo, esperado in ((Modo.CLASSICO, Evento.BATEU), (Modo.SEM_BORDAS, Evento.MOVEU)):
+        cobra = Cobra.nova(P(9, 5), Direcao.DIREITA, 3)
+        partida = partida_controlada(cobra=cobra, modo=modo)
+        assert partida.passo() is esperado
+    assert partida.cobra.cabeca == P(0, 5)
+
+
+def test_sem_bordas_atravessa_por_cima_e_por_baixo():
+    cobra = Cobra.nova(P(4, 0), Direcao.CIMA, 3)
+    partida = partida_controlada(cobra=cobra, modo=Modo.SEM_BORDAS)
+    partida.passo()
+    assert partida.cobra.cabeca == P(4, 9)
+
+
+def test_cobra_acelera_a_cada_comida():
+    nivel = nivel_teste(aceleracao_por_comida=0.5)
+    partida = partida_controlada(nivel=nivel, comida=P(6, 5))
+    assert partida.passos_por_segundo == 10
+    partida.passo()
+    assert partida.passos_por_segundo == 10.5
+
+
+def test_vitoria_conta_so_as_celulas_sem_pedra():
+    nivel = nivel_teste(obstaculos=frozenset({P(0, 0)}))
+    cobra = Cobra.nova(P(3, 0), Direcao.DIREITA, 3)
+    partida = partida_controlada(grade=Grade(5, 1), nivel=nivel, cobra=cobra, comida=P(4, 0))
+    assert partida.passo() is Evento.VENCEU
+
+
+def forcar_fruta_dourada(partida: Partida) -> None:
+    partida.rng.random = lambda: 0.0  # a chance de 10% sempre acontece
+
+
+def test_fruta_dourada_aparece_numa_celula_livre():
+    partida = partida_controlada(comida=P(6, 5))
+    forcar_fruta_dourada(partida)
+    partida.passo()
+    dourada = partida.fruta_dourada
+    assert dourada is not None
+    assert dourada.posicao != partida.comida
+    assert dourada.posicao not in partida.cobra
+    assert dourada.tempo_restante == DURACAO_FRUTA_DOURADA
+
+
+def test_comer_fruta_dourada_vale_mais_e_nao_conta_para_a_meta():
+    partida = partida_controlada()
+    partida.fruta_dourada = FrutaDourada(P(6, 5))
+    assert partida.passo() is Evento.COMEU_DOURADA
+    assert partida.pontos == PONTOS_FRUTA_DOURADA
+    assert partida.comidas_no_nivel == 0
+    assert partida.fruta_dourada is None
+    partida.passo()
+    assert len(partida.cobra) == 4  # também faz crescer
+
+
+def test_fruta_dourada_some_com_o_tempo():
+    partida = partida_controlada()
+    partida.fruta_dourada = FrutaDourada(P(0, 0), tempo_restante=0.05)
+    partida.atualizar(0.06)
+    assert partida.fruta_dourada is None
+
+
+def test_proxima_fase_mantem_o_modo():
+    nivel = nivel_teste(meta_comidas=1)
+    partida = partida_controlada(
+        grade=GRADE_PADRAO, nivel=nivel, comida=P(6, 5), modo=Modo.SEM_BORDAS
+    )
+    partida.passo()
+    assert partida.proxima_fase().modo is Modo.SEM_BORDAS
+
+
+@pytest.mark.parametrize("modo", list(Modo))
+@pytest.mark.parametrize("numero_nivel", [1, 2, 3])
+def test_partidas_aleatorias_respeitam_pedras_e_modos(modo, numero_nivel):
+    rng = random.Random(numero_nivel)
+    partida = Partida(nivel=NIVEIS[numero_nivel - 1], rng=random.Random(7), modo=modo)
+    forcar_fruta_dourada(partida)
+    for _ in range(400):
+        if not partida.em_andamento:
+            break
+        partida.virar(rng.choice(list(Direcao)))
+        partida.passo()
+        segmentos = list(partida.cobra.segmentos)
+        assert len(set(segmentos)) == len(segmentos)
+        assert not set(segmentos) & partida.obstaculos
+        assert all(GRADE_PADRAO.contem(segmento) for segmento in segmentos)
+        if partida.comida is not None:
+            assert partida.comida not in partida.cobra
+            assert partida.comida not in partida.obstaculos

@@ -1,4 +1,4 @@
-"""Pausa (J2): menu por cima do jogo congelado."""
+"""Pausa (J2): menu por cima do jogo congelado, com a música em pausa."""
 
 from __future__ import annotations
 
@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 
 import pygame
 
-from cobrinha.config import ALTURA_JANELA, Paleta
+from cobrinha.audio import Som
+from cobrinha.config import ALTURA_JANELA, Paleta, TamanhoFonte
 from cobrinha.estados import navegacao
 from cobrinha.estados.base import Estado
 from cobrinha.ui.menu import ItemMenu, Menu
@@ -31,8 +32,11 @@ class EstadoPausa(Estado):
                 ItemMenu("REINICIAR", acao=self._reiniciar),
                 ItemMenu("MENU PRINCIPAL", acao=self._ir_para_menu),
                 ItemMenu("SAIR DO JOGO", acao=self._sair),
-            ]
+            ],
+            tocar=jogo.audio.tocar,
         )
+        jogo.audio.tocar(Som.PAUSA)
+        jogo.audio.pausar_musica()
 
     def tratar_evento(self, evento: pygame.Event) -> None:
         if evento.type == pygame.KEYDOWN and evento.key in TECLAS_CONTINUAR:
@@ -40,14 +44,20 @@ class EstadoPausa(Estado):
         else:
             self.menu.tratar_evento(evento)
 
+    def _deixar_pausa(self) -> None:
+        self.jogo.audio.retomar_musica()
+
     def _continuar(self) -> None:
+        self._deixar_pausa()
         navegacao.retomar(self.jogo, self.jogando)
 
     def _reiniciar(self) -> None:
+        self._deixar_pausa()
         self.jogo.progresso.registrar_pontuacao(self.jogando.partida.pontos)
         navegacao.iniciar_campanha(self.jogo, self.jogando.nivel_inicial)
 
     def _ir_para_menu(self) -> None:
+        self._deixar_pausa()
         navegacao.abandonar_partida(self.jogo, self.jogando)
 
     def _sair(self) -> None:
@@ -56,10 +66,14 @@ class EstadoPausa(Estado):
 
     def desenhar(self, superficie: pygame.Surface) -> None:
         superficie.blit(self.veu, (0, 0))
-        y = desenhar_linhas(superficie, [("PAUSADO", 64, Paleta.BRANCO)], ALTURA_JANELA // 2 - 150)
-        self.menu.desenhar(superficie, topo=y + 10)
+        y = desenhar_linhas(
+            superficie,
+            [("PAUSADO", TamanhoFonte.ENORME, Paleta.BRANCO)],
+            ALTURA_JANELA // 2 - 170,
+        )
+        self.menu.desenhar(superficie, topo=y + 20)
         desenhar_linhas(
             superficie,
-            [("ESC ou P: continuar", 22, Paleta.CINZA_CLARO)],
-            ALTURA_JANELA - 60,
+            [("ESC ou P: continuar    M: som", TamanhoFonte.PEQUENO, Paleta.CINZA_CLARO)],
+            ALTURA_JANELA - 50,
         )

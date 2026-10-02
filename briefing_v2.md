@@ -252,7 +252,7 @@ Cada fase deixa o jogo **jogável** ao final.
 |------|------|-------|----------------|
 | **0. Fundação** ✅ | Esqueleto do projeto | E3, E5, E7, E1 (mínimo), paleta e grade (8.2) | `python -m cobrinha` abre a janela 800 × 600 com HUD e grade 32 × 22 desenhados e fecha sem erro; lint e CI passando. |
 | **1. Núcleo do jogo** ✅ | Domínio + estados | E1, E2, E4, E6, E8, D1–D5, J1, regra de vitória do J7 | Snake jogável com formas simples no lugar dos sprites, sem nenhum dos bugs B1–B7, com testes do domínio passando. |
-| **2. Jogabilidade essencial** | Fluxo da partida | J2, J3, J10 + menu inicial simples | Pausa, níveis com progressão sem interrupção, contagem 3‑2‑1 e menu para começar. |
+| **2. Jogabilidade essencial** ✅ | Fluxo da partida | J2, J3, J10, `--nivel` (E8) + menu inicial simples | Pausa, níveis com progressão sem interrupção, contagem 3‑2‑1 e menu para começar. |
 | **3. Interface** | Pixel art e som | I1–I8, D6 | Menus navegáveis, HUD em faixa, sprites pixel art com curvas, sons. |
 | **4. Conteúdo** | Variedade | J4, J5, J6, J8, J9, I9, I10 | Níveis distintos, recordes salvos, opções persistentes. |
 | **5. Entrega** | Portfólio | Seção 7, I11 | README com GIF, CI verde, executável na *release* `v2.0.0`, LOG completo. |

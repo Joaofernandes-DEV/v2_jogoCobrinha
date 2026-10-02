@@ -257,3 +257,17 @@ Modelo:
 **Motivo / observações:**
 - **Roteiro da V2 concluído:** Fases 0 a 5 ✅. O que ficou para depois está na coluna "Fica para a V3" da seção 8.4 do briefing (remapeamento de teclas, power-ups extras, ranking online, partículas, movimento interpolado, versão web etc.).
 - **Para o João fazer:** apagar o arquivo local solto `src/cobrinha/assets/sons/musica.wav` depois de fechar o jogo (ele não está mais no repositório nem no executável), e testar o som do executável num PC sem Python.
+
+### 2026-10-02 16:02 — Guia de contribuição e proteção da `main`
+
+**Feito:**
+- Criado o `CONTRIBUTING.md` com o fluxo para colaboradores: branch, testes (`ruff` e `pytest`), entrada no `LOG.md`, um commit por arquivo (Conventional Commits em português) e Pull Request.
+- Criado o `CLAUDE.md` com o mesmo fluxo resumido, para que o Claude Code de quem colaborar siga o padrão automaticamente.
+- Configurada a descrição e os topics do repositório no GitHub.
+- Proteção da branch `main`: exige Pull Request e os 4 checks do CI (Linux 3.11, 3.12 e 3.13; Windows 3.11) verdes antes do merge. Branch desatualizada em relação à `main` é bloqueada e force-push e exclusão da `main` são proibidos. O dono (admin) pode ignorar a regra em emergências.
+
+**Arquivos:** `CONTRIBUTING.md` (novo), `CLAUDE.md` (novo), `LOG.md`.
+
+**Motivo / observações:**
+- O colaborador vai implementar no mesmo padrão adotado até aqui; documentar o fluxo evita depender de explicação verbal.
+- A proteção foi aplicada depois do push destes arquivos, pois ela bloqueia push direto na `main`.

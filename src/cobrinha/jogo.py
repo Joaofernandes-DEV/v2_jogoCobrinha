@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from typing import TYPE_CHECKING
 
 import pygame
@@ -20,7 +21,10 @@ class Jogo:
     por cima do jogo congelado).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, debug: bool = False, semente: int | None = None) -> None:
+        self.debug = debug
+        # Gerador único de aleatoriedade; com semente, as partidas são reproduzíveis.
+        self.rng = random.Random(semente)
         pygame.init()
         pygame.display.set_caption(TITULO)
         # SCALED permite ampliar a janela e usar tela cheia sem borrar a pixel art.

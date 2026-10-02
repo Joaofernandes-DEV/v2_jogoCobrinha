@@ -10,6 +10,7 @@ import random
 import struct
 import wave
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -101,14 +102,16 @@ def arpejo(notas: list[str], duracao_nota: float, onda: Onda, volume: float = 0.
 # Pico final de cada arquivo (−1 dBFS). O equilíbrio entre os sons fica em INTENSIDADE.
 PICO_ALVO = 0.89
 # Sons de interface mais discretos que os da partida (fração do pico-alvo).
-INTENSIDADE = {"menu_mover": 0.5, "menu_confirmar": 0.7, "pausa": 0.7, "musica": 0.8}
+INTENSIDADE = {"menu_mover": 0.5, "menu_confirmar": 0.7, "pausa": 0.7}
+INTENSIDADE_MUSICA = 0.8
 
 
 def salvar(nome: str, amostras: list[float]) -> None:
     """Normaliza para o pico-alvo e grava. (Antes, a normalização só reduzia o volume,
     nunca aumentava, e os sons saíam ~10 dB baixos demais.)"""
     pico = max((abs(a) for a in amostras), default=1.0) or 1.0
-    escala = PICO_ALVO * INTENSIDADE.get(nome, 1.0) / pico * 32767
+    intensidade = INTENSIDADE_MUSICA if nome.startswith("musica") else INTENSIDADE.get(nome, 1.0)
+    escala = PICO_ALVO * intensidade / pico * 32767
     caminho = DESTINO / f"{nome}.wav"
     with wave.open(str(caminho), "wb") as arquivo:
         arquivo.setnchannels(1)
@@ -146,37 +149,95 @@ def efeitos() -> dict[str, list[float]]:
     }
 
 
-# Música: 8 compassos em loop, Am – F – C – G, 140 bpm.
+# Músicas: uma para o menu e uma para cada fase, cada uma com tom, andamento e timbre
+# próprios, para o jogo não ficar repetitivo. Todas têm 8 compassos e tocam em loop.
 
-BPM = 140
-COLCHEIA = 60 / BPM / 2
-ACORDES = [  # (baixo, notas do arpejo da melodia), 2 compassos cada
-    ("A2", ["A4", "C5", "E5", "C5"]),
-    ("F2", ["F4", "A4", "C5", "A4"]),
-    ("C3", ["E4", "G4", "C5", "G4"]),
-    ("G2", ["D4", "G4", "B4", "G4"]),
-]
-# Variação da melodia no 2º compasso de cada acorde (índices no arpejo; None = pausa).
-VARIACAO = [0, 1, 2, 3, 2, None, 1, 2]
+Padrao = list[int | None]  # 8 colcheias: índice da nota no arpejo, ou None = pausa
 
 
-def musica() -> list[float]:
+@dataclass(frozen=True)
+class Faixa:
+    bpm: int
+    # (nota do baixo, arpejo da melodia), 2 compassos cada.
+    acordes: list[tuple[str, list[str]]]
+    padrao_1: Padrao  # 1º compasso de cada acorde
+    padrao_2: Padrao  # 2º compasso (variação)
+    ciclo_ativo: float  # timbre da melodia: 0,125 = fino, 0,25 = mais cheio
+
+
+FAIXAS: dict[str, Faixa] = {
+    # Menu: lá menor, calma (a mesma música das versões anteriores).
+    "musica_menu": Faixa(
+        bpm=140,
+        acordes=[
+            ("A2", ["A4", "C5", "E5", "C5"]),
+            ("F2", ["F4", "A4", "C5", "A4"]),
+            ("C3", ["E4", "G4", "C5", "G4"]),
+            ("G2", ["D4", "G4", "B4", "G4"]),
+        ],
+        padrao_1=[0, 1, 2, 3, 0, 1, 2, 3],
+        padrao_2=[0, 1, 2, 3, 2, None, 1, 2],
+        ciclo_ativo=0.125,
+    ),
+    # Fase 1, "Campo aberto": dó maior, alegre.
+    "musica_fase1": Faixa(
+        bpm=150,
+        acordes=[
+            ("C3", ["C5", "E5", "G5", "E5"]),
+            ("G2", ["B4", "D5", "G5", "D5"]),
+            ("A2", ["A4", "C5", "E5", "C5"]),
+            ("F2", ["A4", "C5", "F5", "C5"]),
+        ],
+        padrao_1=[0, 1, 2, 1, 3, 2, 1, 2],
+        padrao_2=[3, 2, 1, 0, None, 0, 1, None],
+        ciclo_ativo=0.25,
+    ),
+    # Fase 2, "Pedras no caminho": ré menor, sincopada.
+    "musica_fase2": Faixa(
+        bpm=160,
+        acordes=[
+            ("D3", ["D5", "F5", "A5", "F5"]),
+            ("Bb2", ["Bb4", "D5", "F5", "D5"]),
+            ("F2", ["A4", "C5", "F5", "C5"]),
+            ("C3", ["G4", "C5", "E5", "C5"]),
+        ],
+        padrao_1=[0, None, 2, 1, 0, None, 3, 2],
+        padrao_2=[0, 1, 2, 3, 3, 2, 1, None],
+        ciclo_ativo=0.125,
+    ),
+    # Fase 3, "Labirinto": mi menor, rápida e tensa.
+    "musica_fase3": Faixa(
+        bpm=172,
+        acordes=[
+            ("E2", ["E5", "G5", "B5", "G5"]),
+            ("C3", ["E5", "G5", "C6", "G5"]),
+            ("D3", ["D5", "F#5", "A5", "F#5"]),
+            ("B2", ["D#5", "F#5", "B5", "F#5"]),
+        ],
+        padrao_1=[0, 0, 2, 1, 0, 0, 3, 2],
+        padrao_2=[3, 2, 3, 1, 2, 0, 1, None],
+        ciclo_ativo=0.25,
+    ),
+}
+
+
+def compor(faixa: Faixa) -> list[float]:
+    colcheia = 60 / faixa.bpm / 2
     melodia, baixo = [], []
-    q125 = quadrada(0.125)
-    for nota_baixo, arpejo_notas in ACORDES:
-        for compasso in range(2):
-            for colcheia in range(8):
-                indice = colcheia % 4 if compasso == 0 else VARIACAO[colcheia]
+    timbre = quadrada(faixa.ciclo_ativo)
+    for nota_baixo, arpejo_notas in faixa.acordes:
+        for padrao in (faixa.padrao_1, faixa.padrao_2):
+            for numero_colcheia, indice in enumerate(padrao):
                 if indice is None:
-                    melodia.extend(silencio(COLCHEIA))
+                    melodia.extend(silencio(colcheia))
                 else:
                     melodia.extend(
-                        tom(nota(arpejo_notas[indice]), COLCHEIA, q125, volume=0.22, soltura=0.05)
+                        tom(nota(arpejo_notas[indice]), colcheia, timbre, volume=0.22, soltura=0.05)
                     )
                 # Baixo pulsando em colcheias, uma oitava acima no tempo fraco.
-                oitava = int(nota_baixo[-1]) + (colcheia % 2)
+                oitava = int(nota_baixo[-1]) + (numero_colcheia % 2)
                 frequencia = nota(nota_baixo[:-1] + str(oitava))
-                baixo.extend(tom(frequencia, COLCHEIA, triangular, volume=0.3, soltura=0.02))
+                baixo.extend(tom(frequencia, colcheia, triangular, volume=0.3, soltura=0.02))
     return misturar(melodia, baixo)
 
 
@@ -184,7 +245,8 @@ def main() -> None:
     DESTINO.mkdir(parents=True, exist_ok=True)
     for nome, amostras in efeitos().items():
         salvar(nome, amostras)
-    salvar("musica", musica())
+    for nome, faixa in FAIXAS.items():
+        salvar(nome, compor(faixa))
 
 
 if __name__ == "__main__":

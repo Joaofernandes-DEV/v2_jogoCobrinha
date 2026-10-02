@@ -22,6 +22,12 @@ ALTURA_JANELA: Final = ALTURA_HUD + LINHAS * TAMANHO_CELULA
 
 # Tempo
 FPS: Final = 60
+DURACAO_FADE: Final = 0.25  # segundos do fade de entrada ao trocar de tela (I7)
+
+# Áudio (volumes de 0 a 1; ajustáveis na tela de opções da Fase 4)
+FREQUENCIA_AUDIO: Final = 22_050
+VOLUME_EFEITOS: Final = 0.6
+VOLUME_MUSICA: Final = 0.35
 
 # Jogabilidade
 TAMANHO_INICIAL_COBRA: Final = 3
@@ -30,6 +36,18 @@ LIMITE_FILA_DIRECOES: Final = 2
 # Teto de passos recuperados num único quadro, para a cobra não "teleportar"
 # depois de um travamento (ex.: arrastar a janela).
 MAX_PASSOS_POR_QUADRO: Final = 3
+
+
+class TamanhoFonte:
+    """Tamanhos da fonte pixel (VT323), escolhidos entre os que deixam os traços uniformes."""
+
+    MINIMO: Final = 20
+    PEQUENO: Final = 24
+    MEDIO: Final = 32
+    GRANDE: Final = 40
+    TITULO: Final = 48
+    ENORME: Final = 80
+    GIGANTE: Final = 100
 
 
 class Paleta:

@@ -6,7 +6,7 @@ import pygame
 import pytest
 
 from cobrinha import recursos
-from cobrinha.audio import ARQUIVO_MUSICA, Som
+from cobrinha.audio import Musica, Som
 from cobrinha.config import FREQUENCIA_AUDIO, TAMANHO_CELULA
 from cobrinha.ui.pecas import TipoPeca
 
@@ -21,7 +21,9 @@ def test_sprites_tem_25x25_com_transparencia(jogo, nome):
     assert sprite.get_at((0, 0)).a == 0  # canto transparente
 
 
-@pytest.mark.parametrize("caminho", [recursos.PASTA_SONS / f"{s.value}.wav" for s in Som])
+@pytest.mark.parametrize(
+    "caminho", [recursos.PASTA_SONS / f"{s.value}.wav" for s in [*Som, *Musica]]
+)
 def test_efeitos_sao_wav_mono_na_taxa_do_mixer(caminho):
     with wave.open(str(caminho)) as arquivo:
         assert arquivo.getnchannels() == 1
@@ -29,8 +31,9 @@ def test_efeitos_sao_wav_mono_na_taxa_do_mixer(caminho):
         assert arquivo.getnframes() > 0
 
 
-def test_musica_existe():
-    assert ARQUIVO_MUSICA.is_file()
+def test_musicas_sao_diferentes_entre_si():
+    conteudos = {musica.arquivo.read_bytes() for musica in Musica}
+    assert len(conteudos) == len(Musica)
 
 
 def test_fonte_e_licenca_estao_no_pacote():

@@ -1,47 +1,124 @@
-"""Desenho provisório da cobra e da comida com formas simples.
+"""Desenho da cobra e da comida com os sprites em pixel art (I3, I4).
 
-Os sprites em pixel art substituem estas funções na Fase 3.
+Cada segmento vira uma peça (cabeça, corpo reto, curva ou cauda) girada em
+múltiplos de 90°, a partir das 4 imagens-base geradas por ferramentas/gerar_sprites.py.
 """
+
+from __future__ import annotations
+
+import math
+from collections.abc import Sequence
+from dataclasses import dataclass
+from enum import Enum
 
 import pygame
 
-from cobrinha.config import TAMANHO_CELULA, Paleta
+from cobrinha import recursos
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.ui.campo import celula_para_pixel
 
-MARGEM_SEGMENTO = 2
-TAMANHO_OLHO = 4
 
-# Posição dos dois olhos (em pixels dentro da célula) para cada direção da cabeça.
-_OLHOS = {
-    Direcao.DIREITA: ((15, 6), (15, 15)),
-    Direcao.ESQUERDA: ((6, 6), (6, 15)),
-    Direcao.CIMA: ((6, 6), (15, 6)),
-    Direcao.BAIXO: ((6, 15), (15, 15)),
+class TipoPeca(Enum):
+    """O valor é o nome do PNG da peça-base."""
+
+    CABECA = "cabeca"
+    RETO = "corpo_reto"
+    CURVA = "corpo_curva"
+    CAUDA = "cauda"
+
+
+# Rotação (anti-horária, como em pygame.transform.rotate) que leva "→" para cada direção.
+ANGULO_DA_DIRECAO = {
+    Direcao.DIREITA: 0,
+    Direcao.CIMA: 90,
+    Direcao.ESQUERDA: 180,
+    Direcao.BAIXO: 270,
 }
+_GIRO_ANTI_HORARIO = {
+    Direcao.DIREITA: Direcao.CIMA,
+    Direcao.CIMA: Direcao.ESQUERDA,
+    Direcao.ESQUERDA: Direcao.BAIXO,
+    Direcao.BAIXO: Direcao.DIREITA,
+}
+LADOS_CURVA_BASE = frozenset({Direcao.ESQUERDA, Direcao.BAIXO})
+
+# Comida "flutuando": sobe e desce 1 px.
+VELOCIDADE_FLUTUACAO = 4.0
 
 
-def _retangulo_celula(posicao: Posicao, margem: int = 0) -> pygame.Rect:
-    x, y = celula_para_pixel(posicao)
-    return pygame.Rect(x, y, TAMANHO_CELULA, TAMANHO_CELULA).inflate(-2 * margem, -2 * margem)
+@dataclass(frozen=True)
+class Peca:
+    tipo: TipoPeca
+    posicao: Posicao
+    angulo: int
 
 
-def desenhar_cobra(superficie: pygame.Surface, cobra: Cobra) -> None:
-    # Da cauda para a cabeça, para a cabeça ficar sempre por cima.
-    for indice in range(len(cobra) - 1, 0, -1):
-        cor = Paleta.VERDE if indice % 2 else Paleta.VERDE_CLARO
-        superficie.fill(cor, _retangulo_celula(cobra.segmentos[indice], MARGEM_SEGMENTO))
+def direcao_entre(origem: Posicao, destino: Posicao) -> Direcao:
+    """Direção de uma célula para a vizinha.
 
-    cabeca = _retangulo_celula(cobra.cabeca, 1)
-    superficie.fill(Paleta.VERDE_ESCURO, cabeca)
-    for dx, dy in _OLHOS[cobra.direcao]:
-        superficie.fill(Paleta.BRANCO, (cabeca.x + dx, cabeca.y + dy, TAMANHO_OLHO, TAMANHO_OLHO))
-        superficie.fill(Paleta.PRETO, (cabeca.x + dx + 1, cabeca.y + dy + 1, 2, 2))
+    Se a vizinha estiver do outro lado do campo (modo sem bordas, Fase 4), o salto
+    conta como um passo no sentido contrário.
+    """
+    dx = destino.coluna - origem.coluna
+    dy = destino.linha - origem.linha
+    if abs(dx) > 1:
+        dx = -int(math.copysign(1, dx))
+    if abs(dy) > 1:
+        dy = -int(math.copysign(1, dy))
+    return Direcao((dx, dy))
 
 
-def desenhar_comida(superficie: pygame.Surface, posicao: Posicao) -> None:
-    fruta = _retangulo_celula(posicao, 4)
-    pygame.draw.ellipse(superficie, Paleta.VERMELHO, fruta)
-    folha = pygame.Rect(fruta.centerx, fruta.top - 3, 5, 4)
-    superficie.fill(Paleta.VERDE, folha)
+def angulo_da_curva(lados: frozenset[Direcao]) -> int:
+    """Rotação da curva-base (esquerda + baixo) para ligar os dois `lados` pedidos."""
+    atual = LADOS_CURVA_BASE
+    for angulo in (0, 90, 180, 270):
+        if atual == lados:
+            return angulo
+        atual = frozenset(_GIRO_ANTI_HORARIO[lado] for lado in atual)
+    raise ValueError(f"Lados não formam uma curva: {lados}")
+
+
+def classificar_pecas(segmentos: Sequence[Posicao], direcao: Direcao) -> list[Peca]:
+    """Escolhe a peça e a rotação de cada segmento, da cabeça à cauda."""
+    pecas = []
+    ultimo = len(segmentos) - 1
+    for indice, posicao in enumerate(segmentos):
+        if indice == 0:
+            frente = direcao if ultimo == 0 else direcao_entre(segmentos[1], posicao)
+            pecas.append(Peca(TipoPeca.CABECA, posicao, ANGULO_DA_DIRECAO[frente]))
+        elif indice == ultimo:
+            ligacao = direcao_entre(posicao, segmentos[indice - 1])
+            pecas.append(Peca(TipoPeca.CAUDA, posicao, ANGULO_DA_DIRECAO[ligacao]))
+        else:
+            para_frente = direcao_entre(posicao, segmentos[indice - 1])
+            para_tras = direcao_entre(posicao, segmentos[indice + 1])
+            if para_frente is para_tras.oposta:
+                horizontal = para_frente in (Direcao.ESQUERDA, Direcao.DIREITA)
+                pecas.append(Peca(TipoPeca.RETO, posicao, 0 if horizontal else 90))
+            else:
+                angulo = angulo_da_curva(frozenset({para_frente, para_tras}))
+                pecas.append(Peca(TipoPeca.CURVA, posicao, angulo))
+    return pecas
+
+
+class Sprites:
+    """Todas as rotações das peças, preparadas uma vez (exige a janela aberta)."""
+
+    def __init__(self) -> None:
+        self._pecas = {
+            (tipo, angulo): pygame.transform.rotate(recursos.imagem(tipo.value), angulo)
+            for tipo in TipoPeca
+            for angulo in (0, 90, 180, 270)
+        }
+        self.comida = recursos.imagem("comida")
+
+    def desenhar_cobra(self, superficie: pygame.Surface, cobra: Cobra) -> None:
+        # Da cauda para a cabeça, para a cabeça ficar sempre por cima.
+        for peca in reversed(classificar_pecas(cobra.segmentos, cobra.direcao)):
+            superficie.blit(self._pecas[peca.tipo, peca.angulo], celula_para_pixel(peca.posicao))
+
+    def desenhar_comida(self, superficie: pygame.Surface, posicao: Posicao, tempo: float) -> None:
+        x, y = celula_para_pixel(posicao)
+        deslocamento = round(math.sin(tempo * VELOCIDADE_FLUTUACAO))
+        superficie.blit(self.comida, (x, y + deslocamento))

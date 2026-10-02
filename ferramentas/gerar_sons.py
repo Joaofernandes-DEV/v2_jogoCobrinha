@@ -64,6 +64,23 @@ def ruido(duracao: float, volume: float = 0.4, semente: int = 7) -> list[float]:
     return [rng.uniform(-1, 1) * volume * (1 - i / total) ** 2 for i in range(total)]
 
 
+def passa_baixa(amostras: list[float], suavidade: float) -> list[float]:
+    """Filtro passa-baixa de um polo: tira o chiado do ruído e deixa um som "crocante"."""
+    saida, anterior = [], 0.0
+    for amostra in amostras:
+        anterior += suavidade * (amostra - anterior)
+        saida.append(anterior)
+    return saida
+
+
+def mordida() -> list[float]:
+    """Mordida na maçã ("nhac!"): dois estalos de ruído filtrado e um blip subindo."""
+    estalo_1 = passa_baixa(ruido(0.045, volume=1.0, semente=11), 0.45)
+    estalo_2 = passa_baixa(ruido(0.035, volume=0.7, semente=23), 0.55)
+    blip = tom(520, 0.07, quadrada(0.25), frequencia_final=1040, volume=0.35)
+    return juntar(estalo_1, silencio(0.012), estalo_2, blip)
+
+
 def silencio(duracao: float) -> list[float]:
     return [0.0] * int(duracao * TAXA)
 
@@ -81,9 +98,17 @@ def arpejo(notas: list[str], duracao_nota: float, onda: Onda, volume: float = 0.
     return juntar(*(tom(nota(n), duracao_nota, onda, volume=volume) for n in notas))
 
 
+# Pico final de cada arquivo (−1 dBFS). O equilíbrio entre os sons fica em INTENSIDADE.
+PICO_ALVO = 0.89
+# Sons de interface mais discretos que os da partida (fração do pico-alvo).
+INTENSIDADE = {"menu_mover": 0.5, "menu_confirmar": 0.7, "pausa": 0.7, "musica": 0.8}
+
+
 def salvar(nome: str, amostras: list[float]) -> None:
+    """Normaliza para o pico-alvo e grava. (Antes, a normalização só reduzia o volume,
+    nunca aumentava, e os sons saíam ~10 dB baixos demais.)"""
     pico = max((abs(a) for a in amostras), default=1.0) or 1.0
-    escala = min(1.0, 0.9 / pico) * 32767
+    escala = PICO_ALVO * INTENSIDADE.get(nome, 1.0) / pico * 32767
     caminho = DESTINO / f"{nome}.wav"
     with wave.open(str(caminho), "wb") as arquivo:
         arquivo.setnchannels(1)
@@ -99,7 +124,7 @@ def salvar(nome: str, amostras: list[float]) -> None:
 def efeitos() -> dict[str, list[float]]:
     q25, q50 = quadrada(0.25), quadrada(0.5)
     return {
-        "comer": tom(660, 0.09, q25, frequencia_final=1320, volume=0.45),
+        "comer": mordida(),
         "nivel": arpejo(["C5", "E5", "G5", "C6"], 0.08, q25),
         "bater": misturar(ruido(0.35), tom(330, 0.35, q50, frequencia_final=80, volume=0.35)),
         "vitoria": juntar(

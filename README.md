@@ -4,7 +4,7 @@
 
 Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-DEV/Py_JogoDaCobrinha), feito em Python + Pygame na disciplina de Computação Gráfica (UNIP).
 
-> **Status:** Fase 0 concluída. O jogo abre a janela com HUD e campo; a cobra chega na Fase 1. Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
+> **Status:** Fase 1 concluída. O Snake já é jogável, com formas simples no lugar dos sprites (a pixel art chega na Fase 3). Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
 
 ## O que muda na V2
 
@@ -30,7 +30,20 @@ pip install -e ".[dev]"
 python -m cobrinha
 ```
 
-`Esc` fecha o jogo.
+### Controles
+
+| Tecla | Ação |
+|-------|------|
+| Setas ou `W` `A` `S` `D` | Mover a cobra |
+| `Enter` / `Espaço` | Jogar de novo (na tela de fim de partida) |
+| `Esc` | Sair |
+
+### Opções de linha de comando
+
+```bash
+python -m cobrinha --debug        # mostra FPS e tamanho da cobra
+python -m cobrinha --semente 42   # repete exatamente a mesma sequência de comidas
+```
 
 ## Desenvolvimento
 
@@ -51,8 +64,12 @@ src/cobrinha/
 ├── jogo.py          # loop principal e pilha de estados (telas)
 ├── recursos.py      # caminhos de assets e fontes com cache
 ├── dominio/         # regras puras, sem pygame (testáveis)
-├── estados/         # telas do jogo
-└── ui/              # HUD, campo e texto
+│   ├── grade.py     #   Posicao, Direcao e Grade
+│   ├── cobra.py     #   corpo, movimento, crescimento e fila de direções
+│   ├── comida.py    #   sorteio entre as células livres
+│   └── partida.py   #   passo fixo, colisões, pontuação, vitória e derrota
+├── estados/         # telas: jogando, fim de partida
+└── ui/              # HUD, campo, peças e texto
 tests/               # pytest
 ```
 

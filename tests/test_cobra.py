@@ -108,3 +108,12 @@ def test_avancar_para_a_celula_da_cauda_mantem_a_ocupacao():
     cobra.avancar(P(0, 0))
     assert P(0, 0) in cobra
     assert len(cobra) == 4
+
+
+def test_informa_se_ha_comandos_pendentes():
+    cobra = cobra_para_direita()
+    assert not cobra.tem_comandos_pendentes
+    cobra.virar(Direcao.CIMA)
+    assert cobra.tem_comandos_pendentes
+    cobra.aplicar_proxima_direcao()
+    assert not cobra.tem_comandos_pendentes

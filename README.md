@@ -4,7 +4,7 @@
 
 Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-DEV/Py_JogoDaCobrinha), feito em Python + Pygame na disciplina de Computação Gráfica (UNIP).
 
-> **Status:** Fase 1 concluída. O Snake já é jogável, com formas simples no lugar dos sprites (a pixel art chega na Fase 3). Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
+> **Status:** Fase 2 concluída. Jogo completo em 3 níveis, com menu, pausa e contagem 3-2-1, ainda com formas simples no lugar dos sprites (a pixel art chega na Fase 3). Roteiro completo no [briefing](briefing_v2.md#9-roteiro-em-fases).
 
 ## O que muda na V2
 
@@ -34,15 +34,24 @@ python -m cobrinha
 
 | Tecla | Ação |
 |-------|------|
-| Setas ou `W` `A` `S` `D` | Mover a cobra |
-| `Enter` / `Espaço` | Jogar de novo (na tela de fim de partida) |
-| `Esc` | Sair |
+| Setas ou `W` `A` `S` `D` | Mover a cobra; navegar nos menus |
+| `←` `→` | Escolher o nível inicial no menu |
+| `Enter` / `Espaço` | Confirmar; pular a contagem 3-2-1 |
+| `Esc` ou `P` | Pausar / continuar |
+| `Esc` no menu principal | Sair |
+
+O jogo também pausa sozinho quando a janela perde o foco.
+
+### Como jogar
+
+São 3 níveis, cada um mais rápido que o anterior. Coma a quantidade de comidas da meta (mostrada no HUD, ex.: `NÍVEL 1  4/10`) para concluir o nível. Os pontos se acumulam entre os níveis, e zerar o nível 3 (ou encher o campo) vence o jogo. Os níveis alcançados ficam liberados no menu para começar direto neles. Por enquanto, o recorde e os níveis liberados valem só enquanto o jogo está aberto; a gravação em disco chega na Fase 4.
 
 ### Opções de linha de comando
 
 ```bash
 python -m cobrinha --debug        # mostra FPS e tamanho da cobra
 python -m cobrinha --semente 42   # repete exatamente a mesma sequência de comidas
+python -m cobrinha --nivel 3      # pula o menu e começa direto no nível 3
 ```
 
 ## Desenvolvimento
@@ -67,9 +76,12 @@ src/cobrinha/
 │   ├── grade.py     #   Posicao, Direcao e Grade
 │   ├── cobra.py     #   corpo, movimento, crescimento e fila de direções
 │   ├── comida.py    #   sorteio entre as células livres
-│   └── partida.py   #   passo fixo, colisões, pontuação, vitória e derrota
-├── estados/         # telas: jogando, fim de partida
-└── ui/              # HUD, campo, peças e texto
+│   ├── niveis.py    #   níveis como dados (velocidade e meta)
+│   ├── progresso.py #   recorde e níveis liberados
+│   └── partida.py   #   passo fixo, colisões, pontuação, níveis, vitória e derrota
+├── estados/         # telas: menu, contagem, jogando, pausa, nível concluído, fim
+│   └── navegacao.py #   mapa de todas as trocas de tela
+└── ui/              # HUD, campo, peças, menu, painéis e texto
 tests/               # pytest
 ```
 

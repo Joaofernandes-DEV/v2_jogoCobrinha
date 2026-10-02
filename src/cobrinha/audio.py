@@ -15,6 +15,7 @@ class Som(Enum):
     """Efeitos disponíveis; o valor é o nome do arquivo em assets/sons/."""
 
     COMER = "comer"
+    BONUS = "bonus"
     NIVEL = "nivel"
     BATER = "bater"
     VITORIA = "vitoria"
@@ -66,6 +67,11 @@ class Audio:
     def retomar_musica(self) -> None:
         if self.disponivel:
             pygame.mixer.music.unpause()
+
+    def definir_volumes(self, efeitos: float, musica: float) -> None:
+        self.volume_efeitos = efeitos
+        self.volume_musica = musica
+        self._aplicar_volumes()
 
     def alternar_mudo(self) -> None:
         self.mudo = not self.mudo

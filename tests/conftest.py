@@ -16,10 +16,10 @@ from cobrinha.ui import texto  # noqa: E402
 
 @pytest.fixture(autouse=True)
 def limpar_caches_do_pygame():
-    """Fontes e textos em cache pertencem ao pygame encerrado no fim de cada teste."""
+    """Fontes, imagens e textos em cache pertencem ao pygame encerrado no fim de cada teste."""
     yield
-    recursos.fonte.cache_clear()
-    texto.renderizar.cache_clear()
+    recursos.limpar_cache()
+    texto.limpar_cache()
 
 
 @pytest.fixture

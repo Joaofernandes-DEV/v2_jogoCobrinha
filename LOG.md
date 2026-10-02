@@ -159,3 +159,15 @@ Modelo:
 - **Downloads** (autorizados pelo João): fontes do repositório oficial `google/fonts` (Press Start 2P, Pixelify Sans, Silkscreen e VT323, só para comparação; apenas a VT323 e a licença dela ficaram no projeto). Nenhum som foi baixado; todos foram gerados por código.
 - **Verificado localmente:** ruff sem apontamentos, 122 testes, jogo aberto com áudio real e `python -X dev` (sem avisos), capturas de todas as telas conferidas. Não dá para ouvir os sons por aqui: vale o João testar o volume e o gosto da música.
 - Próximo passo: **Fase 4** (obstáculos nos níveis 2 e 3, fruta dourada, recordes salvos em disco, modos Clássico/Sem bordas, opções e efeitos visuais).
+
+### 2026-10-02 10:54 — Correção do áudio baixo e som de mordida da maçã
+
+**Feito:**
+- **Diagnóstico** (o João relatou que o áudio "não estava funcionando"): o jogo abria o mixer no WASAPI e tocava normalmente. A saída padrão do Windows são os alto-falantes Cirrus Logic, com volume geral em 52%, e a sessão do python.exe estava a 100% e sem mudo. Medindo o pico do sinal que chegava ao Windows com o pycaw (só para diagnóstico, fora do projeto), a música chegava com pico de **0,20** e os efeitos com ~0,27: baixo demais para alto-falantes de notebook.
+- **Causa:** a normalização do `gerar_sons.py` só **reduzia** o volume (`min(1, 0,9/pico)`), nunca aumentava. Somada aos volumes conservadores (efeitos 0,6 e música 0,35), deixava tudo uns 10 dB abaixo do ideal.
+- **Correção:** todos os sons agora são normalizados para pico de 0,89 (−1 dBFS), com intensidade relativa por som (os de menu são mais discretos). Volumes padrão: efeitos 0,9 e música 0,5. Medido de novo: música com pico de **0,41** e efeitos de **0,81 a 0,97**.
+- **Som de mordida** (pedido do João): o "comer" virou um "nhac!" crocante, com dois estalos de ruído filtrado (filtro passa-baixa de um polo) seguidos de um blip subindo, em 0,16 s.
+
+**Arquivos:** `ferramentas/gerar_sons.py`, `src/cobrinha/config.py`, os 10 WAVs de `src/cobrinha/assets/sons/` (regerados), `LOG.md`.
+
+**Motivo / observações:** a medição anterior conferia só se o mixer estava ativo, não se o som era audível. Daqui em diante, mudanças de áudio são conferidas também pelo pico que chega ao Windows.

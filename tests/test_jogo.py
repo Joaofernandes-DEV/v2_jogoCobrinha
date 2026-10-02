@@ -90,3 +90,15 @@ def test_tecla_m_silencia_em_qualquer_tela(jogo):
     pygame.event.post(pygame.Event(pygame.KEYDOWN, key=pygame.K_m))
     jogo._processar_eventos()
     assert jogo.audio.mudo
+
+
+def test_fechar_em_encerra_o_jogo_sozinho():
+    """Usado no teste automático do executável: o loop real roda e fecha sem ninguém clicar."""
+    import time
+
+    from cobrinha.__main__ import main
+
+    inicio = time.monotonic()
+    main(["--fechar-em", "0.3", "--nivel", "2"])
+    assert time.monotonic() - inicio < 10
+    assert not pygame.get_init()

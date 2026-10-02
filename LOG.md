@@ -223,3 +223,23 @@ Modelo:
 - **Interpretações** (o pedido não cobria esses casos): "Jogar de novo" direto da tela de fim **é** um começo de partida, então toca a música da fase (o silêncio vale para a tela de fim). A **vitória** também para a música, para a fanfarra de vitória soar sozinha.
 - **Nível medido no Windows** (pycaw, fora do projeto): as 4 músicas chegam com pico de 0,40 a 0,41 (nenhuma fase mais alta que outra) e, depois de `parar_musica()`, o pico vai a 0,00.
 - O `musica.wav` antigo saiu do repositório com `git rm --cached`, porque o jogo do João estava aberto e o Windows travava o arquivo. A cópia local pode ser apagada depois de fechar o jogo; ela não é mais usada.
+
+### 2026-10-02 11:39 — Fase 5 (entrega: executável, GIF, release e versão 2.0.0)
+
+**Feito:**
+- **Versão 2.0.0** no `pyproject.toml` e em `cobrinha.__version__`. Novo extra `[ferramentas]` (PyInstaller e Pillow), separado do `[dev]`.
+- **Executável Windows:** `ferramentas/empacotar.py` gera o ícone `.ico` a partir do sprite da maçã (ampliado com NEAREST, em 6 tamanhos), inclui **só os assets versionados no Git** (`git ls-files`), roda o PyInstaller (arquivo único, sem console, entrada em `ferramentas/iniciar_jogo.py`) e termina com um **teste de fumaça**: abre o `.exe` no nível 3 com `--fechar-em 3` e exige saída sem erro. Resultado local: `dist/Cobrinha.exe` com 15,2 MB, teste ok e 23 assets dentro (conferido com o leitor de arquivos do PyInstaller).
+- **`--fechar-em SEGUNDOS`:** agenda um evento QUIT, e o jogo encerra pelo caminho normal. Usado no teste do executável (local e no CI) e coberto por teste.
+- **GIF de demonstração** (`docs/demo.gif`, 600 × 450, 15 fps, 14,3 s, 0,2 MB): `ferramentas/gravar_demo.py` joga o jogo de verdade, sem janela, com um piloto automático (busca em largura até a comida, desviando do corpo e das pedras). Roteiro: menu → contagem do nível 2 → partida com maçã dourada → batida → tela de fim. Semente fixa, então o GIF sai sempre igual.
+- **`Cobra.tem_comandos_pendentes`:** propriedade pública usada pelo piloto, para não acessar o atributo privado da fila de direções.
+- **Release automatizada:** `.github/workflows/release.yml` dispara com uma tag `v*`, roda os testes no Windows, gera e testa o executável a partir do repositório limpo e cria a release com o `.exe` anexado e as notas de `docs/notas-<tag>.md`.
+- **README:** GIF no topo, selo da release, seção "Baixar e jogar (Windows)" (com o aviso do SmartScreen), comandos de empacotamento e de gravação do GIF, e como publicar uma versão.
+- **Testes:** de 188 para **190** (`--fechar-em` com o loop real; `tem_comandos_pendentes`).
+
+**Arquivos:** `pyproject.toml`, `src/cobrinha/__init__.py`, `src/cobrinha/__main__.py`, `src/cobrinha/dominio/cobra.py`, `ferramentas/empacotar.py` (novo), `ferramentas/iniciar_jogo.py` (novo), `ferramentas/gravar_demo.py` (novo), `docs/demo.gif` (novo), `docs/notas-v2.0.0.md` (novo), `.github/workflows/release.yml` (novo), `tests/test_cobra.py`, `tests/test_jogo.py`, `README.md`, `briefing_v2.md`, `LOG.md`.
+
+**Motivo / observações:**
+- **O executável publicado é gerado pelo CI, não pela máquina do João:** assim ele é reproduzível e não carrega nada solto da pasta local (ex.: o `musica.wav` antigo, que continua travado pelo jogo aberto).
+- O teste de fumaça local abriu uma janela do jogo por ~3 s na tela do João; no CI ele roda com o driver de vídeo `dummy`.
+- O executável não tem assinatura digital (certificado pago), então o Windows SmartScreen pode avisar na primeira execução. Isso está explicado no README e nas notas da release.
+- A release `v2.0.0` é criada em seguida, pela tag; o resultado fica registrado na próxima entrada.

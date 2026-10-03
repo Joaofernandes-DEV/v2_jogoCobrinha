@@ -427,3 +427,17 @@ Modelo:
 - O João pediu o `Cobrinha.exe` atualizado em *Assets*, agora com o modo Contra o tempo (PR #8).
 - O número escolhido foi **3.1.0**: o modo é uma funcionalidade nova e mantém compatível o que já existia, inclusive os `dados.json` salvos. A v3.0.0 continua publicada.
 - Depois do merge, a tag `v3.1.0` dispara o workflow **Release**. O resultado fica registrado na próxima entrada.
+
+### 2026-10-03 14:56 — Release v3.1.0 publicada
+
+**Feito:**
+- Tag `v3.1.0` criada sobre o commit `453082e` (merge do PR #9), depois de o CI ficar verde nos 4 ambientes.
+- O workflow **Release** rodou no Windows do GitHub e todas as etapas passaram: dependências → testes → executável gerado e testado → release publicada.
+- **Release:** <https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/tag/v3.1.0>, com o anexo `Cobrinha.exe` (16,1 MB, sha256 `79615216…76a492`) e as notas de `docs/notas-v3.1.0.md`. Ela não é rascunho nem pré-lançamento e virou a **Latest**. A v3.0.0 e a v2.0.0 continuam publicadas.
+- **Conferência independente:** baixei o `Cobrinha.exe` publicado e o sha256 bate com o da release. Rodei com `--fechar-em 2 --nivel 1` (driver de vídeo `dummy` e pasta de dados temporária), partindo de um `dados.json` com o modo `CONTRA_O_TEMPO` escolhido: saiu com código 0 e manteve o modo ao salvar. Com o mesmo arquivo, o executável da v3.0.0 descarta o modo desconhecido e volta para `CLASSICO`. Isso confirma que o modo novo está no executável publicado.
+
+**Arquivos:** `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu o `Cobrinha.exe` atualizado em *Assets*. A v3.1.0 traz o modo Contra o tempo do colaborador João Pedro (PR #8), além dos power-ups da v3.0.0.
+- O teste automático não exercita o áudio nem a janela real. Vale abrir o executável num PC sem Python e jogar uma partida no modo Contra o tempo.

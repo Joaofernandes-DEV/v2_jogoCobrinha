@@ -145,7 +145,7 @@ Python 3.11+ · [pygame-ce](https://pyga.me/) · pytest · ruff · GitHub Action
 
 ## Créditos
 
-- **V2:** João Vitor Fernandes.
+- **V2:** João Vitor Fernandes e, como colaborador, João Pedro Sinhorini Silva.
 - **V1 (2025), Computação Gráfica:** João Vitor Fernandes, João Pedro Sinhorini Silva, Vitor Barssoti de Souza e Alex Barbosa Lourenço.
 - **Fonte:** [VT323](https://fonts.google.com/specimen/VT323), de Peter Hull, sob a [SIL Open Font License 1.1](src/cobrinha/assets/fontes/OFL.txt).
 - **Sprites e sons:** gerados por código neste repositório.

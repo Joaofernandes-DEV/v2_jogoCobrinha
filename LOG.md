@@ -413,3 +413,17 @@ Modelo:
 - Não foi criado som novo: o fim por tempo reaproveita `nivel.wav`.
 - A câmera lenta deixa a cobra mais lenta, mas o relógio continua no ritmo normal. Fica como sugestão fazer o relógio também desacelerar nesse modo.
 - O patch chegou por arquivo, avaliado e corrigido pelo João Vitor com o Claude Code. O João Pedro sobe a versão corrigida pelo terminal dele.
+
+### 2026-10-03 14:47 — Preparação da release v3.1.0
+
+**Feito:**
+- Versão do pacote: `3.0.0` → **`3.1.0`** em `pyproject.toml` e `src/cobrinha/__init__.py`.
+- Criadas as notas da release, `docs/notas-v3.1.0.md`: como jogar e as regras do modo Contra o tempo, com o crédito ao João Pedro.
+- README: a seção "Novidades da V3" passou a citar as duas versões, e o exemplo de "Publicar uma versão" agora usa `v3.1.1`.
+
+**Arquivos:** `pyproject.toml`, `src/cobrinha/__init__.py`, `docs/notas-v3.1.0.md` (novo), `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu o `Cobrinha.exe` atualizado em *Assets*, agora com o modo Contra o tempo (PR #8).
+- O número escolhido foi **3.1.0**: o modo é uma funcionalidade nova e mantém compatível o que já existia, inclusive os `dados.json` salvos. A v3.0.0 continua publicada.
+- Depois do merge, a tag `v3.1.0` dispara o workflow **Release**. O resultado fica registrado na próxima entrada.

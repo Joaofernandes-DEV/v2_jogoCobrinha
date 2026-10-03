@@ -50,6 +50,13 @@ FATOR_CAMERA_LENTA: Final = 0.5  # multiplica a velocidade da cobra
 DURACAO_PONTOS_EM_DOBRO: Final = 8.0
 SEGMENTOS_ENCOLHER: Final = 3
 
+# Modo contra o tempo: o relógio corre e comer devolve segundos.
+TEMPO_INICIAL: Final = 60.0  # segundos no início da partida
+TEMPO_POR_COMIDA: Final = 3.0
+TEMPO_POR_FRUTA_DOURADA: Final = 5.0
+TEMPO_MAXIMO: Final = 99.0  # o relógio nunca passa disso
+TEMPO_ALERTA: Final = 10.0  # abaixo disso o relógio fica vermelho
+
 # Recordes (J6)
 TAMANHO_RANKING: Final = 5
 

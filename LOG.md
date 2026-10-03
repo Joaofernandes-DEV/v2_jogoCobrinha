@@ -352,3 +352,17 @@ Modelo:
 **Motivo / observações:**
 - Os sprites (`power_*.png`) e o som (`power_up.wav`) dos power-ups já estavam em `src/cobrinha/assets/` desde o PR #3. Faltava mostrar as novidades no material visual do projeto.
 - O GIF tem 226 quadros e 0,2 MB, então continua leve para o README.
+
+### 2026-10-03 09:59 — Preparação da release v3.0.0
+
+**Feito:**
+- Versão do pacote: `2.0.0` → **`3.0.0`** em `pyproject.toml` e `src/cobrinha/__init__.py`.
+- Criadas as notas da release, `docs/notas-v3.0.0.md`, no mesmo formato das da v2.0.0: como jogar, power-ups, o crédito do colaborador João Pedro e o modo Contra o tempo anunciado para uma próxima versão.
+- README: a seção "Novidades da V3" deixou de dizer "em desenvolvimento" e aponta para o executável da última release. O exemplo de "Publicar uma versão" agora usa `v3.0.1`.
+
+**Arquivos:** `pyproject.toml`, `src/cobrinha/__init__.py`, `docs/notas-v3.0.0.md` (novo), `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu o executável novo em *Assets* e escolheu publicar como release **v3.0.0**. A v2.0.0 continua publicada como está.
+- O nome do jogo e o título da janela continuam os mesmos ("Jogo da Cobrinha V2"), conforme combinado no início da V3.
+- Depois do merge, a tag `v3.0.0` dispara o workflow **Release**, que roda os testes no Windows, gera e testa o `Cobrinha.exe` e cria a release com ele anexado. O resultado fica registrado na próxima entrada.

@@ -271,3 +271,16 @@ Modelo:
 **Motivo / observações:**
 - O colaborador vai implementar no mesmo padrão adotado até aqui; documentar o fluxo evita depender de explicação verbal.
 - A proteção foi aplicada depois do push destes arquivos, pois ela bloqueia push direto na `main`.
+
+### 2026-10-02 22:43 — João Pedro Sinhorini Silva nos créditos da V2
+
+**Feito:**
+- A tela de créditos passou a listar **João Pedro Sinhorini Silva** como colaborador na seção "V2".
+- O README ganhou o mesmo crédito na seção "Créditos".
+- Novo teste garante que o nome aparece na seção V2 e que a lista maior ainda cabe na janela (o rodapé "voltar" não sai da tela).
+
+**Arquivos:** `src/cobrinha/estados/creditos.py`, `tests/test_estados.py`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- João Pedro entra como colaborador do projeto. Ele já constava nos créditos da V1; agora também consta na V2.
+- Ele vai implementar uma versão do modo "Contra o tempo" e subir depois; essa entrega será registrada quando acontecer.

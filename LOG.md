@@ -303,3 +303,25 @@ Modelo:
 - Os sprites seguem presos à grade (a orientação de curvas e cabeça muda por célula); a suavização é só de posição.
 - A versão do pacote continua `2.0.0`; o número da V3 será definido na publicação.
 - Esta branch parte de `docs/creditos-joao-pedro`, que precisa entrar na `main` primeiro.
+
+### 2026-10-02 22:55 — V3: fruta de câmera lenta e outros power-ups
+
+**Feito:**
+- Três power-ups novos, que às vezes aparecem depois de comer (chance de 8%, um por vez no campo) e somem em 7 s se não forem pegos. Pegar um não dá pontos nem faz crescer.
+  - **Câmera lenta** (fruta azul com relógio): a cobra anda na metade da velocidade por 5 s. Com os efeitos visuais ligados, o campo fica azulado.
+  - **Pontos em dobro** (cereja dupla): por 8 s, cada comida vale 2 e a maçã dourada vale 10. A meta do nível continua contando 1 por comida.
+  - **Encolher** (cogumelo): tira 3 segmentos da cauda na hora, sem deixar a cobra menor que o tamanho inicial. Se ela ainda estava para crescer, esse crescimento é cancelado primeiro.
+- Os efeitos contam tempo de jogo (param na pausa). Pegar de novo um efeito ativo renova a duração, sem somar, e todos acabam ao trocar de nível.
+- O HUD mostra os efeitos ativos com os segundos restantes (ex.: `LENTO 4  X2 7`). Ao pegar, sobe um texto azul (`LENTO!`, `X2!`, `-3`) e toca um som próprio. Como a fruta dourada, o power-up pisca quando está para sumir.
+- Novo módulo `dominio/power_ups.py`, com os tipos e as durações; `Cobra.encolher`; `Evento.PEGOU_POWER_UP`; constantes no `config.py`.
+- Sprites `power_camera_lenta`, `power_pontos_em_dobro` e `power_encolher` gerados por `ferramentas/gerar_sprites.py`; som `power_up` gerado por `ferramentas/gerar_sons.py`. Os assets antigos foram regenerados e saíram idênticos.
+- README: power-ups em "Como jogar" e o novo módulo na estrutura.
+- Testes de 200 para **222** (novo `tests/test_power_ups.py`; sprites novos em `tests/test_recursos.py`).
+
+**Arquivos:** `src/cobrinha/config.py`, `src/cobrinha/dominio/power_ups.py` (novo), `src/cobrinha/dominio/cobra.py`, `src/cobrinha/dominio/partida.py`, `src/cobrinha/audio.py`, `src/cobrinha/ui/pecas.py`, `src/cobrinha/ui/hud.py`, `src/cobrinha/estados/jogando.py`, `ferramentas/gerar_sprites.py`, `ferramentas/gerar_sons.py`, `src/cobrinha/assets/imagens/power_camera_lenta.png` (novo), `src/cobrinha/assets/imagens/power_pontos_em_dobro.png` (novo), `src/cobrinha/assets/imagens/power_encolher.png` (novo), `src/cobrinha/assets/sons/power_up.wav` (novo), `tests/test_power_ups.py` (novo), `tests/test_recursos.py`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Item "Fruta de câmera lenta e outros power-ups" do backlog da V3 (seção 8.4 do briefing).
+- O sorteio do power-up usa o mesmo gerador aleatório da partida. Por isso, com `--semente`, a sequência de comidas muda em relação à V2 (continua reproduzível). O GIF de demonstração não foi regravado.
+- Apagado o arquivo local solto `src/cobrinha/assets/sons/musica.wav`, a pedido do João. Ele não estava no repositório, então não gera commit.
+- Esta branch parte de `feat/v3-movimento-suave`.

@@ -133,6 +133,11 @@ def efeitos() -> dict[str, list[float]]:
             arpejo(["E6", "G6", "B6", "E7"], 0.045, q25, volume=0.4),
             tom(nota("E7"), 0.12, q25, volume=0.3, soltura=0.1),
         ),
+        # Power-up (V3): "uuu-ip" subindo, com um brilho no final.
+        "power_up": juntar(
+            tom(300, 0.12, triangular, frequencia_final=900, volume=0.5),
+            arpejo(["A5", "E6", "A6"], 0.04, q25, volume=0.35),
+        ),
         "nivel": arpejo(["C5", "E5", "G5", "C6"], 0.08, q25),
         "bater": misturar(ruido(0.35), tom(330, 0.35, q50, frequencia_final=80, volume=0.35)),
         "vitoria": juntar(

@@ -29,11 +29,13 @@ class EstadoContagem(Estado):
         jogando: EstadoJogando,
         titulo: str | None = None,
         subtitulo: str | None = None,
+        dica: str | None = None,
     ) -> None:
         super().__init__(jogo)
         self.jogando = jogando
         self.titulo = titulo
         self.subtitulo = subtitulo
+        self.dica = dica
         self.tempo = 0.0
         self.veu = criar_veu(OPACIDADE_VEU)
         self._ultima_etapa_tocada = -1
@@ -82,5 +84,7 @@ class EstadoContagem(Estado):
         if self.subtitulo:
             linhas.append((self.subtitulo, TamanhoFonte.MEDIO, Paleta.VERDE_CLARO))
         linhas.append((self.etapa_atual, TamanhoFonte.GIGANTE, Paleta.AMARELO))
+        if self.dica:
+            linhas.append((self.dica, TamanhoFonte.PEQUENO, Paleta.AMARELO))
         linhas.append(("ENTER: começar já", TamanhoFonte.PEQUENO, Paleta.CINZA_CLARO))
         desenhar_linhas(superficie, linhas, topo=ALTURA_JANELA // 2 - 150, espaco=20)

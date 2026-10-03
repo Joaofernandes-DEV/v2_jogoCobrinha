@@ -30,9 +30,10 @@ class Opcoes:
     def ajustar_volume_musica(self, delta: int) -> None:
         self.volume_musica = _limitar(self.volume_musica + delta * PASSO_VOLUME)
 
-    def alternar_modo(self) -> None:
+    def alternar_modo(self, delta: int = 1) -> None:
+        """Passa para o modo seguinte (delta = +1) ou anterior (-1), circulando."""
         modos = list(Modo)
-        self.modo = modos[(modos.index(self.modo_de_jogo) + 1) % len(modos)].name
+        self.modo = modos[(modos.index(self.modo_de_jogo) + delta) % len(modos)].name
 
     def para_dict(self) -> dict[str, Any]:
         return asdict(self)

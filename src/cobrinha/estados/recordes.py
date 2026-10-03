@@ -37,16 +37,18 @@ class EstadoRecordes(Estado):
 
     def tratar_evento(self, evento: pygame.Event) -> None:
         if evento.type == pygame.KEYDOWN:
-            if evento.key in (*TECLAS_ESQUERDA, *TECLAS_DIREITA):
-                self._trocar_modo()
+            if evento.key in TECLAS_ESQUERDA:
+                self._trocar_modo(-1)
+            elif evento.key in TECLAS_DIREITA:
+                self._trocar_modo(+1)
             elif evento.key in TECLAS_VOLTAR:
                 navegacao.abrir_menu(self.jogo)
         elif evento.type == pygame.MOUSEBUTTONDOWN and evento.button == BOTAO_ESQUERDO:
             navegacao.abrir_menu(self.jogo)
 
-    def _trocar_modo(self) -> None:
+    def _trocar_modo(self, delta: int) -> None:
         modos = list(Modo)
-        self.modo = modos[(modos.index(self.modo) + 1) % len(modos)]
+        self.modo = modos[(modos.index(self.modo) + delta) % len(modos)]
 
     def linhas_do_ranking(self) -> list[Linha]:
         ranking = self.jogo.progresso.ranking(self.modo.name)

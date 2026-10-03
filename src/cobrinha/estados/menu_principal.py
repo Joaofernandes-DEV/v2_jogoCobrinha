@@ -83,11 +83,11 @@ class EstadoMenuPrincipal(Estado):
         return f"MODO: < {self.jogo.opcoes.modo_de_jogo.value.upper()} >"
 
     def _alternar_modo(self) -> None:
-        # Só há dois modos: avançar ou voltar dá no mesmo. É salvo ao começar a partida.
+        # ENTER/clique avança para o próximo modo. É salvo ao começar a partida.
         self.jogo.opcoes.alternar_modo()
 
-    def _ajustar_modo(self, _delta: int) -> None:
-        self._alternar_modo()
+    def _ajustar_modo(self, delta: int) -> None:
+        self.jogo.opcoes.alternar_modo(delta)
 
     def _jogar(self) -> None:
         navegacao.iniciar_campanha(self.jogo, self.nivel_escolhido)

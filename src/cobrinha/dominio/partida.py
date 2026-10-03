@@ -98,6 +98,16 @@ class Partida:
         return 1 / self.passos_por_segundo
 
     @property
+    def progresso_passo(self) -> float:
+        """Quanto do passo atual já passou (0 a 1), para animar o movimento entre células (V3).
+
+        Parada a partida (fim do nível, derrota ou vitória), a cobra fica na célula final.
+        """
+        if not self.em_andamento:
+            return 1.0
+        return min(1.0, self._tempo_acumulado / self.intervalo_passo)
+
+    @property
     def celulas_livres_no_campo(self) -> int:
         return self.grade.total_celulas - len(self.obstaculos)
 

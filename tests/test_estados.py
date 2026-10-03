@@ -221,6 +221,24 @@ def test_creditos_abrem_pelo_menu_e_voltam(jogo):
     assert isinstance(jogo.estado_atual, EstadoMenuPrincipal)
 
 
+def test_creditos_da_v2_incluem_o_colaborador_e_cabem_na_janela(jogo):
+    from cobrinha import recursos
+    from cobrinha.config import ALTURA_JANELA, Paleta, TamanhoFonte
+    from cobrinha.estados.creditos import CONTEUDO, EstadoCreditos
+    from cobrinha.ui.painel import desenhar_linhas
+
+    nomes = [linha[0] for linha in CONTEUDO]
+    v2 = nomes[nomes.index("V2") : nomes.index("V1 (2025) - Computação Gráfica")]
+    assert any("João Pedro Sinhorini Silva" in nome for nome in v2)
+
+    # O rodapé "voltar" precisa caber na janela, mesmo com a lista maior.
+    superficie = pygame.Surface(jogo.tela.get_size())
+    y = desenhar_linhas(superficie, [("CRÉDITOS", TamanhoFonte.TITULO, Paleta.VERDE_CLARO)], 30)
+    y = desenhar_linhas(superficie, CONTEUDO, y + 6, espaco=12)
+    assert y + 10 + recursos.fonte(TamanhoFonte.MINIMO).get_linesize() <= ALTURA_JANELA
+    EstadoCreditos(jogo).desenhar(superficie)
+
+
 def test_comer_toca_o_som(jogo, monkeypatch):
     from cobrinha.audio import Som
 

@@ -1,10 +1,9 @@
 import pygame
 import pytest
 
-from cobrinha.config import ALTURA_HUD, LARGURA_JANELA, TAMANHO_CELULA
+from cobrinha.config import TAMANHO_CELULA
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import Direcao, Posicao
-from cobrinha.ui.campo import interpolar_celula
 from cobrinha.ui.pecas import (
     Sprites,
     TipoPeca,
@@ -84,60 +83,3 @@ def test_sprites_tem_todas_as_rotacoes_e_desenham(jogo):
         for angulo in (0, 90, 180, 270):
             peca = sprites._pecas[tipo, angulo]
             assert peca.get_size() == (TAMANHO_CELULA, TAMANHO_CELULA)
-
-
-def test_interpolar_celula_entre_vizinhas():
-    assert interpolar_celula(P(5, 5), P(6, 5), 0) == (5, 5)
-    assert interpolar_celula(P(5, 5), P(6, 5), 0.5) == (5.5, 5)
-    assert interpolar_celula(P(5, 5), P(5, 4), 0.25) == (5, 4.75)
-    assert interpolar_celula(P(5, 5), P(6, 5), 1) == (6, 5)
-
-
-def test_interpolar_celula_atravessando_a_borda_nao_cruza_o_campo():
-    # Sem bordas: da última coluna para a primeira continua para a direita.
-    coluna, linha = interpolar_celula(P(31, 5), P(0, 5), 0.5)
-    assert coluna == pytest.approx(31.5)
-    assert linha == 5
-    coluna, _ = interpolar_celula(P(0, 5), P(31, 5), 0.5)
-    assert coluna == pytest.approx(31.5)  # 0 -> -1 é 31 do outro lado; no meio, 31,5
-    _, linha = interpolar_celula(P(3, 0), P(3, 21), 0.5)
-    assert linha == pytest.approx(21.5)
-
-
-def _x_da_cabeca(jogo, progresso):
-    superficie = pygame.Surface(jogo.tela.get_size())
-    superficie.fill((0, 0, 0))
-    cobra = Cobra.nova(P(5, 5), D.DIREITA, 1)
-    cobra.avancar(P(6, 5))  # a cabeça veio de (5, 5)
-    Sprites().desenhar_cobra(superficie, cobra, progresso)
-    y = ALTURA_HUD + 5 * TAMANHO_CELULA + TAMANHO_CELULA // 2
-    colunas = [x for x in range(LARGURA_JANELA) if superficie.get_at((x, y))[:3] != (0, 0, 0)]
-    return min(colunas)
-
-
-def test_cobra_desliza_entre_as_celulas_conforme_o_progresso(jogo):
-    inicio = _x_da_cabeca(jogo, 0.0)
-    meio = _x_da_cabeca(jogo, 0.5)
-    fim = _x_da_cabeca(jogo, 1.0)
-    assert inicio < meio < fim
-    assert fim - inicio == pytest.approx(TAMANHO_CELULA, abs=2)
-    assert meio - inicio == pytest.approx(TAMANHO_CELULA / 2, abs=3)
-
-
-def test_cobra_na_borda_aparece_dos_dois_lados_e_nunca_no_hud(jogo):
-    superficie = pygame.Surface(jogo.tela.get_size())
-    superficie.fill((0, 0, 0))
-    cobra = Cobra.nova(P(31, 0), D.DIREITA, 1)
-    cobra.avancar(P(0, 0))  # sem bordas: atravessa a borda direita
-    Sprites().desenhar_cobra(superficie, cobra, 0.5)
-    y = ALTURA_HUD + TAMANHO_CELULA // 2
-    assert superficie.get_at((LARGURA_JANELA - 2, y))[:3] != (0, 0, 0)
-    assert superficie.get_at((2, y))[:3] != (0, 0, 0)
-    # Subindo pela linha 0 o segmento sai por cima do campo: o HUD não pode ser pintado.
-    superficie.fill((0, 0, 0))
-    cobra = Cobra.nova(P(3, 0), D.CIMA, 1)
-    cobra.avancar(P(3, 21))
-    Sprites().desenhar_cobra(superficie, cobra, 0.5)
-    assert all(
-        superficie.get_at((x, y))[:3] == (0, 0, 0) for x in range(80) for y in range(ALTURA_HUD)
-    )

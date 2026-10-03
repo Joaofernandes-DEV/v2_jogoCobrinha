@@ -8,9 +8,15 @@ import pytest
 from cobrinha import recursos
 from cobrinha.audio import Musica, Som
 from cobrinha.config import FREQUENCIA_AUDIO, TAMANHO_CELULA
-from cobrinha.ui.pecas import TipoPeca
+from cobrinha.ui.pecas import SPRITE_DO_POWER_UP, TipoPeca
 
-SPRITES = [tipo.value for tipo in TipoPeca] + ["comida", "comida_dourada", "parede"]
+SPRITES = [
+    *(tipo.value for tipo in TipoPeca),
+    "comida",
+    "comida_dourada",
+    "parede",
+    *SPRITE_DO_POWER_UP.values(),
+]
 MAIUSCULAS_ACENTUADAS = "ÁÀÂÃÉÊÍÓÔÕÚÇ"
 
 

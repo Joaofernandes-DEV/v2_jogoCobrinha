@@ -184,7 +184,7 @@ class EstadoJogando(Estado):
         if partida.power_up is not None:
             self.sprites.desenhar_power_up(superficie, partida.power_up, self.tempo)
         if self.cobra_visivel:
-            self.sprites.desenhar_cobra(superficie, partida.cobra, partida.progresso_passo)
+            self.sprites.desenhar_cobra(superficie, partida.cobra)
         self.efeitos.desenhar(superficie)
         if self.jogo.debug:
             self._desenhar_depuracao(superficie)

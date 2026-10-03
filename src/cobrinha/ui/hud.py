@@ -1,5 +1,9 @@
-"""Faixa de HUD no topo da janela (I2): pontos, nível com barra de progresso e recorde."""
+"""Faixa de HUD no topo da janela (I2): pontos, nível com barra de progresso e recorde.
 
+Na V3, também mostra os power-ups ativos com os segundos restantes.
+"""
+
+import math
 from dataclasses import dataclass
 
 import pygame
@@ -24,6 +28,8 @@ class DadosHud:
     meta: int
     modo: str = ""
     mudo: bool = False
+    # (rótulo curto, segundos restantes) de cada power-up ativo.
+    efeitos: tuple[tuple[str, float], ...] = ()
 
 
 def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
@@ -37,6 +43,10 @@ def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
     if dados.modo:
         modo = texto.renderizar(dados.modo.upper(), TamanhoFonte.MINIMO, Paleta.AZUL_CLARO)
         superficie.blit(modo, modo.get_rect(topleft=(MARGEM + 90, Y_ROTULO)))
+    if dados.efeitos:
+        resumo = "  ".join(f"{rotulo} {math.ceil(restante)}" for rotulo, restante in dados.efeitos)
+        imagem = texto.renderizar(resumo, TamanhoFonte.MINIMO, Paleta.AMARELO)
+        superficie.blit(imagem, imagem.get_rect(topleft=(MARGEM + 90, Y_VALOR)))
     if dados.mudo:
         imagem = texto.renderizar("MUDO (M)", TamanhoFonte.MINIMO, Paleta.VERMELHO)
         superficie.blit(imagem, imagem.get_rect(topright=(LARGURA_JANELA - 160, Y_ROTULO)))

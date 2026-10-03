@@ -80,4 +80,14 @@ def test_alternar_modo_circula():
     opcoes.alternar_modo()
     assert opcoes.modo == "SEM_BORDAS"
     opcoes.alternar_modo()
+    assert opcoes.modo == "CONTRA_O_TEMPO"
+    opcoes.alternar_modo()
     assert opcoes.modo == "CLASSICO"
+
+
+def test_alternar_modo_para_tras():
+    opcoes = Opcoes()
+    opcoes.alternar_modo(-1)
+    assert opcoes.modo == "CONTRA_O_TEMPO"
+    opcoes.alternar_modo(-1)
+    assert opcoes.modo == "SEM_BORDAS"

@@ -23,6 +23,7 @@ class Som(Enum):
 
     COMER = "comer"
     BONUS = "bonus"
+    POWER_UP = "power_up"
     NIVEL = "nivel"
     BATER = "bater"
     VITORIA = "vitoria"

@@ -1,6 +1,7 @@
 """Faixa de HUD no topo da janela (I2): pontos, nível com barra de progresso e recorde.
 
-Na V3, também mostra os power-ups ativos com os segundos restantes.
+Na V3, também mostra os power-ups ativos com os segundos restantes e, no modo contra o
+tempo, o relógio no lugar da barra de progresso.
 """
 
 import math
@@ -8,7 +9,14 @@ from dataclasses import dataclass
 
 import pygame
 
-from cobrinha.config import ALTURA_HUD, LARGURA_JANELA, Cor, Paleta, TamanhoFonte
+from cobrinha.config import (
+    ALTURA_HUD,
+    LARGURA_JANELA,
+    TEMPO_ALERTA,
+    Cor,
+    Paleta,
+    TamanhoFonte,
+)
 from cobrinha.ui import texto
 
 MARGEM = 16
@@ -30,6 +38,8 @@ class DadosHud:
     mudo: bool = False
     # (rótulo curto, segundos restantes) de cada power-up ativo.
     efeitos: tuple[tuple[str, float], ...] = ()
+    # Segundos restantes no modo contra o tempo; None nos outros modos.
+    tempo: float | None = None
 
 
 def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
@@ -71,6 +81,10 @@ def _desenhar_nivel(superficie: pygame.Surface, dados: DadosHud) -> None:
     titulo = texto.renderizar(f"NÍVEL {dados.nivel}", TamanhoFonte.PEQUENO, Paleta.AMARELO)
     superficie.blit(titulo, titulo.get_rect(midtop=(centro, 1)))
 
+    if dados.tempo is not None:
+        _desenhar_relogio(superficie, dados.tempo)
+        return
+
     # Barra de progresso da meta de comidas, com contorno preto.
     barra = pygame.Rect(0, 0, LARGURA_BARRA, ALTURA_BARRA)
     barra.midtop = (centro - 24, 30)
@@ -84,3 +98,11 @@ def _desenhar_nivel(superficie: pygame.Surface, dados: DadosHud) -> None:
 
     contagem = texto.renderizar(f"{dados.comidas}/{dados.meta}", TamanhoFonte.MINIMO, Paleta.BRANCO)
     superficie.blit(contagem, contagem.get_rect(midleft=(barra.right + 10, barra.centery)))
+
+
+def _desenhar_relogio(superficie: pygame.Surface, tempo: float) -> None:
+    """Relógio do modo contra o tempo, no lugar da barra de progresso."""
+    cor = Paleta.VERMELHO if tempo <= TEMPO_ALERTA else Paleta.BRANCO
+    segundos = math.ceil(tempo)  # 0,2 s restantes ainda mostram 1
+    imagem = texto.renderizar(f"TEMPO {segundos:02d}", TamanhoFonte.PEQUENO, cor)
+    superficie.blit(imagem, imagem.get_rect(midtop=(LARGURA_JANELA // 2, 25)))

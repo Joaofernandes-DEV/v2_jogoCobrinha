@@ -14,11 +14,11 @@ from enum import Enum
 import pygame
 
 from cobrinha import recursos
-from cobrinha.config import ALTURA_HUD, COLUNAS, LINHAS, TAMANHO_CELULA
+from cobrinha.config import ALTURA_HUD, TAMANHO_CELULA
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.dominio.power_ups import PowerUpNoCampo, TipoPowerUp
-from cobrinha.ui.campo import celula_para_pixel, interpolar_celula
+from cobrinha.ui.campo import celula_para_pixel
 
 
 class TipoPeca(Enum):
@@ -127,43 +127,10 @@ class Sprites:
         self.parede = recursos.imagem("parede")
         self.power_ups = {tipo: recursos.imagem(SPRITE_DO_POWER_UP[tipo]) for tipo in TipoPowerUp}
 
-    def desenhar_cobra(
-        self, superficie: pygame.Surface, cobra: Cobra, progresso: float = 1.0
-    ) -> None:
-        """Desenha a cobra. `progresso` (0 a 1) é o quanto cada segmento já deslizou da célula
-        onde estava no passo anterior até a atual (V3); 1 desenha tudo exatamente nas células."""
-        pecas = classificar_pecas(cobra.segmentos, cobra.direcao)
-        trajetos = cobra.trajetos
+    def desenhar_cobra(self, superficie: pygame.Surface, cobra: Cobra) -> None:
         # Da cauda para a cabeça, para a cabeça ficar sempre por cima.
-        for indice in range(len(pecas) - 1, -1, -1):
-            peca = pecas[indice]
-            imagem = self._pecas[peca.tipo, peca.angulo]
-            if progresso >= 1.0:
-                superficie.blit(imagem, celula_para_pixel(peca.posicao))
-                continue
-            origem, destino = trajetos[indice]
-            coluna, linha = interpolar_celula(origem, destino, progresso)
-            self._blit_no_campo(superficie, imagem, coluna, linha)
-
-    @staticmethod
-    def _blit_no_campo(
-        superficie: pygame.Surface, imagem: pygame.Surface, coluna: float, linha: float
-    ) -> None:
-        """Desenha numa posição fracionária do campo; na borda, repete do outro lado."""
-        x = round(coluna * TAMANHO_CELULA)
-        y = ALTURA_HUD + round(linha * TAMANHO_CELULA)
-        largura = COLUNAS * TAMANHO_CELULA
-        altura = LINHAS * TAMANHO_CELULA
-        anterior = superficie.get_clip()
-        superficie.set_clip(pygame.Rect(0, ALTURA_HUD, largura, altura))
-        superficie.blit(imagem, (x, y))
-        if x > largura - TAMANHO_CELULA:
-            superficie.blit(imagem, (x - largura, y))
-        if y > ALTURA_HUD + altura - TAMANHO_CELULA:
-            superficie.blit(imagem, (x, y - altura))
-            if x > largura - TAMANHO_CELULA:
-                superficie.blit(imagem, (x - largura, y - altura))
-        superficie.set_clip(anterior)
+        for peca in reversed(classificar_pecas(cobra.segmentos, cobra.direcao)):
+            superficie.blit(self._pecas[peca.tipo, peca.angulo], celula_para_pixel(peca.posicao))
 
     def desenhar_comida(self, superficie: pygame.Surface, posicao: Posicao, tempo: float) -> None:
         self._desenhar_flutuando(superficie, self.comida, posicao, tempo)

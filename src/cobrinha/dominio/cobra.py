@@ -22,8 +22,6 @@ class Cobra:
         self.direcao = direcao
         self._fila_direcoes: deque[Direcao] = deque()
         self._crescimento_pendente = 0
-        # Segmentos antes do último passo, para a interface animar o deslizamento (V3).
-        self._antes: tuple[Posicao, ...] = tuple(self.segmentos)
 
     @classmethod
     def nova(cls, cabeca: Posicao, direcao: Direcao, tamanho: int) -> Cobra:
@@ -90,21 +88,7 @@ class Cobra:
             return False
         return posicao in self._ocupadas
 
-    @property
-    def trajetos(self) -> list[tuple[Posicao, Posicao]]:
-        """Para cada segmento (da cabeça à cauda): de onde veio no último passo e onde está.
-
-        O segmento de índice k saiu da célula que o de índice k ocupava antes do passo.
-        Um segmento criado pelo crescimento nasce na célula da cauda antiga e não se mexe.
-        """
-        antes = self._antes
-        return [
-            (antes[indice] if indice < len(antes) else destino, destino)
-            for indice, destino in enumerate(self.segmentos)
-        ]
-
     def avancar(self, nova_cabeca: Posicao) -> None:
-        self._antes = tuple(self.segmentos)
         if self._crescimento_pendente:
             self._crescimento_pendente -= 1
         else:

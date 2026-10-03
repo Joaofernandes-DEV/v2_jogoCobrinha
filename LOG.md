@@ -325,3 +325,17 @@ Modelo:
 - O sorteio do power-up usa o mesmo gerador aleatório da partida. Por isso, com `--semente`, a sequência de comidas muda em relação à V2 (continua reproduzível). O GIF de demonstração não foi regravado.
 - Apagado o arquivo local solto `src/cobrinha/assets/sons/musica.wav`, a pedido do João. Ele não estava no repositório, então não gera commit.
 - Esta branch parte de `feat/v3-movimento-suave`.
+
+### 2026-10-02 23:07 — Volta ao movimento célula a célula
+
+**Feito:**
+- Removido o movimento interpolado (suave) da entrada "Início da V3". A cobra voltou a andar célula a célula, como na V2.
+- Saíram `Cobra.trajetos`, `Partida.progresso_passo`, `interpolar_celula` e o parâmetro `progresso` de `Sprites.desenhar_cobra`, junto com os testes deles.
+- Os power-ups continuam iguais.
+- Testes de 222 para **213**.
+
+**Arquivos:** `src/cobrinha/dominio/cobra.py`, `src/cobrinha/dominio/partida.py`, `src/cobrinha/ui/campo.py`, `src/cobrinha/ui/pecas.py`, `src/cobrinha/estados/jogando.py`, `tests/test_cobra.py`, `tests/test_partida.py`, `tests/test_pecas.py`, `LOG.md`.
+
+**Motivo / observações:**
+- O João testou o movimento suave e preferiu o movimento discreto, fiel ao clássico e à pixel art (a decisão original do D1 no briefing).
+- A remoção foi feita depois do merge dos PRs #1 a #3, para o histórico registrar a tentativa e a volta.

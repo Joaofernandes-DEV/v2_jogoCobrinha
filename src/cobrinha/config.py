@@ -42,6 +42,14 @@ CHANCE_FRUTA_DOURADA: Final = 0.10
 DURACAO_FRUTA_DOURADA: Final = 5.0  # segundos de jogo
 PONTOS_FRUTA_DOURADA: Final = 5
 
+# Power-ups (V3): aparecem às vezes depois de comer e somem se não forem pegos.
+CHANCE_POWER_UP: Final = 0.08
+DURACAO_POWER_UP_NO_CAMPO: Final = 7.0  # segundos de jogo
+DURACAO_CAMERA_LENTA: Final = 5.0
+FATOR_CAMERA_LENTA: Final = 0.5  # multiplica a velocidade da cobra
+DURACAO_PONTOS_EM_DOBRO: Final = 8.0
+SEGMENTOS_ENCOLHER: Final = 3
+
 # Recordes (J6)
 TAMANHO_RANKING: Final = 5
 

@@ -339,3 +339,16 @@ Modelo:
 **Motivo / observações:**
 - O João testou o movimento suave e preferiu o movimento discreto, fiel ao clássico e à pixel art (a decisão original do D1 no briefing).
 - A remoção foi feita depois do merge dos PRs #1 a #3, para o histórico registrar a tentativa e a volta.
+
+### 2026-10-03 09:52 — README e GIF de demonstração com as novidades da V3
+
+**Feito:**
+- **GIF de demonstração regravado:** o piloto automático agora também pega os power-ups. No `docs/demo.gif` aparecem a câmera lenta (campo azulado, `LENTO` no HUD) e a cereja de pontos em dobro (`X2` no HUD e `+2` ao comer), além da maçã dourada.
+- `ferramentas/gravar_demo.py`: o piloto mira primeiro no power-up, e a escolha da célula perto da cabeça virou a função `celula_livre_perto`, usada pela maçã dourada e pelos power-ups.
+- **README:** nova seção "Novidades da V3 (em desenvolvimento)" com uma tabela dos power-ups. Cada linha mostra o sprite direto de `src/cobrinha/assets/imagens/`. A seção avisa que a versão para download ainda é a `v2.0.0` e anuncia o modo Contra o tempo do João Pedro. Em "Como jogar", os power-ups agora apontam para essa seção, e a legenda do GIF foi atualizada.
+
+**Arquivos:** `ferramentas/gravar_demo.py`, `docs/demo.gif`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Os sprites (`power_*.png`) e o som (`power_up.wav`) dos power-ups já estavam em `src/cobrinha/assets/` desde o PR #3. Faltava mostrar as novidades no material visual do projeto.
+- O GIF tem 226 quadros e 0,2 MB, então continua leve para o README.

@@ -148,7 +148,7 @@ class EstadoJogando(Estado):
                 partida.fruta_dourada.tempo_restante,
             )
         if self.cobra_visivel:
-            self.sprites.desenhar_cobra(superficie, partida.cobra)
+            self.sprites.desenhar_cobra(superficie, partida.cobra, partida.progresso_passo)
         self.efeitos.desenhar(superficie)
         if self.jogo.debug:
             self._desenhar_depuracao(superficie)

@@ -117,3 +117,23 @@ def test_informa_se_ha_comandos_pendentes():
     assert cobra.tem_comandos_pendentes
     cobra.aplicar_proxima_direcao()
     assert not cobra.tem_comandos_pendentes
+
+
+def test_trajetos_antes_de_qualquer_passo_nao_se_movem():
+    cobra = cobra_para_direita()
+    assert cobra.trajetos == [(P(5, 5), P(5, 5)), (P(4, 5), P(4, 5)), (P(3, 5), P(3, 5))]
+
+
+def test_trajetos_cada_segmento_vem_da_celula_do_anterior_do_corpo():
+    cobra = cobra_para_direita()
+    cobra.avancar(P(6, 5))
+    assert cobra.trajetos == [(P(5, 5), P(6, 5)), (P(4, 5), P(5, 5)), (P(3, 5), P(4, 5))]
+
+
+def test_trajetos_do_segmento_novo_pelo_crescimento_ficam_parados():
+    cobra = cobra_para_direita()
+    cobra.crescer()
+    cobra.avancar(P(6, 5))
+    assert len(cobra) == 4
+    assert cobra.trajetos[-1] == (P(3, 5), P(3, 5))
+    assert cobra.trajetos[-2] == (P(3, 5), P(4, 5))

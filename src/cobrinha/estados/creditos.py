@@ -26,6 +26,7 @@ DETALHE = (TamanhoFonte.MINIMO, Paleta.CINZA_CLARO)
 CONTEUDO: list[Linha] = [
     ("V2", *SECAO),
     ("João Vitor Fernandes", *NOME),
+    ("João Pedro Sinhorini Silva - colaborador", *NOME),
     ("V1 (2025) - Computação Gráfica", *SECAO),
     ("João Vitor Fernandes", *NOME),
     ("João Pedro Sinhorini Silva", *NOME),

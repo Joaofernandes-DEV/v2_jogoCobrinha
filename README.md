@@ -63,6 +63,11 @@ Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os p
 
 - **A cobra acelera** um pouco a cada maçã, e cada nível começa mais rápido que o anterior.
 - **Maçã dourada:** às vezes aparece depois de comer. Vale **+5 pontos**, faz crescer, não conta para a meta e **some em 5 segundos** (pisca antes de sumir).
+- **Power-ups (V3):** às vezes aparecem depois de comer e somem em 7 segundos. Não dão pontos nem fazem crescer:
+  - **Fruta azul com relógio (câmera lenta):** a cobra anda na metade da velocidade por 5 s, e o campo fica azulado.
+  - **Cereja dupla (pontos em dobro):** cada comida e cada maçã dourada valem o dobro por 8 s.
+  - **Cogumelo (encolher):** a cauda perde 3 segmentos na hora (nunca menos que o tamanho inicial).
+  - Os efeitos ativos aparecem no HUD com os segundos restantes e acabam ao trocar de nível.
 - **Modos de jogo** (escolha no menu): **Clássico**, em que bater na borda perde, e **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado. Pedras e o próprio corpo continuam valendo.
 - **Recordes:** os 5 melhores de cada modo ficam salvos, e os níveis alcançados ficam liberados no menu.
 - **Opções:** volume dos efeitos e da música, tela cheia e efeitos visuais (desligue para tirar o pisca-pisca e os textos de pontos).
@@ -121,6 +126,7 @@ src/cobrinha/
 │   ├── comida.py    #   sorteio entre as células livres
 │   ├── niveis.py    #   níveis como dados (velocidade, meta e mapa de pedras)
 │   ├── progresso.py #   ranking por modo e níveis liberados
+│   ├── power_ups.py #   tipos de power-up e duração dos efeitos
 │   └── partida.py   #   passo fixo, modos, colisões, fruta dourada, vitória e derrota
 ├── opcoes.py        # preferências do jogador
 ├── persistencia.py  # leitura/gravação do JSON de dados

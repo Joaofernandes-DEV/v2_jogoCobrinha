@@ -284,3 +284,22 @@ Modelo:
 **Motivo / observações:**
 - João Pedro entra como colaborador do projeto. Ele já constava nos créditos da V1; agora também consta na V2.
 - Ele vai implementar uma versão do modo "Contra o tempo" e subir depois; essa entrega será registrada quando acontecer.
+
+### 2026-10-02 22:44 — Início da V3: movimento interpolado (suave)
+
+**Feito:**
+- A cobra deixou de "pular" de célula em célula: cada segmento desliza da célula anterior até a atual ao longo do tempo de cada passo. A lógica continua em passo fixo e discreta; só o desenho é interpolado.
+- `Cobra.trajetos`: para cada segmento, de onde veio no último passo e onde está (segmentos nascidos do crescimento ficam parados).
+- `Partida.progresso_passo`: quanto do passo atual já passou (0 a 1); fica em 1 com a partida encerrada.
+- `interpolar_celula` (`ui/campo.py`) calcula a posição entre duas células. No modo **Sem bordas** o segmento sai por um lado e entra pelo outro, em vez de cruzar o campo inteiro; a peça é desenhada nos dois lados da borda e nunca invade o HUD.
+- `Sprites.desenhar_cobra` ganhou o parâmetro `progresso` (padrão 1, que mantém o desenho antigo, usado pela cobra do menu).
+- Testes de 191 para **200**.
+
+**Arquivos:** `src/cobrinha/dominio/cobra.py`, `src/cobrinha/dominio/partida.py`, `src/cobrinha/ui/campo.py`, `src/cobrinha/ui/pecas.py`, `src/cobrinha/estados/jogando.py`, `tests/test_cobra.py`, `tests/test_partida.py`, `tests/test_pecas.py`, `LOG.md`.
+
+**Motivo / observações:**
+- É o primeiro item do backlog da V3 ("Movimento interpolado/suave", seção 8.4 do briefing). O nome do jogo e o título da janela seguem os mesmos.
+- As regras (colisão, comer, pontos) continuam acontecendo no passo discreto, então os testes do domínio e o comportamento do jogo não mudam. O efeito colateral é que o desenho fica até um passo atrás da lógica: a comida some quando a cabeça chega à célula na lógica, um instante antes de a cabeça terminar de deslizar até ela.
+- Os sprites seguem presos à grade (a orientação de curvas e cabeça muda por célula); a suavização é só de posição.
+- A versão do pacote continua `2.0.0`; o número da V3 será definido na publicação.
+- Esta branch parte de `docs/creditos-joao-pedro`, que precisa entrar na `main` primeiro.

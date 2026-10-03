@@ -366,3 +366,18 @@ Modelo:
 - O João pediu o executável novo em *Assets* e escolheu publicar como release **v3.0.0**. A v2.0.0 continua publicada como está.
 - O nome do jogo e o título da janela continuam os mesmos ("Jogo da Cobrinha V2"), conforme combinado no início da V3.
 - Depois do merge, a tag `v3.0.0` dispara o workflow **Release**, que roda os testes no Windows, gera e testa o `Cobrinha.exe` e cria a release com ele anexado. O resultado fica registrado na próxima entrada.
+
+### 2026-10-03 10:24 — Release v3.0.0 publicada
+
+**Feito:**
+- Tag `v3.0.0` criada sobre o commit `ebf7e88` (merge do PR #6), depois de o CI ficar verde nos 4 ambientes.
+- O workflow **Release** rodou no Windows do GitHub e todas as etapas passaram: dependências → testes → executável gerado e testado → release publicada.
+- **Release:** <https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/tag/v3.0.0>, com o anexo `Cobrinha.exe` (16,1 MB, sha256 `573f699f…cebf36`) e as notas de `docs/notas-v3.0.0.md`. Ela não é rascunho nem pré-lançamento e virou a **Latest**. A v2.0.0 continua publicada.
+- **Conferência independente:** baixei o `Cobrinha.exe` publicado e o sha256 bate com o da release. Rodei com `--fechar-em 2 --nivel 3` (driver de vídeo `dummy` e pasta de dados temporária): saiu com código 0 e gravou o `dados.json`. O executável contém os sprites `power_camera_lenta`, `power_pontos_em_dobro` e `power_encolher` e o som `power_up.wav`.
+
+**Arquivos:** `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu o executável novo em *Assets* da página de releases. A V3 sai com os power-ups, o crédito do colaborador João Pedro e o movimento célula a célula da V2.
+- O teste automático não exercita o áudio nem a janela real. Vale o João abrir o executável num PC sem Python para conferir o som e os power-ups jogando.
+- Próximo passo da V3: o modo Contra o tempo, do João Pedro.

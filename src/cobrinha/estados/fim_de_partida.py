@@ -25,6 +25,7 @@ class EstadoFimDePartida(Estado):
         super().__init__(jogo)
         self.nivel_inicial = jogando.nivel_inicial
         self.vitoria = jogando.partida.situacao is Situacao.VITORIA
+        self.tempo_esgotado = jogando.partida.situacao is Situacao.TEMPO_ESGOTADO
         self.pontos = jogando.partida.pontos
         # Colocação no ranking do modo (1 = novo recorde; None = fora do top 5).
         self.colocacao = navegacao.registrar_resultado(jogo, jogando.partida)
@@ -55,6 +56,8 @@ class EstadoFimDePartida(Estado):
         superficie.blit(self.veu, (0, 0))
         if self.vitoria:
             linhas = [("VOCÊ VENCEU!", TamanhoFonte.TITULO, Paleta.AMARELO)]
+        elif self.tempo_esgotado:
+            linhas = [("TEMPO ESGOTADO!", TamanhoFonte.TITULO, Paleta.LARANJA)]
         else:
             linhas = [("FIM DE JOGO", TamanhoFonte.TITULO, Paleta.VERMELHO)]
         linhas.append((f"PONTOS {self.pontos}", TamanhoFonte.MEDIO, Paleta.BRANCO))

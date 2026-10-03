@@ -36,7 +36,7 @@ A V3 (`v3.0.0`) continua a partir da V2, com o mesmo nome e o mesmo movimento c�
 - Pegar de novo um efeito que já está ativo renova a duração. Os efeitos param na pausa e acabam ao trocar de nível.
 - Sprites e som dos power-ups são gerados por código, como o resto dos assets (`ferramentas/gerar_sprites.py` e `ferramentas/gerar_sons.py`).
 
-**Em breve:** modo **Contra o tempo**, feito pelo colaborador João Pedro Sinhorini Silva.
+**Modo Contra o tempo:** feito pelo colaborador João Pedro Sinhorini Silva. Corrida de pontos contra um relógio de 60 s, em que cada maçã devolve segundos. Os power-ups também valem nesse modo. Veja as regras em [Como jogar](#como-jogar).
 
 ## Rodar pelo código-fonte
 
@@ -81,8 +81,9 @@ Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os p
 
 - **A cobra acelera** um pouco a cada maçã, e cada nível começa mais rápido que o anterior.
 - **Maçã dourada:** às vezes aparece depois de comer. Vale **+5 pontos**, faz crescer, não conta para a meta e **some em 5 segundos** (pisca antes de sumir).
+- **Modos de jogo** (escolha no menu, com `←` `→`): **Clássico**, em que bater na borda perde; **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado (pedras e o próprio corpo continuam valendo); e **Contra o tempo**, descrito abaixo.
+- **Contra o tempo:** uma corrida de pontos no nível escolhido. O relógio começa em **60 s** e não há meta de comidas, então o nível não acaba ao comer. Cada maçã dá **+3 s** e a maçã dourada dá **+5 s** (o relógio nunca passa de 99 s). Abaixo de 10 s o relógio fica vermelho. Quando o tempo acaba, a partida termina em "Tempo esgotado!" e os pontos entram no ranking do modo; bater na borda, nas pedras ou no próprio corpo também encerra.
 - **Power-ups (V3):** câmera lenta, pontos em dobro e encolher. Veja a tabela em [Novidades da V3](#novidades-da-v3).
-- **Modos de jogo** (escolha no menu): **Clássico**, em que bater na borda perde, e **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado. Pedras e o próprio corpo continuam valendo.
 - **Recordes:** os 5 melhores de cada modo ficam salvos, e os níveis alcançados ficam liberados no menu.
 - **Opções:** volume dos efeitos e da música, tela cheia e efeitos visuais (desligue para tirar o pisca-pisca e os textos de pontos).
 - **Música:** o menu tem a própria música, e cada fase tem uma diferente (dó maior alegre, ré menor sincopada, mi menor rápida). Ao bater, a música para na hora e só volta no menu.

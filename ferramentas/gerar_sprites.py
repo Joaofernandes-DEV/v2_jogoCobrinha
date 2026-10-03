@@ -223,6 +223,81 @@ def parede() -> pygame.Surface:
     return superficie
 
 
+def pintar(
+    superficie: pygame.Surface, dentro: Callable[[int, int], bool], cor: Callable[[int, int], Cor]
+) -> None:
+    """Pinta a forma pixel a pixel e contorna de preto."""
+    for y in range(T):
+        for x in range(T):
+            if dentro(x, y):
+                superficie.set_at((x, y), cor(x, y))
+    contornar(superficie, dentro, abertos=set())
+
+
+def power_camera_lenta() -> pygame.Surface:
+    """Câmera lenta (V3): fruta azul com um relógio desenhado."""
+    superficie = comida(Paleta.AZUL_CLARO, Paleta.AZUL)
+    for x, y in ((12, 10), (12, 11), (12, 12), (12, 13), (12, 14), (13, 14), (14, 14), (15, 14)):
+        superficie.set_at((x, y), Paleta.PRETO)
+    for x, y in ((12, 7), (19, 14), (12, 21), (5, 14)):
+        superficie.set_at((x, y), Paleta.BRANCO)
+    return superficie
+
+
+def power_pontos_em_dobro() -> pygame.Surface:
+    """Pontos em dobro (V3): duas cerejas presas no mesmo cabinho."""
+    superficie = nova_superficie()
+    centros = ((7.5, 17.5), (17.5, 17.5))
+    raio = 5.5
+
+    def dentro(x: int, y: int) -> bool:
+        return any(math.hypot(x + 0.5 - cx, y + 0.5 - cy) <= raio for cx, cy in centros)
+
+    def cor(x: int, y: int) -> Cor:
+        cx = centros[0][0] if x < T // 2 else centros[1][0]
+        sombra = (x + 0.5 - cx) + (y + 0.5 - 17.5) > raio * 0.8
+        return Paleta.MARROM if sombra else Paleta.VERMELHO
+
+    pintar(superficie, dentro, cor)
+    for x, y in ((5, 15), (6, 15), (15, 15), (16, 15)):
+        superficie.set_at((x, y), Paleta.BRANCO)
+    # Cabinhos em "V" invertido saindo de um ponto em comum.
+    for passo in range(9):
+        superficie.set_at((8 + passo // 2, 12 - passo), Paleta.VERDE_ESCURO)
+        superficie.set_at((17 - passo // 2, 12 - passo), Paleta.VERDE_ESCURO)
+    for x, y in ((13, 2), (14, 2), (15, 2), (14, 1), (15, 3), (16, 3)):
+        superficie.set_at((x, y), Paleta.VERDE)
+    return superficie
+
+
+def power_encolher() -> pygame.Surface:
+    """Encolher (V3): cogumelo de chapéu laranja com pintas brancas."""
+    superficie = nova_superficie()
+
+    def chapeu(x: int, y: int) -> bool:
+        cx, cy = x + 0.5, y + 0.5
+        return cy <= 14 and ((cx - 12.5) / 11) ** 2 + ((cy - 14) / 11) ** 2 <= 1
+
+    def pe(x: int, y: int) -> bool:
+        return 8 <= x <= 16 and 14 <= y <= 22
+
+    def dentro(x: int, y: int) -> bool:
+        return chapeu(x, y) or pe(x, y)
+
+    def cor(x: int, y: int) -> Cor:
+        if chapeu(x, y):
+            return Paleta.LARANJA if y < 12 else Paleta.MARROM
+        return Paleta.CINZA_CLARO if x >= 14 else Paleta.BRANCO
+
+    pintar(superficie, dentro, cor)
+    for cx, cy in ((7, 8), (16, 6), (12, 10), (19, 10)):
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
+            superficie.set_at((cx + dx, cy + dy), Paleta.BRANCO)
+    for x, y in ((10, 17), (14, 17)):
+        superficie.set_at((x, y), Paleta.PRETO)
+    return superficie
+
+
 SPRITES: dict[str, Callable[[], pygame.Surface]] = {
     "cabeca": cabeca,
     "corpo_reto": corpo_reto,
@@ -231,6 +306,9 @@ SPRITES: dict[str, Callable[[], pygame.Surface]] = {
     "comida": comida,
     "comida_dourada": comida_dourada,
     "parede": parede,
+    "power_camera_lenta": power_camera_lenta,
+    "power_pontos_em_dobro": power_pontos_em_dobro,
+    "power_encolher": power_encolher,
 }
 
 

@@ -17,6 +17,7 @@ from cobrinha import recursos
 from cobrinha.config import ALTURA_HUD, COLUNAS, LINHAS, TAMANHO_CELULA
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import Direcao, Posicao
+from cobrinha.dominio.power_ups import PowerUpNoCampo, TipoPowerUp
 from cobrinha.ui.campo import celula_para_pixel, interpolar_celula
 
 
@@ -44,9 +45,15 @@ _GIRO_ANTI_HORARIO = {
 }
 LADOS_CURVA_BASE = frozenset({Direcao.ESQUERDA, Direcao.BAIXO})
 
+SPRITE_DO_POWER_UP = {
+    TipoPowerUp.CAMERA_LENTA: "power_camera_lenta",
+    TipoPowerUp.PONTOS_EM_DOBRO: "power_pontos_em_dobro",
+    TipoPowerUp.ENCOLHER: "power_encolher",
+}
+
 # Comida "flutuando": sobe e desce 1 px.
 VELOCIDADE_FLUTUACAO = 4.0
-# A fruta dourada pisca quando está para sumir.
+# A fruta dourada e os power-ups piscam quando estão para sumir.
 AVISO_FRUTA_SUMINDO = 1.5  # segundos restantes
 PISCADAS_POR_SEGUNDO = 8
 
@@ -118,6 +125,7 @@ class Sprites:
         self.comida = recursos.imagem("comida")
         self.comida_dourada = recursos.imagem("comida_dourada")
         self.parede = recursos.imagem("parede")
+        self.power_ups = {tipo: recursos.imagem(SPRITE_DO_POWER_UP[tipo]) for tipo in TipoPowerUp}
 
     def desenhar_cobra(
         self, superficie: pygame.Surface, cobra: Cobra, progresso: float = 1.0
@@ -163,10 +171,29 @@ class Sprites:
     def desenhar_fruta_dourada(
         self, superficie: pygame.Surface, posicao: Posicao, tempo: float, tempo_restante: float
     ) -> None:
+        self._desenhar_temporario(superficie, self.comida_dourada, posicao, tempo, tempo_restante)
+
+    def desenhar_power_up(
+        self, superficie: pygame.Surface, power_up: PowerUpNoCampo, tempo: float
+    ) -> None:
+        imagem = self.power_ups[power_up.tipo]
+        self._desenhar_temporario(
+            superficie, imagem, power_up.posicao, tempo, power_up.tempo_restante
+        )
+
+    def _desenhar_temporario(
+        self,
+        superficie: pygame.Surface,
+        imagem: pygame.Surface,
+        posicao: Posicao,
+        tempo: float,
+        tempo_restante: float,
+    ) -> None:
+        """Item que some sozinho: pisca quando está para sumir."""
         sumindo = tempo_restante < AVISO_FRUTA_SUMINDO
         if sumindo and int(tempo * PISCADAS_POR_SEGUNDO) % 2:
             return
-        self._desenhar_flutuando(superficie, self.comida_dourada, posicao, tempo)
+        self._desenhar_flutuando(superficie, imagem, posicao, tempo)
 
     def desenhar_obstaculos(
         self, superficie: pygame.Surface, obstaculos: Iterable[Posicao], topo: int = ALTURA_HUD

@@ -8,12 +8,15 @@ from cobrinha.config import (
     ALTURA_JANELA,
     LARGURA_JANELA,
     PONTOS_FRUTA_DOURADA,
+    SEGMENTOS_ENCOLHER,
     TAMANHO_CELULA,
+    Cor,
     Paleta,
     TamanhoFonte,
 )
 from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.dominio.partida import Evento, Partida, Situacao
+from cobrinha.dominio.power_ups import TipoPowerUp
 from cobrinha.estados import navegacao
 from cobrinha.estados.base import Estado
 from cobrinha.jogo import Jogo
@@ -39,10 +42,24 @@ TECLAS_PAUSA = (pygame.K_ESCAPE, pygame.K_p)
 SOM_DO_EVENTO = {
     Evento.COMEU: Som.COMER,
     Evento.COMEU_DOURADA: Som.BONUS,
+    Evento.PEGOU_POWER_UP: Som.POWER_UP,
     Evento.CONCLUIU_NIVEL: Som.NIVEL,
     Evento.BATEU: Som.BATER,
     Evento.VENCEU: Som.VITORIA,
 }
+
+# Power-ups (V3): rótulo curto no HUD e texto que sobe ao pegar.
+ROTULO_DO_POWER_UP = {
+    TipoPowerUp.CAMERA_LENTA: "LENTO",
+    TipoPowerUp.PONTOS_EM_DOBRO: "X2",
+}
+TEXTO_AO_PEGAR = {
+    TipoPowerUp.CAMERA_LENTA: "LENTO!",
+    TipoPowerUp.PONTOS_EM_DOBRO: "X2!",
+    TipoPowerUp.ENCOLHER: f"-{SEGMENTOS_ENCOLHER}",
+}
+# Véu azulado sobre o campo durante a câmera lenta (só com efeitos visuais ligados).
+OPACIDADE_VEU_LENTO = 40
 
 # Ao bater, a cobra pisca antes da tela de fim (I10); sem efeitos visuais, a pausa é curta.
 DURACAO_MORTE = 0.9
@@ -63,6 +80,8 @@ class EstadoJogando(Estado):
         self.tempo = 0.0  # para animações (comida flutuando)
         self.efeitos = Efeitos()
         self.tempo_ate_encerrar: float | None = None
+        self.veu_lento = pygame.Surface(self.fundo_campo.get_size(), pygame.SRCALPHA)
+        self.veu_lento.fill((*Paleta.AZUL, OPACIDADE_VEU_LENTO))
         # A música muda ao sair do menu e a cada troca de fase.
         jogo.audio.tocar_musica(musica_da_fase(self.partida.nivel.numero))
 
@@ -89,6 +108,8 @@ class EstadoJogando(Estado):
 
         comida_antes = self.partida.comida
         dourada_antes = self.partida.fruta_dourada
+        power_up_antes = self.partida.power_up
+        multiplicador = self.partida.multiplicador_pontos
         for evento in self.partida.atualizar(dt):
             if evento in (Evento.BATEU, Evento.VENCEU):
                 # Fim de jogo: a música para na hora e só volta no menu.
@@ -96,9 +117,13 @@ class EstadoJogando(Estado):
             if evento in SOM_DO_EVENTO:
                 self.jogo.audio.tocar(SOM_DO_EVENTO[evento])
             if evento is Evento.COMEU_DOURADA and dourada_antes:
-                self._pontos_flutuantes(f"+{PONTOS_FRUTA_DOURADA}", dourada_antes.posicao)
+                pontos = PONTOS_FRUTA_DOURADA * multiplicador
+                self._pontos_flutuantes(f"+{pontos}", dourada_antes.posicao)
+            elif evento is Evento.PEGOU_POWER_UP and power_up_antes:
+                conteudo = TEXTO_AO_PEGAR[power_up_antes.tipo]
+                self._pontos_flutuantes(conteudo, power_up_antes.posicao, Paleta.AZUL_CLARO)
             elif evento in (Evento.COMEU, Evento.CONCLUIU_NIVEL, Evento.VENCEU) and comida_antes:
-                self._pontos_flutuantes("+1", comida_antes)
+                self._pontos_flutuantes(f"+{multiplicador}", comida_antes)
 
         if not self.partida.em_andamento:
             self._iniciar_encerramento()
@@ -110,12 +135,14 @@ class EstadoJogando(Estado):
         else:
             navegacao.encerrar_partida(self.jogo, self)
 
-    def _pontos_flutuantes(self, conteudo: str, posicao: Posicao) -> None:
+    def _pontos_flutuantes(
+        self, conteudo: str, posicao: Posicao, cor: Cor = Paleta.AMARELO
+    ) -> None:
         if not self.jogo.opcoes.efeitos_visuais:
             return
         x, y = celula_para_pixel(posicao)
         meio = TAMANHO_CELULA // 2
-        self.efeitos.texto_flutuante(conteudo, Paleta.AMARELO, (x + meio, y + meio))
+        self.efeitos.texto_flutuante(conteudo, cor, (x + meio, y + meio))
 
     @property
     def cobra_visivel(self) -> bool:
@@ -135,9 +162,16 @@ class EstadoJogando(Estado):
             meta=partida.nivel.meta_comidas,
             modo=modo.value,
             mudo=self.jogo.audio.mudo,
+            efeitos=tuple(
+                (ROTULO_DO_POWER_UP[tipo], restante)
+                for tipo, restante in partida.efeitos_ativos.items()
+            ),
         )
         desenhar_hud(superficie, dados)
         superficie.blit(self.fundo_campo, (0, ALTURA_HUD))
+        lento = TipoPowerUp.CAMERA_LENTA in partida.efeitos_ativos
+        if lento and self.jogo.opcoes.efeitos_visuais:
+            superficie.blit(self.veu_lento, (0, ALTURA_HUD))
         if partida.comida is not None:
             self.sprites.desenhar_comida(superficie, partida.comida, self.tempo)
         if partida.fruta_dourada is not None:
@@ -147,6 +181,8 @@ class EstadoJogando(Estado):
                 self.tempo,
                 partida.fruta_dourada.tempo_restante,
             )
+        if partida.power_up is not None:
+            self.sprites.desenhar_power_up(superficie, partida.power_up, self.tempo)
         if self.cobra_visivel:
             self.sprites.desenhar_cobra(superficie, partida.cobra, partida.progresso_passo)
         self.efeitos.desenhar(superficie)

@@ -20,9 +20,9 @@ Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-D
 - Menus navegáveis por teclado e mouse, pausa, recordes, sons e dois modos de jogo.
 - Correção dos bugs da V1 (fechamento com erro, grade desalinhada, meia-volta suicida etc.).
 
-## Novidades da V3 (em desenvolvimento)
+## Novidades da V3
 
-A V3 continua a partir da V2, com o mesmo nome e o mesmo movimento célula a célula. A versão publicada para download ainda é a `v2.0.0`; as novidades abaixo já estão no código-fonte.
+A V3 (`v3.0.0`) continua a partir da V2, com o mesmo nome e o mesmo movimento célula a célula. O executável da [última release](https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/latest) já traz as novidades abaixo.
 
 **Power-ups:** às vezes um aparece depois de comer. Ele fica no campo por 7 segundos (pisca antes de sumir) e, ao ser pego, não dá pontos nem faz crescer, só aplica o efeito.
 
@@ -81,7 +81,7 @@ Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os p
 
 - **A cobra acelera** um pouco a cada maçã, e cada nível começa mais rápido que o anterior.
 - **Maçã dourada:** às vezes aparece depois de comer. Vale **+5 pontos**, faz crescer, não conta para a meta e **some em 5 segundos** (pisca antes de sumir).
-- **Power-ups (V3):** câmera lenta, pontos em dobro e encolher. Veja a tabela em [Novidades da V3](#novidades-da-v3-em-desenvolvimento).
+- **Power-ups (V3):** câmera lenta, pontos em dobro e encolher. Veja a tabela em [Novidades da V3](#novidades-da-v3).
 - **Modos de jogo** (escolha no menu): **Clássico**, em que bater na borda perde, e **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado. Pedras e o próprio corpo continuam valendo.
 - **Recordes:** os 5 melhores de cada modo ficam salvos, e os níveis alcançados ficam liberados no menu.
 - **Opções:** volume dos efeitos e da música, tela cheia e efeitos visuais (desligue para tirar o pisca-pisca e os textos de pontos).
@@ -120,7 +120,7 @@ python ferramentas/empacotar.py       # dist/Cobrinha.exe, já testado ao final
 python ferramentas/gravar_demo.py     # docs/demo.gif, jogado por um piloto automático (com power-ups)
 ```
 
-**Publicar uma versão:** basta criar e enviar uma tag (ex.: `git tag v2.0.1 && git push origin v2.0.1`). O workflow `release.yml` roda os testes no Windows, gera e testa o executável e cria a release com ele anexado.
+**Publicar uma versão:** basta criar e enviar uma tag (ex.: `git tag v3.0.1 && git push origin v3.0.1`). O workflow `release.yml` roda os testes no Windows, gera e testa o executável e cria a release com ele anexado.
 
 O GitHub Actions roda lint e testes a cada push (Linux com Python 3.11–3.13 e Windows com 3.11).
 

@@ -381,3 +381,35 @@ Modelo:
 - O João pediu o executável novo em *Assets* da página de releases. A V3 sai com os power-ups, o crédito do colaborador João Pedro e o movimento célula a célula da V2.
 - O teste automático não exercita o áudio nem a janela real. Vale o João abrir o executável num PC sem Python para conferir o som e os power-ups jogando.
 - Próximo passo da V3: o modo Contra o tempo, do João Pedro.
+
+### 2026-10-03 13:42 — Modo contra o tempo (João Pedro Sinhorini Silva)
+
+**Feito:**
+- **Terceiro modo de jogo, `Modo.CONTRA_O_TEMPO`** (item do backlog da V3), feito pelo colaborador João Pedro. Regras: relógio de **60 s**, **+3 s** por maçã, **+5 s** pela maçã dourada e teto de **99 s**. As bordas matam, como no Clássico. Não há meta de comidas: o nível escolhido define só o mapa e a velocidade. A partida acaba quando o tempo esgota, quando a cobra bate ou quando ela vence (campo cheio).
+- **Domínio (`partida.py`):**
+  - Novos `Situacao.TEMPO_ESGOTADO` e `Evento.TEMPO_ESGOTADO`.
+  - `Partida.tempo_restante` (None nos outros modos) e `tem_meta`.
+  - O relógio é descontado depois dos passos do quadro e nunca anda mais que o limite de passos recuperáveis. Assim, um travamento (ex.: arrastar a janela) não rouba segundos do jogador.
+- **Interface:**
+  - O HUD troca a barra de progresso pelo relógio (`TEMPO 42`), que fica vermelho a partir de 10 s.
+  - O texto flutuante ao comer mostra também os segundos ganhos (`+1  +3s`).
+  - A contagem inicial ganha uma linha com as regras.
+  - A tela de fim mostra **TEMPO ESGOTADO!** e toca o som de nível quando o tempo acaba.
+- **Menu e recordes com 3 modos:** `Opcoes.alternar_modo(delta)` circula nos dois sentidos, e a tela de recordes passou a respeitar `←` e `→`. O ranking do modo é separado (`CONTRA_O_TEMPO`), e os `dados.json` antigos continuam válidos.
+- **Integração com a V3** (o patch original foi feito sobre a v2.0.0):
+  - Conflitos resolvidos em `config.py`, `partida.py`, `jogando.py`, `hud.py`, `README.md` e `LOG.md`, mantendo os power-ups.
+  - O texto flutuante considera os pontos em dobro (`+2  +3s`). O bônus de segundos não dobra.
+  - Ao acabar o tempo, o power-up que estiver no campo também é retirado (o patch original só retirava a maçã e a dourada).
+  - No HUD, o relógio fica no centro e os power-ups ativos à esquerda, sem sobreposição.
+  - README: as regras foram para "Como jogar", e a seção "Novidades da V3" passou a apresentar o modo.
+  - A entrada do patch original (datada de 2026-10-02 18:37) foi refeita aqui, no final do LOG, com a data da integração.
+- **Testes:** de 213 para **240**. Novo `tests/test_contra_o_tempo.py`, que cobre regras do relógio, bônus, teto, fim por tempo, ausência de meta, power-ups no modo, HUD, menu, recordes e ranking. `test_alternar_modo_circula` foi atualizado para 3 modos.
+
+**Arquivos:** `src/cobrinha/config.py`, `src/cobrinha/opcoes.py`, `src/cobrinha/dominio/partida.py`, `src/cobrinha/ui/hud.py`, `src/cobrinha/estados/jogando.py`, `src/cobrinha/estados/fim_de_partida.py`, `src/cobrinha/estados/contagem.py`, `src/cobrinha/estados/menu_principal.py`, `src/cobrinha/estados/recordes.py`, `src/cobrinha/estados/navegacao.py`, `tests/test_contra_o_tempo.py` (novo), `tests/test_persistencia.py`, `README.md`, `briefing_v2.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Os valores do modo (60 s, +3 s, +5 s, teto de 99 s, alerta em 10 s) estão em `config.py` e podem ser ajustados sem mexer na lógica. Ainda falta testar jogando para calibrar o equilíbrio.
+- A aceleração por comida do nível continua valendo. Como não há meta, quem come muito joga cada vez mais rápido.
+- Não foi criado som novo: o fim por tempo reaproveita `nivel.wav`.
+- A câmera lenta deixa a cobra mais lenta, mas o relógio continua no ritmo normal. Fica como sugestão fazer o relógio também desacelerar nesse modo.
+- O patch chegou por arquivo, avaliado e corrigido pelo João Vitor com o Claude Code. O João Pedro sobe a versão corrigida pelo terminal dele.

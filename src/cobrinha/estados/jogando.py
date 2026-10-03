@@ -10,6 +10,8 @@ from cobrinha.config import (
     PONTOS_FRUTA_DOURADA,
     SEGMENTOS_ENCOLHER,
     TAMANHO_CELULA,
+    TEMPO_POR_COMIDA,
+    TEMPO_POR_FRUTA_DOURADA,
     Cor,
     Paleta,
     TamanhoFonte,
@@ -46,6 +48,7 @@ SOM_DO_EVENTO = {
     Evento.CONCLUIU_NIVEL: Som.NIVEL,
     Evento.BATEU: Som.BATER,
     Evento.VENCEU: Som.VITORIA,
+    Evento.TEMPO_ESGOTADO: Som.NIVEL,
 }
 
 # Power-ups (V3): rótulo curto no HUD e texto que sobe ao pegar.
@@ -111,19 +114,22 @@ class EstadoJogando(Estado):
         power_up_antes = self.partida.power_up
         multiplicador = self.partida.multiplicador_pontos
         for evento in self.partida.atualizar(dt):
-            if evento in (Evento.BATEU, Evento.VENCEU):
+            if evento in (Evento.BATEU, Evento.VENCEU, Evento.TEMPO_ESGOTADO):
                 # Fim de jogo: a música para na hora e só volta no menu.
                 self.jogo.audio.parar_musica()
             if evento in SOM_DO_EVENTO:
                 self.jogo.audio.tocar(SOM_DO_EVENTO[evento])
             if evento is Evento.COMEU_DOURADA and dourada_antes:
                 pontos = PONTOS_FRUTA_DOURADA * multiplicador
-                self._pontos_flutuantes(f"+{pontos}", dourada_antes.posicao)
+                self._pontos_flutuantes(
+                    self._texto_do_bonus(pontos, TEMPO_POR_FRUTA_DOURADA), dourada_antes.posicao
+                )
             elif evento is Evento.PEGOU_POWER_UP and power_up_antes:
                 conteudo = TEXTO_AO_PEGAR[power_up_antes.tipo]
                 self._pontos_flutuantes(conteudo, power_up_antes.posicao, Paleta.AZUL_CLARO)
             elif evento in (Evento.COMEU, Evento.CONCLUIU_NIVEL, Evento.VENCEU) and comida_antes:
-                self._pontos_flutuantes(f"+{multiplicador}", comida_antes)
+                texto = self._texto_do_bonus(multiplicador, TEMPO_POR_COMIDA)
+                self._pontos_flutuantes(texto, comida_antes)
 
         if not self.partida.em_andamento:
             self._iniciar_encerramento()
@@ -134,6 +140,12 @@ class EstadoJogando(Estado):
             self.tempo_ate_encerrar = DURACAO_MORTE if efeitos else DURACAO_MORTE_SEM_EFEITOS
         else:
             navegacao.encerrar_partida(self.jogo, self)
+
+    def _texto_do_bonus(self, pontos: int, segundos: float) -> str:
+        """\"+1\"; no contra o tempo, também os segundos ganhos (\"+1  +3s\")."""
+        if self.partida.tempo_restante is None:
+            return f"+{pontos}"
+        return f"+{pontos}  +{segundos:g}s"
 
     def _pontos_flutuantes(
         self, conteudo: str, posicao: Posicao, cor: Cor = Paleta.AMARELO
@@ -166,6 +178,7 @@ class EstadoJogando(Estado):
                 (ROTULO_DO_POWER_UP[tipo], restante)
                 for tipo, restante in partida.efeitos_ativos.items()
             ),
+            tempo=partida.tempo_restante,
         )
         desenhar_hud(superficie, dados)
         superficie.blit(self.fundo_campo, (0, ALTURA_HUD))

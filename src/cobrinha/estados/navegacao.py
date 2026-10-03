@@ -16,6 +16,7 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING
 
+from cobrinha.config import TEMPO_INICIAL, TEMPO_POR_COMIDA, TEMPO_POR_FRUTA_DOURADA
 from cobrinha.dominio.niveis import obter_nivel
 from cobrinha.dominio.partida import Partida, Situacao
 
@@ -112,11 +113,18 @@ def _comecar_partida(jogo: Jogo, partida: Partida, nivel_inicial: int) -> None:
 
     jogando = EstadoJogando(jogo, partida, nivel_inicial)
     jogo.trocar_estado(jogando)
+    dica = None
+    if partida.tempo_restante is not None:
+        dica = (
+            f"{TEMPO_INICIAL:g} s no relógio   maçã +{TEMPO_POR_COMIDA:g} s"
+            f"   dourada +{TEMPO_POR_FRUTA_DOURADA:g} s"
+        )
     jogo.empilhar(
         EstadoContagem(
             jogo,
             jogando,
             titulo=f"NÍVEL {partida.nivel.numero}",
             subtitulo=partida.nivel.nome,
+            dica=dica,
         )
     )

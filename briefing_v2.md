@@ -230,7 +230,7 @@ Critério: entra o que torna o jogo **completo e polido** (um jogo pronto, não 
 | **J4** 3 níveis definidos como dados: 1 campo aberto, 2 com blocos internos, 3 labirinto | Editor de níveis |
 | **J5** Uma comida especial: **fruta dourada** (+5 pontos, some em 5 s, chance de ~10% por comida) | Fruta de câmera lenta e outros power-ups |
 | **J6** Top 5 de recordes local em JSON, com "novo recorde!" | Ranking online |
-| **J8** Dois modos: **Clássico** (bordas matam) e **Sem bordas** (atravessa) | Modo contra o tempo |
+| **J8** Dois modos: **Clássico** (bordas matam) e **Sem bordas** (atravessa) | ~~Modo contra o tempo~~ (feito depois da v2.0.0, ver LOG) |
 | **J9** Leve aceleração dentro do nível | — |
 | **I8** Efeitos sonoros retrô + 1 música de menu/jogo, com mudo (M) | Trilha diferente por nível |
 | **I9** Opções: volumes, tela cheia, modo de jogo. Setas **e** WASD sempre funcionam | Remapeamento de teclas |

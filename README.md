@@ -5,7 +5,7 @@
 
 Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-DEV/Py_JogoDaCobrinha), feito em Python + Pygame na disciplina de Computação Gráfica (UNIP).
 
-![Demonstração: menu, contagem do nível 2, partida com a maçã dourada e fim de jogo](docs/demo.gif)
+![Demonstração: menu, contagem do nível 2, partida com a maçã dourada e os power-ups de câmera lenta e pontos em dobro, e fim de jogo](docs/demo.gif)
 
 ## Baixar e jogar (Windows)
 
@@ -19,6 +19,24 @@ Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-D
 - Arte nova e coesa em **pixel art**, grade de 32 × 22 células e HUD próprio.
 - Menus navegáveis por teclado e mouse, pausa, recordes, sons e dois modos de jogo.
 - Correção dos bugs da V1 (fechamento com erro, grade desalinhada, meia-volta suicida etc.).
+
+## Novidades da V3 (em desenvolvimento)
+
+A V3 continua a partir da V2, com o mesmo nome e o mesmo movimento célula a célula. A versão publicada para download ainda é a `v2.0.0`; as novidades abaixo já estão no código-fonte.
+
+**Power-ups:** às vezes um aparece depois de comer. Ele fica no campo por 7 segundos (pisca antes de sumir) e, ao ser pego, não dá pontos nem faz crescer, só aplica o efeito.
+
+| Item | Power-up | Efeito |
+|:----:|----------|--------|
+| <img src="src/cobrinha/assets/imagens/power_camera_lenta.png" alt="Fruta azul com relógio"> | **Câmera lenta** | A cobra anda na metade da velocidade por 5 s, e o campo fica azulado. |
+| <img src="src/cobrinha/assets/imagens/power_pontos_em_dobro.png" alt="Cereja dupla"> | **Pontos em dobro** | Por 8 s, cada maçã vale 2 pontos e a maçã dourada vale 10. A meta do nível continua contando 1 por maçã. |
+| <img src="src/cobrinha/assets/imagens/power_encolher.png" alt="Cogumelo"> | **Encolher** | A cauda perde 3 segmentos na hora, sem a cobra ficar menor que o tamanho inicial. |
+
+- Os efeitos ativos aparecem no HUD com os segundos restantes (ex.: `LENTO 4  X2 7`).
+- Pegar de novo um efeito que já está ativo renova a duração. Os efeitos param na pausa e acabam ao trocar de nível.
+- Sprites e som dos power-ups são gerados por código, como o resto dos assets (`ferramentas/gerar_sprites.py` e `ferramentas/gerar_sons.py`).
+
+**Em breve:** modo **Contra o tempo**, feito pelo colaborador João Pedro Sinhorini Silva.
 
 ## Rodar pelo código-fonte
 
@@ -63,11 +81,7 @@ Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os p
 
 - **A cobra acelera** um pouco a cada maçã, e cada nível começa mais rápido que o anterior.
 - **Maçã dourada:** às vezes aparece depois de comer. Vale **+5 pontos**, faz crescer, não conta para a meta e **some em 5 segundos** (pisca antes de sumir).
-- **Power-ups (V3):** às vezes aparecem depois de comer e somem em 7 segundos. Não dão pontos nem fazem crescer:
-  - **Fruta azul com relógio (câmera lenta):** a cobra anda na metade da velocidade por 5 s, e o campo fica azulado.
-  - **Cereja dupla (pontos em dobro):** cada comida e cada maçã dourada valem o dobro por 8 s.
-  - **Cogumelo (encolher):** a cauda perde 3 segmentos na hora (nunca menos que o tamanho inicial).
-  - Os efeitos ativos aparecem no HUD com os segundos restantes e acabam ao trocar de nível.
+- **Power-ups (V3):** câmera lenta, pontos em dobro e encolher. Veja a tabela em [Novidades da V3](#novidades-da-v3-em-desenvolvimento).
 - **Modos de jogo** (escolha no menu): **Clássico**, em que bater na borda perde, e **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado. Pedras e o próprio corpo continuam valendo.
 - **Recordes:** os 5 melhores de cada modo ficam salvos, e os níveis alcançados ficam liberados no menu.
 - **Opções:** volume dos efeitos e da música, tela cheia e efeitos visuais (desligue para tirar o pisca-pisca e os textos de pontos).
@@ -103,7 +117,7 @@ Executável e GIF de demonstração (precisam de `pip install -e ".[ferramentas]
 
 ```bash
 python ferramentas/empacotar.py       # dist/Cobrinha.exe, já testado ao final
-python ferramentas/gravar_demo.py     # docs/demo.gif, jogado por um piloto automático
+python ferramentas/gravar_demo.py     # docs/demo.gif, jogado por um piloto automático (com power-ups)
 ```
 
 **Publicar uma versão:** basta criar e enviar uma tag (ex.: `git tag v2.0.1 && git push origin v2.0.1`). O workflow `release.yml` roda os testes no Windows, gera e testa o executável e cria a release com ele anexado.

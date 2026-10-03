@@ -5,7 +5,8 @@ Requer: pip install -e ".[ferramentas]"
 
 Um "piloto automático" busca a comida pelo caminho mais curto (busca em largura),
 desviando do corpo e das pedras. Roteiro: menu → contagem do nível 2 → partida
-(com uma fruta dourada) → batida proposital → tela de fim. A semente é fixa, então
+(com uma fruta dourada e os power-ups de câmera lenta e pontos em dobro) → batida
+proposital → tela de fim. A semente é fixa, então
 o GIF sai sempre igual.
 """
 
@@ -29,6 +30,7 @@ sys.path.insert(0, str(RAIZ / "src"))
 
 from cobrinha.dominio.grade import Direcao, Posicao  # noqa: E402
 from cobrinha.dominio.partida import FrutaDourada, Partida  # noqa: E402
+from cobrinha.dominio.power_ups import PowerUpNoCampo, TipoPowerUp  # noqa: E402
 from cobrinha.estados import navegacao  # noqa: E402
 from cobrinha.estados.jogando import EstadoJogando  # noqa: E402
 from cobrinha.jogo import Jogo  # noqa: E402
@@ -70,10 +72,33 @@ def pilotar(partida: Partida) -> None:
     alvos = [partida.comida]
     if partida.fruta_dourada:
         alvos.insert(0, partida.fruta_dourada.posicao)
+    if partida.power_up:
+        alvos.insert(0, partida.power_up.posicao)
     for alvo in alvos:
         if alvo is not None and (direcao := proximo_passo(partida, alvo)):
             partida.virar(direcao)
             return
+
+
+def celula_livre_perto(partida: Partida) -> Posicao:
+    """Célula livre a alguns passos da cabeça, para o item aparecer logo no GIF."""
+    cabeca = partida.cobra.cabeca
+    ocupadas = {partida.comida}
+    if partida.fruta_dourada:
+        ocupadas.add(partida.fruta_dourada.posicao)
+    if partida.power_up:
+        ocupadas.add(partida.power_up.posicao)
+    return next(
+        p
+        for p in (
+            Posicao(cabeca.coluna + dx, cabeca.linha + dy)
+            for dx, dy in ((4, 3), (-4, 3), (4, -3), (-4, -3), (3, 4), (-3, -4))
+        )
+        if partida.grade.contem(p)
+        and p not in partida.cobra
+        and p not in partida.obstaculos
+        and p not in ocupadas
+    )
 
 
 class Gravador:
@@ -132,20 +157,12 @@ def main() -> None:
 
     gravador.rodar(4.0, jogar)
     # Uma fruta dourada perto da cabeça, para aparecer no GIF.
-    cabeca = partida.cobra.cabeca
-    livre = next(
-        p
-        for p in (
-            Posicao(cabeca.coluna + dx, cabeca.linha + dy)
-            for dx, dy in ((4, 3), (-4, 3), (4, -3), (-4, -3))
-        )
-        if partida.grade.contem(p)
-        and p not in partida.cobra
-        and p not in partida.obstaculos
-        and p != partida.comida
-    )
-    partida.fruta_dourada = FrutaDourada(livre)
-    gravador.rodar(5.0, jogar)
+    partida.fruta_dourada = FrutaDourada(celula_livre_perto(partida))
+    gravador.rodar(4.0, jogar)
+    # Power-ups da V3: câmera lenta (campo azulado) e, depois, pontos em dobro.
+    for tipo, segundos in ((TipoPowerUp.CAMERA_LENTA, 4.0), (TipoPowerUp.PONTOS_EM_DOBRO, 3.5)):
+        partida.power_up = PowerUpNoCampo(tipo, celula_livre_perto(partida))
+        gravador.rodar(segundos, jogar)
 
     # Final: o piloto "se distrai" e segue reto até bater.
     while partida.em_andamento:

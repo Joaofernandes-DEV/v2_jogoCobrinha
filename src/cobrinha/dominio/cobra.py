@@ -113,6 +113,20 @@ class Cobra:
         self.segmentos.appendleft(nova_cabeca)
         self._ocupadas.add(nova_cabeca)
 
+    def encolher(self, quantidade: int, minimo: int = 1) -> int:
+        """Tira até `quantidade` segmentos da cauda, sem deixar a cobra menor que `minimo`.
+
+        Crescimento ainda pendente é cancelado primeiro. Devolve quantos foram tirados.
+        """
+        tirados = 0
+        while tirados < quantidade and self.tamanho_final > minimo:
+            if self._crescimento_pendente:
+                self._crescimento_pendente -= 1
+            else:
+                self._ocupadas.discard(self.segmentos.pop())
+            tirados += 1
+        return tirados
+
     def crescer(self, quantidade: int = 1) -> None:
         """A cobra ganha `quantidade` segmentos nos próximos passos (a cauda para)."""
         self._crescimento_pendente += quantidade

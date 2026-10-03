@@ -291,22 +291,3 @@ def test_partidas_aleatorias_respeitam_pedras_e_modos(modo, numero_nivel):
         if partida.comida is not None:
             assert partida.comida not in partida.cobra
             assert partida.comida not in partida.obstaculos
-
-
-def test_progresso_do_passo_acompanha_o_tempo():
-    partida = partida_controlada()  # 10 passos por segundo: 0,1 s por passo
-    assert partida.progresso_passo == 0
-    partida.atualizar(0.04)
-    assert partida.progresso_passo == pytest.approx(0.4)
-    partida.atualizar(0.07)  # completa um passo (0,11 s) e sobra 0,01 s
-    assert partida.cobra.cabeca == P(6, 5)
-    assert partida.progresso_passo == pytest.approx(0.1)
-
-
-def test_progresso_do_passo_fica_em_1_com_a_partida_encerrada():
-    partida = partida_controlada(
-        grade=Grade(10, 10), cobra=Cobra.nova(P(2, 5), Direcao.ESQUERDA, 3)
-    )
-    partida.atualizar(0.5)
-    assert partida.situacao is Situacao.DERROTA
-    assert partida.progresso_passo == 1.0

@@ -8,15 +8,19 @@ from enum import Enum, auto
 
 from cobrinha.config import (
     CHANCE_FRUTA_DOURADA,
+    CHANCE_POWER_UP,
     DURACAO_FRUTA_DOURADA,
+    FATOR_CAMERA_LENTA,
     MAX_PASSOS_POR_QUADRO,
     PONTOS_FRUTA_DOURADA,
+    SEGMENTOS_ENCOLHER,
     TAMANHO_INICIAL_COBRA,
 )
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.comida import sortear_posicao_livre
 from cobrinha.dominio.grade import GRADE_PADRAO, Direcao, Grade, Posicao
 from cobrinha.dominio.niveis import NIVEIS, Nivel, proximo_nivel
+from cobrinha.dominio.power_ups import PowerUpNoCampo, TipoPowerUp
 
 
 class Modo(Enum):
@@ -39,6 +43,7 @@ class Evento(Enum):
     MOVEU = auto()
     COMEU = auto()
     COMEU_DOURADA = auto()
+    PEGOU_POWER_UP = auto()
     CONCLUIU_NIVEL = auto()
     BATEU = auto()
     VENCEU = auto()
@@ -74,6 +79,9 @@ class Partida:
             )
         self.cobra = cobra
         self.fruta_dourada: FrutaDourada | None = None
+        self.power_up: PowerUpNoCampo | None = None
+        # Efeitos com duração em andamento → segundos restantes (V3).
+        self.efeitos_ativos: dict[TipoPowerUp, float] = {}
         self.comida: Posicao | None = None
         self.comida = comida if comida is not None else self._sortear_celula_livre()
         # Pontos acumulados na campanha; comidas contam só neste nível.
@@ -88,10 +96,20 @@ class Partida:
 
     @property
     def passos_por_segundo(self) -> float:
-        """Velocidade atual: a do nível mais a aceleração por comida (J9)."""
-        return self.nivel.passos_por_segundo + self.nivel.aceleracao_por_comida * (
+        """Velocidade atual: a do nível mais a aceleração por comida (J9).
+
+        Com a câmera lenta ativa (V3), a velocidade cai pelo `FATOR_CAMERA_LENTA`.
+        """
+        velocidade = self.nivel.passos_por_segundo + self.nivel.aceleracao_por_comida * (
             self.comidas_no_nivel
         )
+        if TipoPowerUp.CAMERA_LENTA in self.efeitos_ativos:
+            velocidade *= FATOR_CAMERA_LENTA
+        return velocidade
+
+    @property
+    def multiplicador_pontos(self) -> int:
+        return 2 if TipoPowerUp.PONTOS_EM_DOBRO in self.efeitos_ativos else 1
 
     @property
     def intervalo_passo(self) -> float:
@@ -123,6 +141,7 @@ class Partida:
         if not self.em_andamento:
             return []
         self._envelhecer_fruta_dourada(dt)
+        self._envelhecer_power_ups(dt)
         limite = self.intervalo_passo * MAX_PASSOS_POR_QUADRO
         self._tempo_acumulado = min(self._tempo_acumulado + dt, limite)
         eventos = []
@@ -149,6 +168,8 @@ class Partida:
         self.cobra.avancar(nova_cabeca)
         if self.fruta_dourada and nova_cabeca == self.fruta_dourada.posicao:
             return self._comer_fruta_dourada()
+        if self.power_up and nova_cabeca == self.power_up.posicao:
+            return self._pegar_power_up(self.power_up.tipo)
         if nova_cabeca != self.comida:
             return Evento.MOVEU
         return self._comer()
@@ -163,7 +184,7 @@ class Partida:
         )
 
     def _comer(self) -> Evento:
-        self.pontos += 1
+        self.pontos += self.multiplicador_pontos
         self.comidas_no_nivel += 1
         self.cobra.crescer()
 
@@ -177,6 +198,7 @@ class Partida:
             self.situacao = Situacao.NIVEL_CONCLUIDO
             self.comida = None
             self.fruta_dourada = None
+            self.power_up = None
             return Evento.CONCLUIU_NIVEL
 
         self.comida = self._sortear_celula_livre()
@@ -186,16 +208,41 @@ class Partida:
             posicao = self._sortear_celula_livre()
             if posicao is not None:
                 self.fruta_dourada = FrutaDourada(posicao)
+        if self.power_up is None and self.rng.random() < CHANCE_POWER_UP:
+            tipo = self.rng.choice(list(TipoPowerUp))
+            posicao = self._sortear_celula_livre()
+            if posicao is not None:
+                self.power_up = PowerUpNoCampo(tipo, posicao)
         return Evento.COMEU
 
     def _comer_fruta_dourada(self) -> Evento:
         # Vale mais pontos, mas não conta para a meta do nível.
-        self.pontos += PONTOS_FRUTA_DOURADA
+        self.pontos += PONTOS_FRUTA_DOURADA * self.multiplicador_pontos
         self.cobra.crescer()
         self.fruta_dourada = None
         if self.cobra.tamanho_final >= self.celulas_livres_no_campo:
             return self._vencer()
         return Evento.COMEU_DOURADA
+
+    def _pegar_power_up(self, tipo: TipoPowerUp) -> Evento:
+        """Não dá pontos nem faz crescer: só aplica o efeito."""
+        self.power_up = None
+        if tipo is TipoPowerUp.ENCOLHER:
+            self.cobra.encolher(SEGMENTOS_ENCOLHER, minimo=TAMANHO_INICIAL_COBRA)
+        else:
+            # Pegar de novo um efeito ativo renova a duração, sem somar.
+            self.efeitos_ativos[tipo] = tipo.duracao
+        return Evento.PEGOU_POWER_UP
+
+    def _envelhecer_power_ups(self, dt: float) -> None:
+        if self.power_up is not None:
+            self.power_up.tempo_restante -= dt
+            if self.power_up.tempo_restante <= 0:
+                self.power_up = None
+        for tipo in list(self.efeitos_ativos):
+            self.efeitos_ativos[tipo] -= dt
+            if self.efeitos_ativos[tipo] <= 0:
+                del self.efeitos_ativos[tipo]
 
     def _envelhecer_fruta_dourada(self, dt: float) -> None:
         if self.fruta_dourada is None:
@@ -205,16 +252,19 @@ class Partida:
             self.fruta_dourada = None
 
     def _sortear_celula_livre(self) -> Posicao | None:
-        """Célula sem cobra, pedra, comida nem fruta dourada."""
+        """Célula sem cobra, pedra, comida, fruta dourada nem power-up."""
         ocupadas = set(self.cobra.segmentos) | self.obstaculos
         if self.comida is not None:
             ocupadas.add(self.comida)
         if self.fruta_dourada is not None:
             ocupadas.add(self.fruta_dourada.posicao)
+        if self.power_up is not None:
+            ocupadas.add(self.power_up.posicao)
         return sortear_posicao_livre(self.grade, ocupadas, self.rng)
 
     def _vencer(self) -> Evento:
         self.situacao = Situacao.VITORIA
         self.comida = None
         self.fruta_dourada = None
+        self.power_up = None
         return Evento.VENCEU

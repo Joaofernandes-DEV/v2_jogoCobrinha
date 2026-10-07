@@ -4,7 +4,7 @@ Antes de entrar nos conceitos, vale conhecer o objeto de estudo e a sua históri
 
 ::: figura linha-do-tempo
 Linha do tempo do projeto, da V1 à release v3.1.0
-Fonte: elaborada pelo autor (2026), com base no `LOG.md` e nos *pull requests* do repositório.
+Fonte: elaborada pelos autores (2026), com base no `LOG.md` e nos *pull requests* do repositório.
 :::
 
 ## A V1 (2025): o protótipo da disciplina
@@ -41,13 +41,13 @@ A V2 também trouxe som sintetizado por código, recordes salvos em disco, três
 
 ::: figura captura-menu
 Menu principal do jogo, com título e cobra decorativa desenhados com os próprios sprites
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 65%
 :::
 
 ## A V3: power-ups, uma tentativa revertida e o modo Contra o tempo
 
-A V3 começou na mesma noite. O primeiro item do backlog foi o **movimento interpolado**: em vez de pular de célula em célula, cada segmento da cobra deslizaria entre as células ao longo do intervalo de cada passo (*pull request* 2). Onze minutos depois entraram os **power-ups** (câmera lenta, pontos em dobro e encolher; *pull request* 3). Às 23:07, depois de jogar com o movimento suave, o autor decidiu voltar ao movimento discreto, e a remoção foi feita como um *pull request* próprio (4), para que o histórico registrasse a tentativa e a volta. Esse episódio é o estudo de caso do capítulo 11.
+A V3 começou na mesma noite. O primeiro item do backlog foi o **movimento interpolado**: em vez de pular de célula em célula, cada segmento da cobra deslizaria entre as células ao longo do intervalo de cada passo (*pull request* 2). Onze minutos depois entraram os **power-ups** (câmera lenta, pontos em dobro e encolher; *pull request* 3). Às 23:07, depois de jogar com o movimento suave, João Vitor decidiu voltar ao movimento discreto, e a remoção foi feita como um *pull request* próprio (4), para que o histórico registrasse a tentativa e a volta. Esse episódio é o estudo de caso do capítulo 11.
 
 A release v3.0.0 saiu em 3 de outubro, e a v3.1.0, no mesmo dia, trouxe o modo **Contra o tempo**, implementado pelo colaborador João Pedro Sinhorini Silva: um relógio de 60 s em que cada maçã devolve segundos (*pull request* 8). O patch chegou sobre a v2.0.0 e foi integrado à V3 resolvendo conflitos com os power-ups, como descreve o diário de bordo.
 
@@ -57,7 +57,7 @@ A @fig:diagrama-arquitetura mostra como o código está dividido. A separação 
 
 ::: figura diagrama-arquitetura
 Arquitetura do Jogo da Cobrinha: módulos que dependem do pygame e o domínio puro
-Fonte: elaborada pelo autor (2026), com base na estrutura de `src/cobrinha/`.
+Fonte: elaborada pelos autores (2026), com base na estrutura de `src/cobrinha/`.
 :::
 
 Cada tela do jogo (menu, contagem, partida, pausa, fim de partida, recordes, opções, créditos) é uma subclasse de `Estado`, cujo contrato aparece no @cod:estado-base. O laço principal chama esses três métodos a cada quadro, e é essa regularidade que permite tratar todas as telas da mesma forma no pipeline de desenho (capítulo 6).

@@ -48,7 +48,7 @@ A @fig:diagrama-coordenadas ilustra a conversão para a célula (4, 3), que vai 
 
 ::: figura diagrama-coordenadas
 Coordenadas de tela do jogo: origem no canto superior esquerdo, HUD de 50 px e a conversão da célula (4, 3) para o pixel (100, 125)
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`.
+Fonte: elaborada pelos autores (2026).
 :::
 
 Como toda a conversão está em uma função, mover o HUD para baixo, ou acrescentar uma borda em volta do campo, exige mudar uma única linha. É também por isso que o fundo do campo é desenhado numa superfície própria, com origem no topo do campo (sem o HUD), e copiado para a janela na posição (0, 50) (capítulo 6).

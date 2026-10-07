@@ -20,7 +20,7 @@ O deslocamento vertical é sen(4*t*), uma oscilação suave entre −1 e 1 com p
 
 ::: figura grafico-animacoes
 Funções de animação do jogo: (a) flutuação dos itens; (b) pisca-pisca dos itens que vão sumir; (c) opacidade dos textos flutuantes
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`, com as constantes de `ui/pecas.py` e `ui/efeitos.py`.
+Fonte: elaborada pelos autores (2026), com as constantes de `ui/pecas.py` e `ui/efeitos.py`.
 :::
 
 ## Piscar
@@ -39,7 +39,7 @@ O segundo uso é a animação de morte. Ao bater, a cobra pisca durante 0,9 s, c
 
 ::: figura captura-fim
 Tela de fim de partida, empilhada sobre o campo congelado depois da animação de morte
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 65%
 :::
 
@@ -51,7 +51,7 @@ Ao comer, um texto como "+1" sobe 30 px e desaparece em 0,8 s (@cod:texto-flutua
 
 ## Estudo de caso: o movimento interpolado
 
-A decisão D1 do briefing estabeleceu que a cobra se moveria célula a célula, "fiel ao clássico e à pixel art", e deixou o movimento suave para a V3. O primeiro trabalho da V3, em 2 de outubro de 2026, às 22:44, foi exatamente esse (*pull request* 2). Às 23:07, o autor decidiu desfazê-lo (*pull request* 4). O episódio, bem documentado no diário de bordo e no histórico do Git, é um bom exemplo de decisão de projeto em CG.
+A decisão D1 do briefing estabeleceu que a cobra se moveria célula a célula, "fiel ao clássico e à pixel art", e deixou o movimento suave para a V3. O primeiro trabalho da V3, em 2 de outubro de 2026, às 22:44, foi exatamente esse (*pull request* 2). Às 23:07, João Vitor decidiu desfazê-lo (*pull request* 4). O episódio, bem documentado no diário de bordo e no histórico do Git, é um bom exemplo de decisão de projeto em CG.
 
 ### A técnica
 
@@ -75,7 +75,7 @@ O diário de bordo registra a consequência principal já na entrada que introdu
 
 ::: figura grafico-interpolacao
 Posição da cabeça na lógica (degraus) e no desenho interpolado (rampas): o desenho fica até uma célula atrás
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`, a 8 passos por segundo.
+Fonte: elaborada pelos autores (2026), a 8 passos por segundo.
 :::
 
 A 8 passos por segundo, esse atraso chega a 125 ms. Num jogo em que o jogador reage ao que vê, a diferença entre o que está na tela e o que vale para as regras não é só estética: a cobra pode bater num obstáculo que, na tela, ainda parece estar a meia célula de distância.
@@ -86,7 +86,7 @@ Os registros de 2 de outubro de 2026 permitem montar o quadro de prós e contras
 
 ::: quadro #interpolacao
 Prós e contras do movimento interpolado, segundo o diário de bordo
-Fonte: elaborado pelo autor (2026) com base no `LOG.md` (entradas de 2 de outubro de 2026, 22:44 e 23:07).
+Fonte: elaborado pelos autores (2026) com base no `LOG.md` (entradas de 2 de outubro de 2026, 22:44 e 23:07).
 | A favor | Contra |
 |---|---|
 | Movimento contínuo, sem "pulos" de célula em célula | O desenho fica até um passo atrás da lógica: a comida some antes de a cabeça chegar |
@@ -95,7 +95,7 @@ Fonte: elaborado pelo autor (2026) com base no `LOG.md` (entradas de 2 de outubr
 | — | Afasta-se do estilo escolhido: o clássico e a pixel art são discretos (decisão D1) |
 :::
 
-A decisão final, registrada às 23:07, foi de design: o autor testou o movimento suave e preferiu o discreto, "fiel ao clássico e à pixel art". A remoção foi feita depois do merge dos *pull requests* 1 a 3, "para o histórico registrar a tentativa e a volta", e o número de testes voltou de 222 para 213.
+A decisão final, registrada às 23:07, foi de design: João Vitor testou o movimento suave e preferiu o discreto, "fiel ao clássico e à pixel art". A remoção foi feita depois do merge dos *pull requests* 1 a 3, "para o histórico registrar a tentativa e a volta", e o número de testes voltou de 222 para 213.
 
 ### Lições do caso
 

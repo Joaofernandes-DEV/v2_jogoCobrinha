@@ -16,7 +16,7 @@ O HUD recebe um objeto `DadosHud`, montado pela tela de jogo a partir da partida
 
 ::: figura captura-contra-o-tempo
 Modo Contra o tempo: no centro do HUD, o relógio em vermelho, abaixo de 10 segundos, no lugar da barra de progresso
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 72%
 :::
 
@@ -34,7 +34,7 @@ Três decisões do código de texto são de CG:
 Texto sem suavização, com cache e medida do excesso acima da fonte
 :::
 
-Um teste do projeto vai além: ele lê o código das telas, extrai todos os textos exibidos e confere se cada caractere gera pixels na fonte. O teste nasceu de um problema encontrado nas capturas da Fase 4: as setas "← →" informavam métricas, mas o glifo era vazio, e apareciam em branco na tela. O mesmo problema reapareceu na produção deste ebook, nos fluxogramas desenhados com a VT323, e foi resolvido da mesma forma: o gerador de figuras troca os símbolos sem desenho e falha se sobrar algum (`docs/ebook/figuras.py`, função `preparar`).
+Um teste do projeto vai além: ele lê o código das telas, extrai todos os textos exibidos e confere se cada caractere gera pixels na fonte. O teste nasceu de um problema encontrado nas capturas da Fase 4: as setas "← →" informavam métricas, mas o glifo era vazio, e apareciam em branco na tela.
 
 ## Telas de transição
 
@@ -42,7 +42,7 @@ A contagem 3-2-1 antes de cada nível (@fig:captura-contagem) é um exemplo de c
 
 ::: figura captura-contagem
 Contagem antes do nível 2, empilhada sobre a partida, com o véu escuro e o nome da fase
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 65%
 :::
 
@@ -68,12 +68,12 @@ A função `nota` usa a afinação temperada: cada semitom multiplica a frequên
 
 ::: figura grafico-ondas
 Dez milissegundos das ondas quadrada e triangular a 440 Hz, com envelope e amostras a 22 050 Hz
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`, reproduzindo as fórmulas de `ferramentas/gerar_sons.py`.
+Fonte: elaborada pelos autores (2026), reproduzindo as fórmulas de `ferramentas/gerar_sons.py`.
 :::
 
 ### Volume medido, e não suposto
 
-O diário de bordo registra um episódio instrutivo. Depois da Fase 3, o autor relatou que o áudio "não estava funcionando". O diagnóstico mostrou que o som tocava, mas baixo: a normalização do gerador só **reduzia** o volume quando o pico passava de 0,9, nunca aumentava, e, somada aos volumes padrão conservadores, deixava os sons cerca de 10 dB abaixo do ideal. A correção normaliza todos os sons para um pico de 0,89 (−1 dBFS), com intensidade relativa por som, e a lição ficou registrada: "mudanças de áudio são conferidas também pelo pico que chega ao Windows". É o equivalente sonoro de conferir as capturas de tela em vez de supor que o desenho está certo.
+O diário de bordo registra um episódio instrutivo. Depois da Fase 3, João Vitor relatou que o áudio "não estava funcionando". O diagnóstico mostrou que o som tocava, mas baixo: a normalização do gerador só **reduzia** o volume quando o pico passava de 0,9, nunca aumentava, e, somada aos volumes padrão conservadores, deixava os sons cerca de 10 dB abaixo do ideal. A correção normaliza todos os sons para um pico de 0,89 (−1 dBFS), com intensidade relativa por som, e a lição ficou registrada: "mudanças de áudio são conferidas também pelo pico que chega ao Windows". É o equivalente sonoro de conferir as capturas de tela em vez de supor que o desenho está certo.
 
 ### Som ligado aos eventos
 

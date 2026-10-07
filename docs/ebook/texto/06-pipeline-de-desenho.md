@@ -52,7 +52,7 @@ A economia cresce com o número de pedras. No nível 3, "Labirinto" (@fig:captur
 
 ::: figura captura-labirinto
 Nível 3, "Labirinto": as pedras fazem parte do fundo pré-renderizado
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 65%
 :::
 
@@ -64,14 +64,14 @@ O pipeline não termina na tela de jogo. A pausa, a contagem 3-2-1, a tela de n�
 
 ::: figura fluxo-estados
 Telas do jogo e as transições entre elas; em lilás, as telas empilhadas sobre a partida
-Fonte: elaborada pelo autor (2026) com base em `src/cobrinha/estados/navegacao.py`.
+Fonte: elaborada pelos autores (2026) com base em `src/cobrinha/estados/navegacao.py`.
 :::
 
 Na hora de desenhar, `Jogo._desenhar` (@cod:desenhar, no capítulo 3) percorre a pilha **de baixo para cima**. Só a tela do topo recebe eventos e é atualizada, mas todas são pintadas. É o algoritmo do pintor aplicado a telas inteiras: a partida é pintada primeiro e a pausa, por último, como mostra a @fig:captura-pausa.
 
 ::: figura captura-pausa
 Tela de pausa empilhada sobre a partida congelada: o véu escuro deixa o campo visível ao fundo
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 65%
 :::
 
@@ -87,7 +87,7 @@ A @fig:fluxo-pipeline-quadro junta tudo: o fluxograma à esquerda segue a ordem 
 
 ::: figura fluxo-pipeline-quadro
 Pipeline de desenho de um quadro durante a pausa: etapas (à esquerda) e camadas (à direita)
-Fonte: elaborada pelo autor (2026) com base em `jogo.py`, `estados/jogando.py` e `estados/pausa.py`.
+Fonte: elaborada pelos autores (2026) com base em `jogo.py`, `estados/jogando.py` e `estados/pausa.py`.
 :::
 
 ## Redesenhar tudo a cada quadro?

@@ -19,7 +19,7 @@ Cada volta tem quatro etapas, que a @fig:fluxo-laco-principal mostra como fluxog
 
 ::: figura fluxo-laco-principal
 Fluxograma do laço principal: eventos, atualização, desenho e `flip()`
-Fonte: elaborada pelo autor (2026) com base em `src/cobrinha/jogo.py`.
+Fonte: elaborada pelos autores (2026) com base em `src/cobrinha/jogo.py`.
 :::
 
 Dois detalhes do código corrigem diretamente bugs da V1. O bloco `try ... finally` garante que `pygame.quit()` seja chamado em um único ponto, depois que o laço termina, por qualquer motivo (B1 e B5). E o `clock.tick` vale para todas as telas, inclusive os menus, que na V1 rodavam em laços próprios sem limite de quadros e ocupavam 100% de um núcleo da CPU enquanto o jogador lia as opções (item D2 do briefing).
@@ -42,7 +42,7 @@ O intervalo de um passo é o inverso da velocidade da cobra, `1 / passos_por_seg
 
 ::: figura grafico-acumulador
 Valor do acumulador ao longo de 0,6 s, com quadros a 60 FPS e passos a cada 0,125 s
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`, simulando a regra do @cod:atualizar-partida.
+Fonte: elaborada pelos autores (2026), simulando a regra do @cod:atualizar-partida.
 :::
 
 Note que o acumulador às vezes passa um pouco do intervalo antes de o passo acontecer (por exemplo, 8 × 1/60 ≈ 0,133 s), porque o tempo só é verificado uma vez por quadro. O excesso não se perde: ele fica no acumulador e antecipa o passo seguinte. Em média, a cobra anda exatamente 8 células por segundo, qualquer que seja a taxa de quadros.
@@ -51,7 +51,7 @@ A @fig:fluxo-passo-fixo mostra o método inteiro como fluxograma, incluindo o en
 
 ::: figura fluxo-passo-fixo
 Fluxograma do passo de tempo fixo em `Partida.atualizar`
-Fonte: elaborada pelo autor (2026) com base em `src/cobrinha/dominio/partida.py`.
+Fonte: elaborada pelos autores (2026) com base em `src/cobrinha/dominio/partida.py`.
 :::
 
 ## O teto de passos e a "espiral da morte"
@@ -72,7 +72,7 @@ A câmera lenta, por exemplo, multiplica a velocidade por 0,5: o intervalo dobra
 
 ## Passo fixo e testes
 
-Um efeito colateral valioso do passo fixo é a **reprodutibilidade**. Fiedler (2004) observa que ele permite repetir exatamente a mesma simulação de uma execução para outra. Os testes do projeto exploram isso: em `tests/test_partida.py`, partidas inteiras são simuladas chamando `atualizar` com valores de `dt` escolhidos pelo teste, sem janela e sem esperar o tempo real passar, e o gerador de números aleatórios recebe uma semente fixa. O GIF de demonstração do README e as capturas deste ebook são gerados da mesma forma: o jogo roda "de verdade", mas o tempo é controlado pelo script.
+Um efeito colateral valioso do passo fixo é a **reprodutibilidade**. Fiedler (2004) observa que ele permite repetir exatamente a mesma simulação de uma execução para outra. Os testes do projeto exploram isso: em `tests/test_partida.py`, partidas inteiras são simuladas chamando `atualizar` com valores de `dt` escolhidos pelo teste, sem janela e sem esperar o tempo real passar, e o gerador de números aleatórios recebe uma semente fixa. O GIF de demonstração do README é gravado da mesma forma: o jogo roda "de verdade", mas o tempo é controlado pelo script de gravação.
 
 <div class="caixa" markdown="1">
 <p class="titulo-caixa">Para ir além</p>

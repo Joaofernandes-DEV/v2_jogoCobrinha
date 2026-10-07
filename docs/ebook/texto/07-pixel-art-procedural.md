@@ -10,7 +10,7 @@ A paleta do jogo tem 16 cores, definidas na classe `Paleta` do `config.py` e usa
 
 ::: figura paleta
 A paleta de 16 cores do jogo (classe `Paleta`, em `config.py`), com os valores RGB
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`, a partir de `src/cobrinha/config.py`.
+Fonte: elaborada pelos autores (2026), a partir de `src/cobrinha/config.py`.
 largura: 80%
 :::
 
@@ -18,7 +18,7 @@ A @fig:sprites-ampliados mostra todos os sprites gerados, ampliados oito vezes c
 
 ::: figura sprites-ampliados
 Os dez sprites do jogo (25 × 25 px), ampliados 8 vezes pelo vizinho mais próximo
-Fonte: elaborada pelo autor (2026) a partir dos PNGs gerados por `ferramentas/gerar_sprites.py`.
+Fonte: elaborada pelos autores (2026) a partir dos PNGs gerados por `ferramentas/gerar_sprites.py`.
 :::
 
 ## Formas descritas por funções
@@ -49,7 +49,7 @@ A distância *d* ao centro, menos a borda de 4 px, vira a **profundidade** do pi
 
 ::: figura curva-distancia
 Sprite da curva ampliado 24 vezes, com os círculos de raio 4 (vermelho) e 21 (azul) centrados no canto inferior esquerdo
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`, a partir de `corpo_curva.png`.
+Fonte: elaborada pelos autores (2026), a partir de `corpo_curva.png`.
 largura: 72%
 :::
 

@@ -49,7 +49,7 @@ A @fig:rotacoes mostra a cabeça e a curva nas quatro rotações, produzidas pel
 
 ::: figura rotacoes
 Cabeça e curva giradas por `pygame.transform.rotate` em 0°, 90°, 180° e 270°
-Fonte: elaborada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: elaborada pelos autores (2026).
 largura: 72%
 :::
 
@@ -72,10 +72,10 @@ A @fig:escala-vizinho-bilinear compara os dois métodos na maçã do jogo, ampli
 
 ::: figura escala-vizinho-bilinear
 A maçã do jogo ampliada 16 vezes pelo vizinho mais próximo e por interpolação bilinear
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`.
+Fonte: elaborada pelos autores (2026).
 :::
 
-Para pixel art, a escolha é o vizinho mais próximo. O projeto o usa em vários lugares: nas figuras deste ebook, na redução das capturas do GIF de demonstração (`ferramentas/gravar_demo.py`, linha 116) e na geração do ícone do executável a partir da maçã (`ferramentas/empacotar.py`).
+Para pixel art, a escolha é o vizinho mais próximo. O projeto o usa em vários lugares: na redução das capturas do GIF de demonstração (`ferramentas/gravar_demo.py`, linha 116) e na geração do ícone do executável a partir da maçã (`ferramentas/empacotar.py`).
 
 ## Tela cheia sem borrar
 

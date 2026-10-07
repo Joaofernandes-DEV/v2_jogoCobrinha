@@ -51,7 +51,7 @@ A @fig:quantizacao mostra um trecho de uma captura real quantizado para 48, 8 e 
 
 ::: figura quantizacao
 Trecho de uma captura do jogo quantizado pelo corte pela mediana para 48, 8 e 4 cores (sem pontilhado)
-Fonte: elaborada pelo autor (2026) com `docs/ebook/capturas.py` e a biblioteca Pillow.
+Fonte: elaborada pelos autores (2026), com a biblioteca Pillow.
 largura: 72%
 :::
 

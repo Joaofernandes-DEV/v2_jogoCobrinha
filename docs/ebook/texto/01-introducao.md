@@ -8,8 +8,7 @@ Este ebook usa um projeto real, o Jogo da Cobrinha desenvolvido para a disciplin
 
 O objetivo é que o leitor consiga, ao final, ligar a teoria clássica de CG (raster, sistemas de coordenadas, transformações, cor, composição alfa, animação e recorte) a decisões concretas de implementação, e entender por que cada decisão foi tomada. O público-alvo são estudantes de graduação em computação que já conhecem o básico de Python; nenhum conhecimento prévio de pygame é necessário.
 
-O texto foi escrito para ser lido com o código aberto ao lado. Os trechos citados estão no repositório público do projeto (<https://github.com/Joaofernandes-DEV/v2_jogoCobrinha>), e todas as figuras deste ebook foram geradas por scripts versionados junto com ele, inclusive as capturas de tela, que são produzidas rodando o próprio jogo sem janela (Apêndice B).
-
+O texto foi escrito para ser lido com o código aberto ao lado. Os trechos citados estão no repositório público do projeto (<https://github.com/Joaofernandes-DEV/v2_jogoCobrinha>), e as capturas de tela mostram o jogo em funcionamento.
 
 ## O que é Computação Gráfica
 
@@ -35,7 +34,9 @@ O jogo foi escrito em Python 3.11 com a biblioteca pygame-ce (*pygame Community 
 
 O capítulo 2 conta a história do projeto, da V1 feita em grupo em 2025 até a versão 3.1.0, e apresenta a arquitetura do código. Os capítulos 3 a 13 tratam, cada um, de um conceito: gráficos raster e buffer duplo (3), sistemas de coordenadas (4), laço de jogo e passo de tempo fixo (5), o pipeline de desenho 2D (6), pixel art gerada por código (7), transformações geométricas (8), cor e quantização (9), transparência e composição (10), animação, com o estudo de caso do movimento interpolado que foi revertido (11), colisão, recorte e envolvimento de bordas (12) e interface e som (13). O capítulo 14 traz as considerações finais.
 
-Ao final estão as referências, um glossário, o Apêndice A, com exercícios do tipo "experimente você mesmo" organizados por capítulo, e o Apêndice B, que explica como regenerar este ebook, suas figuras e as capturas de tela.
+Ao final estão as referências, um glossário e o Apêndice A, com exercícios do tipo "experimente você mesmo" organizados por capítulo.
+
+A apresentação segue as normas da ABNT para trabalhos acadêmicos (Associação Brasileira de Normas Técnicas, 2024), as citações seguem a NBR 10520 (Associação Brasileira de Normas Técnicas, 2023), no sistema autor-data, e as referências seguem a NBR 6023 (Associação Brasileira de Normas Técnicas, 2018).
 
 <div class="caixa" markdown="1">
 <p class="titulo-caixa">Convenções</p>

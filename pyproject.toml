@@ -17,6 +17,8 @@ dependencies = ["pygame-ce>=2.5,<3"]
 dev = ["pytest>=8", "ruff>=0.6"]
 # Gerar o executável (PyInstaller) e o GIF de demonstração (Pillow).
 ferramentas = ["pyinstaller>=6", "pillow>=10"]
+# Gerar o ebook didático em PDF (docs/ebook/): Markdown e figuras.
+ebook = ["markdown>=3.5", "pillow>=10"]
 
 [project.gui-scripts]
 cobrinha = "cobrinha.__main__:main"

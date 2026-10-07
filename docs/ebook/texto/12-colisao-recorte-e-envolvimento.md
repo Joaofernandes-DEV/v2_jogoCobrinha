@@ -12,7 +12,7 @@ Essa separação tem três consequências práticas, todas visíveis no projeto:
 
 - **Testabilidade**: a maior parte dos 240 testes roda sem janela. `tests/test_partida.py` simula partidas aleatórias de 500 passos e confere invariantes a cada passo; `tests/test_niveis.py` usa uma busca em largura para provar que nenhum mapa de pedras tem área fechada.
 - **Experimentação segura**: o movimento interpolado (capítulo 11) foi implementado e removido mexendo quase só na interface.
-- **Reuso**: o piloto automático que grava o GIF de demonstração e as capturas deste ebook joga com o mesmo modelo, sem duplicar regras.
+- **Reuso**: o piloto automático que grava o GIF de demonstração joga com o mesmo modelo, sem duplicar regras.
 
 ## Detecção de colisão
 
@@ -38,7 +38,7 @@ Um passo da partida: movimento, colisão e itens (`Partida.passo`)
 
 ::: figura fluxo-passo-partida
 Fluxograma de um passo da partida: mover, colidir, comer, pegar power-up, vencer ou concluir o nível
-Fonte: elaborada pelo autor (2026) com base em `src/cobrinha/dominio/partida.py`.
+Fonte: elaborada pelos autores (2026) com base em `src/cobrinha/dominio/partida.py`.
 :::
 
 Três observações ajudam a ler o código.
@@ -81,14 +81,14 @@ O operador `%` (resto da divisão) do Python devolve sempre um valor entre 0 e o
 
 ::: figura diagrama-envolvimento
 Envolvimento de bordas numa grade de 10 × 6: a cabeça em (9, 2) indo para a direita aparece em (0, 2)
-Fonte: elaborada pelo autor (2026) com `docs/ebook/figuras.py`.
+Fonte: elaborada pelos autores (2026).
 :::
 
 O desenho também precisa saber do envolvimento. Para escolher a peça e a rotação de cada segmento (capítulo 8), `classificar_pecas` calcula a direção entre segmentos vizinhos, e dois vizinhos em lados opostos do campo estão, numericamente, a 31 colunas de distância. A função `direcao_entre` (`ui/pecas.py`, linhas 68 a 80) trata esse salto como um passo no sentido contrário, e a cobra é desenhada corretamente atravessando a borda, como mostra a @fig:captura-sem-bordas.
 
 ::: figura captura-sem-bordas
 Modo Sem bordas: a cobra atravessa a borda direita e continua pela esquerda do campo
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 72%
 :::
 

@@ -26,8 +26,8 @@ Os exercícios abaixo usam o próprio repositório do jogo. Para prepará-lo, si
 
 ## Capítulos 9 e 10: cor e composição
 
-11. Abra `docs/ebook/figuras/captura-jogando.png` com a Pillow e quantize-a para 16 cores com e sem pontilhado (`dither`). Compare os resultados com uma lupa.
-12. Calcule a cor de um pixel da grama escura (124, 178, 66) sob o véu azul da câmera lenta e confira com a captura `captura-camera-lenta.png`, no pixel (35, 70).
+11. Tire uma captura de tela do jogo durante uma partida, abra-a com a Pillow e quantize-a para 16 cores com e sem pontilhado (`dither`). Compare os resultados com uma lupa.
+12. Calcule a cor de um pixel da grama escura (124, 178, 66) sob o véu azul da câmera lenta e confira o resultado com uma captura de tela do jogo com a câmera lenta ativa.
 13. Mude `OPACIDADE_VEU_LENTO` em `src/cobrinha/estados/jogando.py` para 120. O efeito fica mais claro? O campo continua legível?
 
 ## Capítulo 11: animação

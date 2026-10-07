@@ -4,7 +4,7 @@ Este ebook percorreu os conceitos centrais da Computação Gráfica 2D usando co
 
 ::: quadro #resumo-conceitos
 Conceitos de Computação Gráfica e onde aparecem no Jogo da Cobrinha
-Fonte: elaborado pelo autor (2026).
+Fonte: elaborado pelos autores (2026).
 | Conceito | Onde aparece no jogo | Capítulo |
 |---|---|---|
 | Raster, framebuffer e buffer duplo | `pygame.Surface`, `Jogo._desenhar` e `display.flip()` | 3 |
@@ -22,11 +22,11 @@ Fonte: elaborado pelo autor (2026).
 
 Três ideias atravessam todos os capítulos.
 
-A primeira é a **separação entre modelo e imagem**. O jogo nunca guarda a posição da cobra em pixels, e as regras nunca dependem de como algo é desenhado. Essa separação, proposta no briefing da V2 como resposta direta aos bugs da V1, é o que permitiu testar o jogo sem janela, gerar as capturas deste ebook com um piloto automático e experimentar o movimento interpolado sem risco para as regras.
+A primeira é a **separação entre modelo e imagem**. O jogo nunca guarda a posição da cobra em pixels, e as regras nunca dependem de como algo é desenhado. Essa separação, proposta no briefing da V2 como resposta direta aos bugs da V1, é o que permitiu testar o jogo sem janela, gravar o GIF de demonstração com um piloto automático e experimentar o movimento interpolado sem risco para as regras.
 
 A segunda é **fazer o trabalho uma vez**. O fundo é pré-renderizado, as rotações das peças são calculadas ao criar a tela, as imagens são convertidas para o formato da tela ao carregar, e os textos ficam em cache. Em todos os casos, a técnica é trocar um pouco de memória por tempo de quadro, uma das trocas mais comuns da CG interativa.
 
-A terceira é **gerar por código**. Sprites, sons, o GIF de demonstração, as capturas e as figuras deste ebook são produzidos por scripts versionados no repositório. Isso torna o resultado reproduzível e transforma cada asset em documentação de como ele foi feito, o que é especialmente valioso num trabalho acadêmico: quem quiser entender um sprite pode ler a função que o desenha.
+A terceira é **gerar por código**. Sprites, sons e o GIF de demonstração são produzidos por scripts versionados no repositório. Isso torna o resultado reproduzível e transforma cada asset em documentação de como ele foi feito, o que é especialmente valioso num trabalho acadêmico: quem quiser entender um sprite pode ler a função que o desenha.
 
 O estudo de caso do movimento interpolado mostrou, por fim, que conhecer a teoria não substitui o julgamento de projeto. A interpolação é uma técnica correta e bem fundamentada na literatura, e foi bem implementada; mesmo assim, para um Snake a 8 passos por segundo, com pixel art e jogabilidade discreta, o atraso visual e a perda de estilo pesaram mais. O diário de bordo, ao registrar a tentativa e a volta, transformou uma reversão em aprendizado.
 

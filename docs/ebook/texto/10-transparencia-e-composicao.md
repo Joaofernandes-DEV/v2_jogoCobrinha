@@ -28,7 +28,7 @@ A captura da @fig:captura-camera-lenta, gerada rodando o jogo, tem exatamente a 
 
 ::: figura captura-camera-lenta
 Câmera lenta e pontos em dobro ativos: o véu azul sobre o campo e os efeitos escritos no HUD
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 72%
 :::
 
@@ -45,7 +45,7 @@ O jogo usa os dois, e a @fig:composicao-alfa mostra o mesmo trecho do campo sob 
 
 ::: figura composicao-alfa
 O mesmo trecho do campo sem camada, sob o véu azul (α = 40), sob o véu da pausa (α = 170) e sob o fade no meio da transição (α = 128)
-Fonte: elaborada pelo autor (2026) com `docs/ebook/capturas.py`, usando as funções e constantes do jogo.
+Fonte: elaborada pelos autores (2026), usando as funções e constantes do jogo.
 :::
 
 ### Véus escuros das telas empilhadas

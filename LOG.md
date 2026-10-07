@@ -441,3 +441,39 @@ Modelo:
 **Motivo / observações:**
 - O João pediu o `Cobrinha.exe` atualizado em *Assets*. A v3.1.0 traz o modo Contra o tempo do colaborador João Pedro (PR #8), além dos power-ups da v3.0.0.
 - O teste automático não exercita o áudio nem a janela real. Vale abrir o executável num PC sem Python e jogar uma partida no modo Contra o tempo.
+
+### 2026-10-07 20:59 — Ebook didático de Computação Gráfica (PDF, ABNT)
+
+**Feito:**
+- Novo ebook em `docs/ebook/`: *Computação Gráfica na prática: o Jogo da Cobrinha em Python com pygame-ce*, em PDF (101 páginas, das quais cerca de 78 de texto), para colegas e professor da disciplina, no formato ABNT completo (NBR 14724:2024, 10520:2023 e 6023:2018). Sumário aprovado pelo João antes da escrita.
+- 14 capítulos: introdução e história da CG; a evolução da V1 à V3; gráficos raster e buffer duplo; sistemas de coordenadas; laço de jogo e passo fixo; pipeline de desenho 2D; pixel art gerada por código; transformações geométricas; cor e quantização (median cut); transparência e composição alfa (Porter e Duff); animação, com o estudo de caso do movimento interpolado revertido; colisão, recorte e envolvimento de bordas; interface e som; considerações finais. Mais resumo, *abstract*, listas, glossário, exercícios (Apêndice A) e como gerar o ebook (Apêndice B).
+- 25 referências, todas conferidas na web (editora, DOI ou documentação oficial) antes de citar; o que não deu para confirmar ficou de fora ou com data provável, como manda a NBR 6023.
+- 29 figuras geradas por código: 5 fluxogramas pedidos (laço principal, passo fixo com acumulador, pilha de telas, passo da partida e pipeline do quadro), diagramas, gráficos, sprites ampliados pelo vizinho mais próximo e 9 capturas reais do jogo rodando sem janela (driver `dummy`).
+- `gerar_ebook.py`: os trechos de código saem dos arquivos reais (ou de um commit, com `git show`) com os números de linha verdadeiros; seções, figuras, quadros e códigos são numerados sozinhos; o PDF é impresso pelo Edge/Chrome sem janela, e o sumário e as listas ganham as páginas lendo o *outline* do próprio PDF (segunda passada).
+- Novo extra `[ebook]` no `pyproject.toml` (markdown e Pillow) e `tests/test_ebook.py` (4 testes, só biblioteca padrão): rótulos únicos, referências cruzadas válidas, toda figura gerada é citada e todo intervalo de código existe. Testes de 240 para **244**.
+- README: o ebook entrou em "Documentos do projeto"; `docs/ebook/README.md` documenta o comando e a sintaxe dos textos.
+
+**Arquivos:** `docs/ebook/` (novo: `README.md`, `figuras.py`, `capturas.py`, `gerar_ebook.py`, `estilo.css`, `metadados.toml`, `texto/*.md`, `figuras/*.png`, `ebook-computacao-grafica-cobrinha.pdf`), `tests/test_ebook.py` (novo), `pyproject.toml`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Pedido do João: material didático que explique os conceitos de CG com embasamento em fontes confiáveis e mostre onde cada um aparece no código.
+- **Achados ao escrever:** o `pygame.SCALED` usa vizinho mais próximo porque o pygame-ce 2.5.8 define a dica `SDL_HINT_RENDER_SCALE_QUALITY` como `nearest` (`src_c/display.c`), com escala inteira em janela e "pixels desiguais" em tela cheia. As capturas confirmam o operador *over*: a grama (142, 196, 78) sob o véu azul α 40 vira (130, 183, 94), e sob o véu da pausa logo depois, (57, 72, 48).
+- **Tropeços na geração:** a VT323 não tem setas, `α` nem `⌊⌋`; o gerador de figuras troca esses símbolos e falha se sobrar algum sem desenho. O Edge, no Windows, devolve o controle antes de terminar o PDF, então o script espera o arquivo ficar completo. O *outline* do Chromium tira o espaço nas quebras de linha dos títulos, então a comparação é feita sem espaços.
+- As figuras foram regeneradas e saíram idênticas (mesmo MD5). Nenhum sprite, som ou código do jogo mudou.
+- **Para o João conferir:** o nome do(a) professor(a) fica vazio em `metadados.toml` (a linha some da folha de rosto) e a cidade da capa está como Osasco; ajuste se a sua unidade da UNIP for outra.
+
+### 2026-10-07 21:32 — Ebook: autores, professora, cidade e sem o Apêndice B
+
+**Feito** (pedido do João, revisando o PR do ebook):
+- **Autores:** João Pedro Sinhorini Silva, que ajudou na produção da V2, entrou como coautor do ebook, ao lado de João Vitor Teixeira Fernandes, na capa e na folha de rosto. As fontes das figuras passaram de "elaborada pelo autor" para "elaborada pelos autores".
+- **Folha de rosto:** "Professora: Stephany Oliveira".
+- **Local:** Osasco → São Paulo.
+- **Apêndice B removido** ("Como este ebook foi gerado"), e o texto deixou de dizer que o ebook, as figuras ou as capturas foram gerados por código. Saíram as menções a `docs/ebook/figuras.py` e `capturas.py` nas fontes das figuras e as frases na introdução, nos capítulos 5, 8, 12, 13 e 14, no Apêndice A, no resumo e no *abstract*. As normas da ABNT, antes citadas só no Apêndice B, agora são citadas na introdução.
+- O PDF foi regenerado: 99 páginas.
+
+**Arquivos:** `docs/ebook/metadados.toml`, `docs/ebook/gerar_ebook.py`, `docs/ebook/texto/*.md` (`apendice-b-como-gerar.md` removido), `docs/ebook/ebook-computacao-grafica-cobrinha.pdf`, `LOG.md`.
+
+**Motivo / observações:**
+- `metadados.toml` agora aceita uma lista de autores (`autores`) e o rótulo do professor (`rotulo_professor`).
+- Os scripts e o `docs/ebook/README.md` continuam documentando como regenerar o PDF, para quem mantém o repositório; isso só não aparece mais no texto do ebook.
+- Nos capítulos, "o autor" que se referia às decisões da V2 e da V3 virou "João Vitor", para não confundir com a autoria do ebook.

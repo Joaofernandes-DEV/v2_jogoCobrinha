@@ -1,0 +1,12 @@
+# Dados da capa e da folha de rosto (ABNT NBR 14724:2024).
+instituicao = "Universidade Paulista – UNIP"
+curso = "Ciência da Computação"
+autores = ["João Vitor Teixeira Fernandes", "João Pedro Sinhorini Silva"]
+titulo = "Computação Gráfica na prática"
+subtitulo = "o Jogo da Cobrinha em Python com pygame-ce"
+natureza = "Ebook didático apresentado à disciplina de Computação Gráfica do curso de Ciência da Computação da Universidade Paulista – UNIP, sobre os conceitos de computação gráfica aplicados no projeto Jogo da Cobrinha."
+# Professor(a) da disciplina; vazio = a linha não aparece na folha de rosto.
+professor = "Stephany Oliveira"
+rotulo_professor = "Professora"
+local = "São Paulo"
+ano = 2026

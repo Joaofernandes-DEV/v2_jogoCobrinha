@@ -22,7 +22,7 @@ A @fig:captura-jogando é um quadro real do jogo, exatamente como ele fica na me
 
 ::: figura captura-jogando
 Um quadro do jogo (nível 2): HUD, pedras, maçã, maçã dourada, power-up de câmera lenta e o texto "+1" logo depois de comer
-Fonte: captura gerada pelo autor (2026) com `docs/ebook/capturas.py`.
+Fonte: captura de tela do jogo, elaborada pelos autores (2026).
 largura: 72%
 :::
 

@@ -461,3 +461,19 @@ Modelo:
 - **Tropeços na geração:** a VT323 não tem setas, `α` nem `⌊⌋`; o gerador de figuras troca esses símbolos e falha se sobrar algum sem desenho. O Edge, no Windows, devolve o controle antes de terminar o PDF, então o script espera o arquivo ficar completo. O *outline* do Chromium tira o espaço nas quebras de linha dos títulos, então a comparação é feita sem espaços.
 - As figuras foram regeneradas e saíram idênticas (mesmo MD5). Nenhum sprite, som ou código do jogo mudou.
 - **Para o João conferir:** o nome do(a) professor(a) fica vazio em `metadados.toml` (a linha some da folha de rosto) e a cidade da capa está como Osasco; ajuste se a sua unidade da UNIP for outra.
+
+### 2026-10-07 21:32 — Ebook: autores, professora, cidade e sem o Apêndice B
+
+**Feito** (pedido do João, revisando o PR do ebook):
+- **Autores:** João Pedro Sinhorini Silva, que ajudou na produção da V2, entrou como coautor do ebook, ao lado de João Vitor Teixeira Fernandes, na capa e na folha de rosto. As fontes das figuras passaram de "elaborada pelo autor" para "elaborada pelos autores".
+- **Folha de rosto:** "Professora: Stephany Oliveira".
+- **Local:** Osasco → São Paulo.
+- **Apêndice B removido** ("Como este ebook foi gerado"), e o texto deixou de dizer que o ebook, as figuras ou as capturas foram gerados por código. Saíram as menções a `docs/ebook/figuras.py` e `capturas.py` nas fontes das figuras e as frases na introdução, nos capítulos 5, 8, 12, 13 e 14, no Apêndice A, no resumo e no *abstract*. As normas da ABNT, antes citadas só no Apêndice B, agora são citadas na introdução.
+- O PDF foi regenerado: 99 páginas.
+
+**Arquivos:** `docs/ebook/metadados.toml`, `docs/ebook/gerar_ebook.py`, `docs/ebook/texto/*.md` (`apendice-b-como-gerar.md` removido), `docs/ebook/ebook-computacao-grafica-cobrinha.pdf`, `LOG.md`.
+
+**Motivo / observações:**
+- `metadados.toml` agora aceita uma lista de autores (`autores`) e o rótulo do professor (`rotulo_professor`).
+- Os scripts e o `docs/ebook/README.md` continuam documentando como regenerar o PDF, para quem mantém o repositório; isso só não aparece mais no texto do ebook.
+- Nos capítulos, "o autor" que se referia às decisões da V2 e da V3 virou "João Vitor", para não confundir com a autoria do ebook.

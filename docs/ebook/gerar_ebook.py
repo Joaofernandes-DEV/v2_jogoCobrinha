@@ -165,11 +165,11 @@ def expandir_blocos(livro: Livro, texto: str) -> str:
         livro.legendas.append(legenda)
         if tipo == "figura":
             miolo = _html_figura(nome, legenda, largura)
-            fonte = fonte_linhas[0] if fonte_linhas else "Fonte: elaborada pelo autor (2026)."
+            fonte = fonte_linhas[0] if fonte_linhas else "Fonte: elaborada pelos autores (2026)."
         elif tipo == "quadro":
             tabela = "\n".join(resto[1:])
             miolo = markdown.markdown(tabela, extensions=["tables"])
-            fonte = fonte_linhas[0] if fonte_linhas else "Fonte: elaborado pelo autor (2026)."
+            fonte = fonte_linhas[0] if fonte_linhas else "Fonte: elaborado pelos autores (2026)."
         else:
             caminho, intervalo = [p for p in cabecalho if not p.startswith("#")]
             miolo, fonte_padrao = _html_codigo(caminho, intervalo)
@@ -355,7 +355,7 @@ def capa(meta: dict) -> str:
     return f"""
 <section class="capa">
   <p class="instituicao">{meta["instituicao"]}<br>{meta["curso"]}</p>
-  <p class="autor">{meta["autor"]}</p>
+  <p class="autor">{"<br>".join(meta["autores"])}</p>
   <div class="titulo-capa">
     <p class="titulo">{meta["titulo"]}:</p>
     <p class="subtitulo">{meta["subtitulo"]}</p>
@@ -366,10 +366,11 @@ def capa(meta: dict) -> str:
 
 def folha_de_rosto(meta: dict) -> str:
     professor = meta.get("professor")
-    orientador = f'<p class="orientador">Professor(a): {professor}</p>' if professor else ""
+    rotulo = meta.get("rotulo_professor", "Professor(a)")
+    orientador = f'<p class="orientador">{rotulo}: {professor}</p>' if professor else ""
     return f"""
 <section class="folha-de-rosto">
-  <p class="autor">{meta["autor"]}</p>
+  <p class="autor">{"<br>".join(meta["autores"])}</p>
   <div class="titulo-capa">
     <p class="titulo">{meta["titulo"]}:</p>
     <p class="subtitulo">{meta["subtitulo"]}</p>
@@ -443,7 +444,7 @@ def montar_html(livro: Livro) -> str:
 <head>
 <meta charset="utf-8">
 <title>{meta["titulo"]}: {meta["subtitulo"]}</title>
-<meta name="author" content="{meta["autor"]}">
+<meta name="author" content="{"; ".join(meta["autores"])}">
 <style>{estilo}</style>
 </head>
 <body>

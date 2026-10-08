@@ -5,6 +5,8 @@
                                  │
                                  ├─ meta do nível ──► Nível concluído ─► Contagem (próximo nível)
                                  └─ bateu/venceu ───► Fim de partida ──► Contagem | Menu
+    Menu ──Duelo──► Contagem ─► Duelo ──Esc/P/perdeu foco──► Pausa ─► Contagem ─► Duelo
+                                 └─ sobrou 1 (ou nenhum) ─► Fim do duelo ──► Contagem | Menu
 
 As telas importam este módulo, e ele importa as telas dentro das funções.
 Isso evita importações circulares e deixa o fluxo inteiro num lugar só.
@@ -21,6 +23,8 @@ from cobrinha.dominio.niveis import obter_nivel
 from cobrinha.dominio.partida import Partida, Situacao
 
 if TYPE_CHECKING:
+    from cobrinha.estados.base import EstadoDePartida
+    from cobrinha.estados.duelo import EstadoDuelo
     from cobrinha.estados.jogando import EstadoJogando
     from cobrinha.jogo import Jogo
 
@@ -66,13 +70,13 @@ def concluir_nivel(jogo: Jogo, numero_liberado: int) -> None:
     jogo.salvar()
 
 
-def pausar(jogo: Jogo, jogando: EstadoJogando) -> None:
+def pausar(jogo: Jogo, jogando: EstadoDePartida) -> None:
     from cobrinha.estados.pausa import EstadoPausa
 
     jogo.empilhar(EstadoPausa(jogo, jogando))
 
 
-def retomar(jogo: Jogo, jogando: EstadoJogando) -> None:
+def retomar(jogo: Jogo, jogando: EstadoDePartida) -> None:
     """Fecha a pausa e volta ao jogo com contagem 3-2-1 (J10)."""
     from cobrinha.estados.contagem import EstadoContagem
 
@@ -105,6 +109,30 @@ def abandonar_partida(jogo: Jogo, jogando: EstadoJogando) -> None:
     """Sai de uma partida inacabada pelo menu, sem perder os pontos para o ranking."""
     registrar_resultado(jogo, jogando.partida)
     abrir_menu(jogo)
+
+
+def iniciar_duelo(jogo: Jogo, numero_nivel: int = 1) -> None:
+    """Começa um duelo no mapa e na velocidade do nível escolhido. Não entra nos recordes."""
+    from cobrinha.estados.contagem import EstadoContagem
+    from cobrinha.estados.duelo import DICA_DOS_CONTROLES, EstadoDuelo
+
+    duelo = EstadoDuelo(jogo, numero_nivel)
+    jogo.trocar_estado(duelo)
+    jogo.empilhar(
+        EstadoContagem(
+            jogo,
+            duelo,
+            titulo="DUELO",
+            subtitulo=duelo.partida.nivel.nome,
+            dica=DICA_DOS_CONTROLES,
+        )
+    )
+
+
+def encerrar_duelo(jogo: Jogo, duelo: EstadoDuelo) -> None:
+    from cobrinha.estados.fim_do_duelo import EstadoFimDoDuelo
+
+    jogo.empilhar(EstadoFimDoDuelo(jogo, duelo))
 
 
 def _comecar_partida(jogo: Jogo, partida: Partida, nivel_inicial: int) -> None:

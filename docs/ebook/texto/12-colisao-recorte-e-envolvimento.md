@@ -32,7 +32,7 @@ O detalhe da linha 87 é uma regra fina do Snake: a célula da cauda é segura q
 
 O método `Partida.passo` junta todas as regras de colisão e consumo de itens (@cod:passo). A @fig:fluxo-passo-partida mostra o mesmo método como fluxograma, incluindo as regras de `_comer`.
 
-::: codigo #passo src/cobrinha/dominio/partida.py 161-183
+::: codigo #passo 270f2fc:src/cobrinha/dominio/partida.py 161-183
 Um passo da partida: movimento, colisão e itens (`Partida.passo`)
 :::
 

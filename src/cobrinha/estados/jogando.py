@@ -10,12 +10,14 @@ from cobrinha.config import (
     PONTOS_FRUTA_DOURADA,
     SEGMENTOS_ENCOLHER,
     TAMANHO_CELULA,
+    TEMPO_ALERTA,
     TEMPO_POR_COMIDA,
     TEMPO_POR_FRUTA_DOURADA,
     Cor,
     Paleta,
     TamanhoFonte,
 )
+from cobrinha.controle import Vibracao
 from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.dominio.partida import Evento, Partida, Situacao
 from cobrinha.dominio.power_ups import TipoPowerUp
@@ -49,6 +51,17 @@ SOM_DO_EVENTO = {
     Evento.BATEU: Som.BATER,
     Evento.VENCEU: Som.VITORIA,
     Evento.TEMPO_ESGOTADO: Som.NIVEL,
+}
+
+# Vibração do controle (V3) em cada acontecimento da partida.
+VIBRACAO_DO_EVENTO = {
+    Evento.COMEU: Vibracao.FRACA,
+    Evento.COMEU_DOURADA: Vibracao.MEDIA,
+    Evento.PEGOU_POWER_UP: Vibracao.MEDIA,
+    Evento.CONCLUIU_NIVEL: Vibracao.MEDIA,
+    Evento.VENCEU: Vibracao.MEDIA,
+    Evento.BATEU: Vibracao.FORTE,
+    Evento.TEMPO_ESGOTADO: Vibracao.FORTE,
 }
 
 # Power-ups (V3): rótulo curto no HUD e texto que sobe ao pegar.
@@ -119,6 +132,8 @@ class EstadoJogando(Estado):
                 self.jogo.audio.parar_musica()
             if evento in SOM_DO_EVENTO:
                 self.jogo.audio.tocar(SOM_DO_EVENTO[evento])
+            if evento in VIBRACAO_DO_EVENTO:
+                self.jogo.controles.vibrar(VIBRACAO_DO_EVENTO[evento])
             if evento is Evento.COMEU_DOURADA and dourada_antes:
                 pontos = PONTOS_FRUTA_DOURADA * multiplicador
                 self._pontos_flutuantes(
@@ -155,6 +170,21 @@ class EstadoJogando(Estado):
         x, y = celula_para_pixel(posicao)
         meio = TAMANHO_CELULA // 2
         self.efeitos.texto_flutuante(conteudo, cor, (x + meio, y + meio))
+
+    @property
+    def cor_do_controle(self) -> Cor:
+        """Luz do controle: vermelha ao bater ou com o relógio acabando; azul na câmera
+        lenta; amarela com pontos em dobro; verde no resto da partida."""
+        partida = self.partida
+        if partida.situacao is Situacao.DERROTA:
+            return Paleta.VERMELHO
+        if partida.tempo_restante is not None and partida.tempo_restante <= TEMPO_ALERTA:
+            return Paleta.VERMELHO
+        if TipoPowerUp.CAMERA_LENTA in partida.efeitos_ativos:
+            return Paleta.AZUL
+        if TipoPowerUp.PONTOS_EM_DOBRO in partida.efeitos_ativos:
+            return Paleta.AMARELO
+        return Paleta.VERDE
 
     @property
     def cobra_visivel(self) -> bool:

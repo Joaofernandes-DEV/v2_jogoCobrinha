@@ -491,3 +491,24 @@ Modelo:
 - Pedido do João: um anúncio em motion design, sem narração, feito em outra sessão. O roteiro fica versionado para a sessão nova ler direto.
 - O prompt manda não usar `creditos.png` da V1 nem nomes do grupo da V1, que fez o projeto em grupo.
 - Nenhum código, sprite ou som mudou. `ruff check`, `ruff format --check` e `pytest` passaram (244 testes).
+
+### 2026-10-08 16:48 — Controle de PS5 (DualSense), com vibração e luz
+
+**Feito:**
+- **Novo módulo `src/cobrinha/controle.py`:** o jogo passa a aceitar controle de videogame pelo SDL (DualSense do PS5, por USB ou Bluetooth, e outros que o Windows reconhece). Os botões viram "teclas virtuais", eventos `KEYDOWN` marcados com `controle=True`, num único ponto (`Jogo._processar_eventos`). Por isso todas as telas funcionam com o controle sem tratar nada de novo.
+  - Direcional → setas; ✕ → Enter; ◯ → Esc; Options → `P`; Create → `M`.
+  - O analógico esquerdo funciona como direcional, com zona morta (55% para valer e volta abaixo de 30% para valer de novo), para não repetir nem virar a cobra sem querer.
+  - O controle pode ser conectado antes ou depois de abrir o jogo. Se ele desconectar no meio da partida, o jogo pausa (gera o mesmo evento de quando a janela perde o foco).
+  - No menu principal, o ◯ não fecha o jogo; o Esc do teclado continua fechando.
+- **Vibração** (`Vibracao` FRACA, MEDIA e FORTE): fraca ao comer, média na maçã dourada, nos power-ups e ao concluir o nível ou vencer, e forte ao bater ou quando o tempo do Contra o tempo acaba.
+- **Luz do controle:** cada tela informa a cor em `Estado.cor_do_controle` (verde-claro por padrão). Na partida: verde jogando, azul na câmera lenta, amarela com pontos em dobro e vermelha ao bater ou com o relógio do Contra o tempo no alerta (≤ 10 s). A luz só é reenviada ao controle quando a cor muda.
+- `Jogo._atualizar_quadro(dt)`: a atualização de cada quadro saiu do laço principal para um método próprio, que também acende a luz da tela do topo.
+- README: seção "Controle de PS5 (DualSense)" com a tabela de botões, a vibração e a luz, e o novo módulo na estrutura.
+- Testes de 244 para **270**. O novo `tests/test_controle.py` usa um controle falso e cobre os botões, o analógico com zona morta e sem repetição, a conexão e a desconexão, a vibração, a luz e a integração com menu, pausa, mudo e partida.
+
+**Arquivos:** `src/cobrinha/controle.py` (novo), `src/cobrinha/jogo.py`, `src/cobrinha/estados/base.py`, `src/cobrinha/estados/menu_principal.py`, `src/cobrinha/estados/jogando.py`, `tests/test_controle.py` (novo), `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Ideia do João para a V3: jogar com o controle do PS5. Não precisou de dependência nova: o pygame-ce 2.5.8 (SDL 2.32) já reconhece o DualSense e oferece vibração (`rumble`) e luz (`set_led`).
+- **Teste real:** o João testou com o DualSense e funcionou tudo: direcional, analógico, botões, vibração e luz.
+- **Executável:** gerado localmente com `ferramentas/empacotar.py`, passou no teste de fumaça (confirma que o módulo `pygame._sdl2.controller` entra no `.exe`).

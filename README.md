@@ -69,6 +69,23 @@ python -m cobrinha
 
 O jogo também pausa sozinho quando a janela perde o foco.
 
+#### Controle de PS5 (DualSense)
+
+Conecte o controle por cabo USB ou Bluetooth, antes ou depois de abrir o jogo. Outros controles reconhecidos pelo Windows (como o do Xbox) também funcionam, com os botões nas mesmas posições.
+
+| Controle | Ação |
+|----------|------|
+| Direcional ou analógico esquerdo | Mover a cobra; navegar nos menus |
+| ✕ | Confirmar; pular a contagem 3-2-1 |
+| ◯ | Voltar; pausar durante a partida |
+| Options | Pausar / continuar |
+| Create | Ligar / desligar o som |
+
+- **Vibração:** curta ao comer, média na maçã dourada, nos power-ups e ao concluir o nível, e forte ao bater ou quando o tempo acaba.
+- **Luz do controle:** verde jogando, azul na câmera lenta, amarela com pontos em dobro e vermelha ao bater ou quando o relógio do Contra o tempo está acabando.
+- Se o controle desconectar no meio da partida, o jogo pausa.
+- No menu principal, o ◯ não fecha o jogo (para sair, use a opção SAIR).
+
 ### Como jogar
 
 Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os pontos se acumulam entre os níveis, e zerar o nível 3 (ou encher o campo) vence o jogo.
@@ -134,6 +151,7 @@ src/cobrinha/
 ├── jogo.py          # loop principal e pilha de estados (telas)
 ├── recursos.py      # carregamento único de fontes e imagens
 ├── audio.py         # efeitos, música e mudo
+├── controle.py      # controle de videogame: botões viram teclas, vibração e luz
 ├── assets/          # fonte, sprites (PNG) e sons (WAV)
 ├── dominio/         # regras puras, sem pygame (testáveis)
 │   ├── grade.py     #   Posicao, Direcao e Grade

@@ -18,6 +18,7 @@ from cobrinha.config import (
     TITULO,
     Paleta,
 )
+from cobrinha.controle import Controles
 
 if TYPE_CHECKING:
     from cobrinha.estados.base import Estado
@@ -46,6 +47,8 @@ class Jogo:
         self.tela = pygame.display.set_mode((LARGURA_JANELA, ALTURA_JANELA), pygame.SCALED)
         self.relogio = pygame.time.Clock()
         self.audio = Audio()
+        # Controle de videogame (V3): os botões viram teclas; vibra e acende a luz.
+        self.controles = Controles()
         self.aplicar_opcoes()
         self.pilha: list[Estado] = []
         self.rodando = False
@@ -97,24 +100,38 @@ class Jogo:
                 self._processar_eventos()
                 if not self.rodando:
                     break
-                self.estado_atual.atualizar(dt)
-                self.opacidade_fade = max(0.0, self.opacidade_fade - dt / DURACAO_FADE)
+                self._atualizar_quadro(dt)
                 self._desenhar()
         finally:
             # Único ponto de encerramento do pygame (corrige B1 e B5 da V1).
+            self.controles.encerrar()
             pygame.quit()
 
+    def _atualizar_quadro(self, dt: float) -> None:
+        if self.estado_atual is None:
+            return
+        self.estado_atual.atualizar(dt)
+        if self.estado_atual is not None:
+            # A luz do controle acompanha a tela do topo (ex.: azul na câmera lenta).
+            self.controles.definir_luz(self.estado_atual.cor_do_controle)
+        self.opacidade_fade = max(0.0, self.opacidade_fade - dt / DURACAO_FADE)
+
     def _processar_eventos(self) -> None:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                self.sair()
-                return
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_m:
-                # M silencia/reativa o som em qualquer tela.
-                self.audio.alternar_mudo()
-                continue
-            if self.estado_atual is not None:
-                self.estado_atual.tratar_evento(evento)
+        for bruto in pygame.event.get():
+            # Botões do controle chegam aqui já convertidos em teclas.
+            for evento in self.controles.traduzir(bruto):
+                if evento.type == pygame.QUIT:
+                    self.sair()
+                    return
+                self._tratar_evento(evento)
+
+    def _tratar_evento(self, evento: pygame.Event) -> None:
+        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_m:
+            # M (ou Create no controle) silencia/reativa o som em qualquer tela.
+            self.audio.alternar_mudo()
+            return
+        if self.estado_atual is not None:
+            self.estado_atual.tratar_evento(evento)
 
     def _desenhar(self) -> None:
         self.tela.fill(Paleta.PRETO)

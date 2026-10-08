@@ -1,4 +1,5 @@
-"""Menu principal: jogar, nível inicial (entre os liberados), modo, recordes, opções e créditos."""
+"""Menu principal: jogar, duelo, nível inicial (entre os liberados), modo, recordes, opções e
+créditos."""
 
 from __future__ import annotations
 
@@ -56,6 +57,7 @@ class EstadoMenuPrincipal(Estado):
         self.menu = Menu(
             [
                 ItemMenu("JOGAR", acao=self._jogar),
+                ItemMenu("DUELO (2 JOGADORES)", acao=self._duelar),
                 ItemMenu(self._rotulo_nivel, acao=self._jogar, ajustar=self._mudar_nivel),
                 ItemMenu(self._rotulo_modo, acao=self._alternar_modo, ajustar=self._ajustar_modo),
                 ItemMenu("RECORDES", acao=lambda: navegacao.abrir_recordes(jogo)),
@@ -93,6 +95,10 @@ class EstadoMenuPrincipal(Estado):
     def _jogar(self) -> None:
         navegacao.iniciar_campanha(self.jogo, self.nivel_escolhido)
 
+    def _duelar(self) -> None:
+        # O nível escolhido define o mapa e a velocidade do duelo.
+        navegacao.iniciar_duelo(self.jogo, self.nivel_escolhido)
+
     def tratar_evento(self, evento: pygame.Event) -> None:
         if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
             # No controle, ◯ volta nas outras telas; aqui não pode fechar o jogo sem querer.
@@ -120,10 +126,11 @@ class EstadoMenuPrincipal(Estado):
                 ("COBRINHA", TamanhoFonte.ENORME, Paleta.VERDE_CLARO),
                 ("V2", TamanhoFonte.PEQUENO, Paleta.AMARELO),
             ],
-            topo=18,
+            topo=8,
             espaco=2,
         )
-        self.menu.desenhar(superficie, topo=y + 8, espaco=8)
+        # Espaço justo: com o DUELO são 8 itens, e o último não pode encostar na cobra.
+        self.menu.desenhar(superficie, topo=y + 8, espaco=6)
 
         rodape = []
         modo = self.jogo.opcoes.modo_de_jogo

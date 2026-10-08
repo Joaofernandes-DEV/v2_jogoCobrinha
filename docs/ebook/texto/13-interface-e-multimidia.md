@@ -8,7 +8,7 @@ Na V1, menus, créditos, tela de fim de jogo e transições eram imagens feitas 
 
 O @cod:hud mostra o começo do desenho do HUD: o fundo cinza-escuro, uma borda preta de 3 px separando-o do campo e os contadores de pontos e recorde. Os elementos seguintes dependem do estado da partida, como o modo de jogo, os power-ups ativos e o aviso de som desligado.
 
-::: codigo #hud src/cobrinha/ui/hud.py 45-63
+::: codigo #hud 270f2fc:src/cobrinha/ui/hud.py 45-63
 Desenho do HUD (`desenhar_hud`)
 :::
 

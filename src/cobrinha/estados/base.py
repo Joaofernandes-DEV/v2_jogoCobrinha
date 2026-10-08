@@ -34,3 +34,22 @@ class Estado(ABC):
     @abstractmethod
     def desenhar(self, superficie: pygame.Surface) -> None:
         """Desenha a tela inteira na superfície recebida."""
+
+
+class EstadoDePartida(Estado):
+    """Tela de uma partida em andamento (1 jogador ou duelo).
+
+    A pausa e a contagem ficam por cima dela e pedem a ela o que fazer ao reiniciar
+    ou sair, porque isso muda conforme o tipo de partida (ex.: só 1 jogador tem ranking).
+    """
+
+    @abstractmethod
+    def reiniciar(self) -> None:
+        """Recomeça do início (REINICIAR na pausa)."""
+
+    @abstractmethod
+    def abandonar(self) -> None:
+        """Volta ao menu principal no meio da partida."""
+
+    def antes_de_sair_do_jogo(self) -> None:  # noqa: B027 - opcional nas subclasses
+        """Guarda o que for preciso antes de o jogo fechar (SAIR DO JOGO na pausa)."""

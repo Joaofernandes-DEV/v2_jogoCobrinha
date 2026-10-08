@@ -7,11 +7,11 @@ import pytest
 
 from cobrinha import recursos
 from cobrinha.audio import Musica, Som
-from cobrinha.config import FREQUENCIA_AUDIO, TAMANHO_CELULA
+from cobrinha.config import FREQUENCIA_AUDIO, PELES, TAMANHO_CELULA, Paleta
 from cobrinha.ui.pecas import SPRITE_DO_POWER_UP, TipoPeca
 
 SPRITES = [
-    *(tipo.value for tipo in TipoPeca),
+    *(tipo.value + pele.sufixo for pele in PELES for tipo in TipoPeca),
     "comida",
     "comida_dourada",
     "parede",
@@ -25,6 +25,29 @@ def test_sprites_tem_25x25_com_transparencia(jogo, nome):
     sprite = recursos.imagem(nome)
     assert sprite.get_size() == (TAMANHO_CELULA, TAMANHO_CELULA)
     assert sprite.get_at((0, 0)).a == 0  # canto transparente
+
+
+@pytest.mark.parametrize("nome", SPRITES)
+def test_sprites_usam_so_cores_da_paleta(nome):
+    """Pixel art coesa: todo pixel é transparente ou uma das 16 cores da paleta."""
+    cores = {valor for nome_cor, valor in vars(Paleta).items() if nome_cor.isupper()}
+    imagem = pygame.image.load(recursos.PASTA_IMAGENS / f"{nome}.png")
+    largura, altura = imagem.get_size()
+    fora = {
+        tuple(pixel)[:3]
+        for x in range(largura)
+        for y in range(altura)
+        if (pixel := imagem.get_at((x, y))).a and tuple(pixel)[:3] not in cores
+    }
+    assert fora == set()
+
+
+def test_peles_das_cobras_sao_diferentes_entre_si():
+    assert len({pele.sufixo for pele in PELES}) == len(PELES)
+    assert len({pele.media for pele in PELES}) == len(PELES)
+    assert len({pele.destaque for pele in PELES}) == len(PELES)
+    imagens = {(recursos.PASTA_IMAGENS / f"cabeca{pele.sufixo}.png").read_bytes() for pele in PELES}
+    assert len(imagens) == len(PELES)
 
 
 @pytest.mark.parametrize(

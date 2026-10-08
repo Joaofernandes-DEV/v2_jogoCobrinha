@@ -1,7 +1,7 @@
 """Fluxo entre as telas: menu, contagem, jogo, pausa, nível concluído e fim de partida."""
 
 import pygame
-from auxiliares import desenhar_tudo, encerrar, enviar, jogo_em_andamento
+from auxiliares import descer_ate, desenhar_tudo, encerrar, enviar, jogo_em_andamento
 
 from cobrinha.dominio.partida import Situacao
 from cobrinha.estados import navegacao
@@ -28,7 +28,8 @@ def test_menu_jogar_abre_contagem_do_nivel_1(jogo):
 def test_menu_so_oferece_niveis_liberados(jogo):
     navegacao.abrir_menu(jogo)
     menu = jogo.estado_atual
-    enviar(jogo, pygame.K_DOWN, pygame.K_RIGHT)
+    descer_ate(jogo, "NÍVEL")
+    enviar(jogo, pygame.K_RIGHT)
     assert menu.nivel_escolhido == 1  # só o nível 1 está liberado
 
     jogo.progresso.liberar_nivel(3)
@@ -214,7 +215,8 @@ def test_creditos_abrem_pelo_menu_e_voltam(jogo):
     from cobrinha.estados.creditos import EstadoCreditos
 
     navegacao.abrir_menu(jogo)
-    enviar(jogo, *[pygame.K_DOWN] * 5, pygame.K_RETURN)
+    descer_ate(jogo, "CRÉDITOS")
+    enviar(jogo, pygame.K_RETURN)
     assert isinstance(jogo.estado_atual, EstadoCreditos)
     desenhar_tudo(jogo)
     enviar(jogo, pygame.K_ESCAPE)

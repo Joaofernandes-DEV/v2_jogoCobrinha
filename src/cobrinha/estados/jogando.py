@@ -22,7 +22,7 @@ from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.dominio.partida import Evento, Partida, Situacao
 from cobrinha.dominio.power_ups import TipoPowerUp
 from cobrinha.estados import navegacao
-from cobrinha.estados.base import Estado
+from cobrinha.estados.base import EstadoDePartida
 from cobrinha.jogo import Jogo
 from cobrinha.ui import texto
 from cobrinha.ui.campo import celula_para_pixel, criar_fundo_campo
@@ -83,7 +83,7 @@ DURACAO_MORTE_SEM_EFEITOS = 0.3
 PISCADAS_POR_SEGUNDO = 7
 
 
-class EstadoJogando(Estado):
+class EstadoJogando(EstadoDePartida):
     def __init__(self, jogo: Jogo, partida: Partida | None = None, nivel_inicial: int = 1) -> None:
         super().__init__(jogo)
         self.sprites = Sprites()
@@ -112,6 +112,17 @@ class EstadoJogando(Estado):
                 self.partida.virar(TECLAS_DIRECAO[evento.key])
             elif evento.key in TECLAS_PAUSA:
                 navegacao.pausar(self.jogo, self)
+
+    def reiniciar(self) -> None:
+        navegacao.registrar_resultado(self.jogo, self.partida)
+        navegacao.iniciar_campanha(self.jogo, self.nivel_inicial)
+
+    def abandonar(self) -> None:
+        navegacao.abandonar_partida(self.jogo, self)
+
+    def antes_de_sair_do_jogo(self) -> None:
+        # Sair pela pausa também conta para o ranking.
+        navegacao.registrar_resultado(self.jogo, self.partida)
 
     def atualizar(self, dt: float) -> None:
         self.tempo += dt

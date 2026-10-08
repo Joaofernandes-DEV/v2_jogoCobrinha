@@ -62,7 +62,7 @@ Fonte: elaborada pelos autores (2026), com base na estrutura de `src/cobrinha/`.
 
 Cada tela do jogo (menu, contagem, partida, pausa, fim de partida, recordes, opções, créditos) é uma subclasse de `Estado`, cujo contrato aparece no @cod:estado-base. O laço principal chama esses três métodos a cada quadro, e é essa regularidade que permite tratar todas as telas da mesma forma no pipeline de desenho (capítulo 6).
 
-::: codigo #estado-base src/cobrinha/estados/base.py 14-29
+::: codigo #estado-base 270f2fc:src/cobrinha/estados/base.py 14-29
 Contrato comum a todas as telas (`Estado`)
 :::
 

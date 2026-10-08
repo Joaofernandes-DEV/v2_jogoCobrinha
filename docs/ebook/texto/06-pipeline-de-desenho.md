@@ -16,7 +16,7 @@ A operação básica do pipeline 2D é o *blit* (de *bit block transfer*): copia
 
 O @cod:desenhar-jogando é o método que desenha a tela de jogo. Lido de cima para baixo, ele é a própria lista de camadas, da mais funda para a mais próxima.
 
-::: codigo #desenhar-jogando src/cobrinha/estados/jogando.py 183-203
+::: codigo #desenhar-jogando 270f2fc:src/cobrinha/estados/jogando.py 183-203
 Ordem de pintura da partida (`EstadoJogando.desenhar`)
 :::
 
@@ -32,7 +32,7 @@ A ordem tem consequências visíveis. A cobra é desenhada depois dos itens, ent
 
 A própria cobra também segue o algoritmo do pintor internamente. O @cod:desenhar-cobra percorre as peças da cauda para a cabeça, com `reversed`, para que a cabeça seja sempre a última a ser pintada.
 
-::: codigo #desenhar-cobra src/cobrinha/ui/pecas.py 130-133
+::: codigo #desenhar-cobra 270f2fc:src/cobrinha/ui/pecas.py 130-133
 Peças da cobra desenhadas da cauda para a cabeça
 :::
 
@@ -77,7 +77,7 @@ largura: 65%
 
 O @cod:desenhar-pausa mostra que a tela de pausa não precisa redesenhar nada da partida: ela só pinta um véu escuro semitransparente sobre o que já está no quadro e escreve o menu.
 
-::: codigo #desenhar-pausa src/cobrinha/estados/pausa.py 67-79
+::: codigo #desenhar-pausa 270f2fc:src/cobrinha/estados/pausa.py 67-79
 A pausa pinta só o véu e o menu (`EstadoPausa.desenhar`)
 :::
 

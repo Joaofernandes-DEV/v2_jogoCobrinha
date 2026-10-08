@@ -4,7 +4,7 @@ Toda medida em pixels deriva da grade (ver seção 8.2 do briefing):
 32 × 22 células de 25 px + faixa de HUD de 50 px = janela de 800 × 600.
 """
 
-from typing import Final
+from typing import Final, NamedTuple
 
 Cor = tuple[int, int, int]
 
@@ -60,6 +60,10 @@ TEMPO_ALERTA: Final = 10.0  # abaixo disso o relógio fica vermelho
 # Recordes (J6)
 TAMANHO_RANKING: Final = 5
 
+# Duelo (V3): de 2 a 4 cobras no mesmo campo; vence quem sobrar por último.
+MAXIMO_JOGADORES: Final = 4
+COMIDAS_NO_DUELO: Final = 2  # maçãs no campo ao mesmo tempo
+
 
 class TamanhoFonte:
     """Tamanhos da fonte pixel (VT323), escolhidos entre os que deixam os traços uniformes."""
@@ -92,3 +96,28 @@ class Paleta:
     MARROM: Final[Cor] = (110, 72, 46)
     AZUL: Final[Cor] = (64, 112, 178)
     AZUL_CLARO: Final[Cor] = (128, 182, 226)
+
+
+class PeleCobra(NamedTuple):
+    """Cores de uma cobra, todas da paleta. A verde é a original; as outras são do Duelo."""
+
+    nome: str  # mostrado na tela
+    sufixo: str  # dos PNGs: cabeca{sufixo}.png, corpo_reto{sufixo}.png...
+    escura: Cor  # faixa da borda e escamas
+    media: Cor  # corpo
+    clara: Cor  # listra do meio
+    destaque: Cor  # textos do HUD e luz do controle (legível sobre o HUD escuro)
+
+
+PELES: Final = (
+    PeleCobra(
+        "VERDE", "", Paleta.VERDE_ESCURO, Paleta.VERDE, Paleta.VERDE_CLARO, Paleta.VERDE_CLARO
+    ),
+    PeleCobra(
+        "AZUL", "_azul", Paleta.CINZA_ESCURO, Paleta.AZUL, Paleta.AZUL_CLARO, Paleta.AZUL_CLARO
+    ),
+    PeleCobra("AMARELA", "_amarela", Paleta.LARANJA, Paleta.AMARELO, Paleta.BRANCO, Paleta.AMARELO),
+    PeleCobra(
+        "VERMELHA", "_vermelha", Paleta.MARROM, Paleta.VERMELHO, Paleta.LARANJA, Paleta.VERMELHO
+    ),
+)

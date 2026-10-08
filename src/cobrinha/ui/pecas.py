@@ -2,6 +2,7 @@
 
 Cada segmento vira uma peça (cabeça, corpo reto, curva ou cauda) girada em
 múltiplos de 90°, a partir das 4 imagens-base geradas por ferramentas/gerar_sprites.py.
+Cada pele (cor) da cobra tem as próprias imagens-base; a verde é a padrão.
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ from enum import Enum
 import pygame
 
 from cobrinha import recursos
-from cobrinha.config import ALTURA_HUD, TAMANHO_CELULA
+from cobrinha.config import ALTURA_HUD, PELES, TAMANHO_CELULA, PeleCobra
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.dominio.power_ups import PowerUpNoCampo, TipoPowerUp
@@ -114,23 +115,34 @@ def classificar_pecas(segmentos: Sequence[Posicao], direcao: Direcao) -> list[Pe
 
 
 class Sprites:
-    """Todas as rotações das peças, preparadas uma vez (exige a janela aberta)."""
+    """Todas as rotações das peças, em todas as peles, preparadas uma vez (exige a janela)."""
 
     def __init__(self) -> None:
-        self._pecas = {
-            (tipo, angulo): pygame.transform.rotate(recursos.imagem(tipo.value), angulo)
-            for tipo in TipoPeca
-            for angulo in (0, 90, 180, 270)
+        # (tipo, ângulo) → peça girada, para cada pele; `_pecas` é a da cobra verde.
+        self._pecas_da_pele = {
+            pele: {
+                (tipo, angulo): pygame.transform.rotate(
+                    recursos.imagem(tipo.value + pele.sufixo), angulo
+                )
+                for tipo in TipoPeca
+                for angulo in (0, 90, 180, 270)
+            }
+            for pele in PELES
         }
+        self._pecas = self._pecas_da_pele[PELES[0]]
         self.comida = recursos.imagem("comida")
         self.comida_dourada = recursos.imagem("comida_dourada")
         self.parede = recursos.imagem("parede")
         self.power_ups = {tipo: recursos.imagem(SPRITE_DO_POWER_UP[tipo]) for tipo in TipoPowerUp}
 
-    def desenhar_cobra(self, superficie: pygame.Surface, cobra: Cobra) -> None:
+    def desenhar_cobra(
+        self, superficie: pygame.Surface, cobra: Cobra, pele: PeleCobra = PELES[0]
+    ) -> None:
         # Da cauda para a cabeça, para a cabeça ficar sempre por cima.
+        pecas = self._pecas_da_pele[pele]
         for peca in reversed(classificar_pecas(cobra.segmentos, cobra.direcao)):
-            superficie.blit(self._pecas[peca.tipo, peca.angulo], celula_para_pixel(peca.posicao))
+            imagem = pecas[peca.tipo, peca.angulo]
+            superficie.blit(imagem, celula_para_pixel(peca.posicao))
 
     def desenhar_comida(self, superficie: pygame.Surface, posicao: Posicao, tempo: float) -> None:
         self._desenhar_flutuando(superficie, self.comida, posicao, tempo)

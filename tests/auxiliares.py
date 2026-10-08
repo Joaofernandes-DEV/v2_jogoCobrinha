@@ -15,6 +15,16 @@ def enviar(jogo, *codigos: int) -> None:
         jogo.estado_atual.tratar_evento(tecla(codigo))
 
 
+def descer_ate(jogo, rotulo_inicial: str) -> None:
+    """Desce com a seta no menu da tela atual até o item cujo texto começa com `rotulo_inicial`."""
+    menu = jogo.estado_atual.menu
+    for _ in menu.itens:
+        if menu.item_atual.texto.startswith(rotulo_inicial):
+            return
+        enviar(jogo, pygame.K_DOWN)
+    raise AssertionError(f"o menu não tem o item {rotulo_inicial!r}")
+
+
 def desenhar_tudo(jogo) -> None:
     superficie = pygame.Surface(jogo.tela.get_size())
     for estado in jogo.pilha:

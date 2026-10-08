@@ -14,7 +14,7 @@ from cobrinha.ui.menu import ItemMenu, Menu
 from cobrinha.ui.painel import criar_veu, desenhar_linhas
 
 if TYPE_CHECKING:
-    from cobrinha.estados.jogando import EstadoJogando
+    from cobrinha.estados.base import EstadoDePartida
     from cobrinha.jogo import Jogo
 
 TECLAS_CONTINUAR = (pygame.K_ESCAPE, pygame.K_p)
@@ -22,7 +22,7 @@ OPACIDADE_VEU = 170
 
 
 class EstadoPausa(Estado):
-    def __init__(self, jogo: Jogo, jogando: EstadoJogando) -> None:
+    def __init__(self, jogo: Jogo, jogando: EstadoDePartida) -> None:
         super().__init__(jogo)
         self.jogando = jogando
         self.veu = criar_veu(OPACIDADE_VEU)
@@ -53,15 +53,14 @@ class EstadoPausa(Estado):
 
     def _reiniciar(self) -> None:
         self._deixar_pausa()
-        navegacao.registrar_resultado(self.jogo, self.jogando.partida)
-        navegacao.iniciar_campanha(self.jogo, self.jogando.nivel_inicial)
+        self.jogando.reiniciar()
 
     def _ir_para_menu(self) -> None:
         self._deixar_pausa()
-        navegacao.abandonar_partida(self.jogo, self.jogando)
+        self.jogando.abandonar()
 
     def _sair(self) -> None:
-        navegacao.registrar_resultado(self.jogo, self.jogando.partida)
+        self.jogando.antes_de_sair_do_jogo()
         self.jogo.sair()
 
     def desenhar(self, superficie: pygame.Surface) -> None:

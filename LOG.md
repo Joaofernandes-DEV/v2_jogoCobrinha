@@ -526,3 +526,20 @@ Modelo:
 - O João pediu o `.exe` novo com o suporte ao controle de PS5 (PR #13).
 - O número escolhido foi **3.2.0**: o controle é uma funcionalidade nova e não muda nada do que já existia. A v3.1.0 continua publicada.
 - Depois do merge, a tag `v3.2.0` dispara o workflow **Release**. O resultado fica registrado na próxima entrada.
+
+### 2026-10-08 16:56 — Release v3.2.0 publicada
+
+**Feito:**
+- Tag `v3.2.0` criada sobre o commit `9eeca51` (merge do PR #14), depois de o CI ficar verde nos 4 ambientes.
+- O workflow **Release** rodou no Windows do GitHub e todas as etapas passaram: dependências → testes → executável gerado e testado → release publicada.
+- **Release:** <https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/tag/v3.2.0>, com o anexo `Cobrinha.exe` (16,1 MB, sha256 `c09c624f…b195759`) e as notas de `docs/notas-v3.2.0.md`. Ela não é rascunho nem pré-lançamento e virou a **Latest**. A v3.1.0, a v3.0.0 e a v2.0.0 continuam publicadas.
+- **Conferência independente:**
+  - baixei o `Cobrinha.exe` publicado e o sha256 bate com o da release;
+  - rodei com `--fechar-em 2 --nivel 2` (driver de vídeo `dummy` e pasta de dados temporária): saiu com código 0 e gravou o `dados.json`;
+  - o executável contém o módulo `cobrinha.controle` e o `pygame._sdl2.controller`, carregados ao abrir o jogo, já que os controles são iniciados junto com ele.
+
+**Arquivos:** `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu o `.exe` novo com o suporte ao controle de PS5 (PR #13). O controle já tinha sido testado por ele com o DualSense, rodando pelo código-fonte.
+- O teste automático não usa um controle de verdade nem o áudio. Vale abrir o executável publicado com o DualSense conectado para conferir a vibração e a luz.

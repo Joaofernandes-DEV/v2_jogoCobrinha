@@ -16,7 +16,7 @@ Guardar 24 bits por pixel nem sempre foi possível. Os primeiros *frame buffers*
 
 O pygame-ce ainda suporta esse formato: superfícies de 8 bits usam uma paleta para mapear seus valores para cores de 24 bits (Pygame-ce Developers, c2023). O jogo não usa superfícies indexadas, mas segue o espírito da técnica: todas as cores de sprites e interface vêm de uma única tabela de 16 entradas, a classe `Paleta` (@cod:paleta).
 
-::: codigo #paleta src/cobrinha/config.py 76-94
+::: codigo #paleta 270f2fc:src/cobrinha/config.py 76-94
 A paleta única do jogo (`config.py`)
 :::
 

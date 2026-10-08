@@ -55,6 +55,7 @@ class Evento(Enum):
     BATEU = auto()
     VENCEU = auto()
     TEMPO_ESGOTADO = auto()
+    EMPATOU = auto()  # só no duelo: todos eliminados no mesmo passo
 
 
 @dataclass

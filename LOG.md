@@ -543,3 +543,31 @@ Modelo:
 **Motivo / observações:**
 - O João pediu o `.exe` novo com o suporte ao controle de PS5 (PR #13). O controle já tinha sido testado por ele com o DualSense, rodando pelo código-fonte.
 - O teste automático não usa um controle de verdade nem o áudio. Vale abrir o executável publicado com o DualSense conectado para conferir a vibração e a luz.
+
+### 2026-10-08 17:38 — Modo Duelo, etapa 1: dois jogadores no teclado
+
+**Feito:**
+- **Domínio (`dominio/duelo.py`, novo):** `PartidaDuelo`, de 2 a 4 cobras no mesmo campo, todas andando no mesmo passo fixo. As colisões de um passo são julgadas juntas, como se todos tivessem andado:
+  - borda, pedra ou corpo (o próprio ou o de outra cobra, incluindo a cabeça de antes do passo) eliminam; a cauda de quem não está crescendo conta como livre;
+  - duas ou mais cabeças na mesma célula eliminam todas; cabeças que trocam de lugar também (cada uma entra no pescoço da outra);
+  - a cobra eliminada some do campo; vence quem sobrar e, se todos forem eliminados no mesmo passo, é empate (`Evento.EMPATOU`, novo).
+- **Itens e velocidade:** 2 maçãs no campo ao mesmo tempo (`COMIDAS_NO_DUELO`) e a maçã dourada. A velocidade é uma só e acelera com as maçãs de todos. Power-ups ficam para a etapa 3.
+- **Nascimento como dados:** 4 posições em faixas horizontais diferentes; um teste confere, nos 3 mapas, que nenhuma cai em pedra e que há 6 células livres à frente sem cruzar o caminho das outras.
+- **Cobras coloridas:** `PeleCobra` e `PELES` no `config.py` (verde, azul, amarela e vermelha, só com cores da paleta). O `gerar_sprites.py` gera as 4 peças em cada pele; 12 PNGs novos (`cabeca_azul.png` etc.). Os 10 sprites antigos saíram idênticos (mesmo hash).
+- **Telas:** item **DUELO (2 JOGADORES)** no menu, abaixo de JOGAR; o "Nível inicial" escolhe o mapa e a velocidade. Contagem com a dica "J1: WASD   J2: SETAS". Nova `EstadoDuelo`: WASD move só o jogador 1 e as setas só o jogador 2; quem bate pisca e some. Nova `EstadoFimDoDuelo`: "JOGADOR 2 VENCEU!" na cor da cobra, ou "EMPATE!", com os pontos de cada um.
+- **HUD do duelo:** pontos de cada jogador na cor da cobra (cinza e "FORA" quando eliminado), "DUELO" e o nome do mapa no meio. Já cabe 4 jogadores.
+- **Pausa genérica:** nova `EstadoDePartida` (`estados/base.py`). A pausa pede à tela de baixo para reiniciar, abandonar ou guardar antes de sair; o `EstadoJogando` faz isso com o código de antes, então 1 jogador não muda. O duelo não entra nos recordes.
+- **Menu mais compacto:** com 8 itens, o SAIR ficava em cima da cobra decorativa; o título subiu 10 px e o espaço entre os itens passou de 8 para 6 px.
+- README: controles, regras do Duelo em "Como jogar", Novidades da V3 e estrutura.
+- Testes de 270 para **368**: novos `tests/test_duelo.py` (colisões, cabeça com cabeça, troca de lugar, 3 cabeças, empate, vencedor, cauda que sai, maçãs, passo fixo, nascimentos e duelos aleatórios de 2 a 4 cobras nos 3 mapas) e `tests/test_estados_duelo.py` (menu, controles separados, pausa, eliminação, fim, sons e HUD); `tests/test_recursos.py` confere que **todo pixel de todo sprite é transparente ou da paleta**.
+
+**Arquivos:** `src/cobrinha/config.py`, `src/cobrinha/dominio/partida.py`, `src/cobrinha/dominio/duelo.py` (novo), `ferramentas/gerar_sprites.py`, `src/cobrinha/assets/imagens/` (12 PNGs novos: `cabeca`, `corpo_reto`, `corpo_curva` e `cauda` em `_azul`, `_amarela` e `_vermelha`), `src/cobrinha/ui/pecas.py`, `src/cobrinha/ui/hud.py`, `src/cobrinha/estados/base.py`, `src/cobrinha/estados/pausa.py`, `src/cobrinha/estados/contagem.py`, `src/cobrinha/estados/jogando.py`, `src/cobrinha/estados/navegacao.py`, `src/cobrinha/estados/menu_principal.py`, `src/cobrinha/estados/duelo.py` (novo), `src/cobrinha/estados/fim_do_duelo.py` (novo), `tests/test_duelo.py` (novo), `tests/test_estados_duelo.py` (novo), `tests/test_recursos.py`, `tests/auxiliares.py`, `tests/test_estados.py`, `docs/ebook/texto/` (10 textos), `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Primeira das 3 etapas do modo Duelo pedidas pelo João: 2 jogadores no teclado. A etapa 2 traz a tela "Quem joga?", até 4 jogadores com controles ligados pelo `instance_id`, luz e vibração individuais; a etapa 3, os power-ups disputados, o placar até 3 vitórias e a variante com relógio.
+- `PartidaDuelo` é uma classe à parte, e não uma extensão da `Partida`, porque a `Partida` carrega meta, campanha, relógio e power-ups de 1 jogador. Ela reaproveita `Cobra`, `Grade`, `Nivel`, o sorteio de células e a `FrutaDourada`. A `Partida` só ganhou o `Evento.EMPATOU`, e os testes do domínio não mudaram.
+- Decisões confirmadas pelo João: a cobra eliminada some; o DUELO fica abaixo de JOGAR. Para isso, dois testes de tela (`test_menu_so_oferece_niveis_liberados` e `test_creditos_abrem_pelo_menu_e_voltam`) passaram a achar o item pelo nome (`descer_ate`) em vez de contar as setas.
+- O `Sprites._pecas` continua guardando as peças da cobra verde, porque um teste existente o usa; as outras peles ficam em `_pecas_da_pele`.
+- **Ebook:** o `test_ebook.py` falhou porque o ebook cita o código por número de linha, e esta etapa muda arquivos citados. As 20 citações desses arquivos foram fixadas no commit em que o PDF foi gerado (`270f2fc`), e o PDF não mudou. Citações de outros arquivos que já estavam desatualizadas desde o PR do controle (ex.: `jogo.py`) ficaram como estavam, porque o ebook vai sair do repositório.
+- Nesta etapa, o direcional do controle ainda vira "setas" e por isso move o jogador 2 (avisado no README). A vibração ainda vale para todos os controles e a luz não muda no duelo; as duas coisas ficam individuais na etapa 2.
+- **Verificado localmente:** ruff sem apontamentos, 368 testes, capturas de todas as telas novas (menu, contagem, duelo no labirinto, eliminação, vitória, empate e HUD com 4 jogadores) e o jogo testado pelo João.

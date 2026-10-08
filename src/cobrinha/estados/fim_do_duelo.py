@@ -25,6 +25,7 @@ class EstadoFimDoDuelo(Estado):
         super().__init__(jogo)
         partida = duelo.partida
         self.numero_nivel = duelo.numero_nivel
+        self.entradas = tuple(duelo.entradas)  # jogar de novo com a mesma formação
         self.vencedor = partida.vencedor  # None = empate
         self.pontos = [jogador.pontos for jogador in partida.jogadores]
         self.veu = criar_veu(OPACIDADE_VEU)
@@ -48,7 +49,7 @@ class EstadoFimDoDuelo(Estado):
             self.menu.tratar_evento(evento)
 
     def _jogar_de_novo(self) -> None:
-        navegacao.iniciar_duelo(self.jogo, self.numero_nivel)
+        navegacao.iniciar_duelo(self.jogo, self.numero_nivel, self.entradas)
 
     def desenhar(self, superficie: pygame.Surface) -> None:
         superficie.blit(self.veu, (0, 0))

@@ -29,19 +29,19 @@ Os múltiplos de 90° são um caso especial. A matriz da rotação de 90° tem s
 
 O gerador de sprites desenha cada peça em uma única orientação: a cabeça olhando para a direita, o corpo reto na horizontal, a curva ligando os lados esquerdo e de baixo, e a cauda presa à direita. As outras orientações são obtidas por rotação. O @cod:angulos mostra as tabelas que relacionam direções e ângulos.
 
-::: codigo #angulos src/cobrinha/ui/pecas.py 33-46
+::: codigo #angulos 270f2fc:src/cobrinha/ui/pecas.py 33-46
 Ângulos de rotação por direção e o giro anti-horário dos lados
 :::
 
 Para escolher a peça e o ângulo de cada segmento, a função `classificar_pecas` (@cod:classificar) olha para os vizinhos de cada segmento. A cabeça aponta para longe do segmento seguinte; a cauda aponta para o anterior; um segmento do meio é reto se os vizinhos estão em lados opostos e é curva em caso contrário.
 
-::: codigo #classificar src/cobrinha/ui/pecas.py 93-113
+::: codigo #classificar 270f2fc:src/cobrinha/ui/pecas.py 93-113
 Escolha da peça e da rotação de cada segmento (`classificar_pecas`)
 :::
 
 O caso mais elegante é o da curva. A curva-base liga os lados {esquerda, baixo}. Girada 90° no sentido anti-horário, cada lado vai para o seguinte da tabela `_GIRO_ANTI_HORARIO`: esquerda vira baixo e baixo vira direita, e a curva passa a ligar {baixo, direita}. A função `angulo_da_curva` (@cod:angulo-curva) gira o conjunto de lados da curva-base até ele coincidir com os lados pedidos e devolve o ângulo correspondente. Em vez de uma tabela com as quatro curvas escrita à mão, o código usa a própria definição da rotação.
 
-::: codigo #angulo-curva src/cobrinha/ui/pecas.py 83-90
+::: codigo #angulo-curva 270f2fc:src/cobrinha/ui/pecas.py 83-90
 Ângulo da curva obtido girando os lados da curva-base (`angulo_da_curva`)
 :::
 
@@ -57,7 +57,7 @@ largura: 72%
 
 Rotacionar uma imagem tem custo, mesmo que pequeno. Como só existem 4 peças × 4 ângulos = 16 combinações, o jogo calcula todas uma única vez, ao criar a tela de jogo, e guarda o resultado num dicionário (@cod:sprites-init). Durante a partida, desenhar uma peça é só procurar a imagem pronta e fazer um `blit`. É a mesma troca de memória por tempo da pré-renderização do fundo (capítulo 6).
 
-::: codigo #sprites-init src/cobrinha/ui/pecas.py 116-124
+::: codigo #sprites-init 270f2fc:src/cobrinha/ui/pecas.py 116-124
 As 16 rotações preparadas uma vez (`Sprites.__init__`)
 :::
 

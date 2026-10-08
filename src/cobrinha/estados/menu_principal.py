@@ -8,6 +8,7 @@ import pygame
 
 from cobrinha.audio import Musica
 from cobrinha.config import ALTURA_JANELA, Paleta, TamanhoFonte
+from cobrinha.controle import veio_do_controle
 from cobrinha.dominio.cobra import Cobra
 from cobrinha.dominio.grade import GRADE_PADRAO, Direcao, Posicao
 from cobrinha.estados import navegacao
@@ -94,7 +95,9 @@ class EstadoMenuPrincipal(Estado):
 
     def tratar_evento(self, evento: pygame.Event) -> None:
         if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
-            self.jogo.sair()
+            # No controle, ◯ volta nas outras telas; aqui não pode fechar o jogo sem querer.
+            if not veio_do_controle(evento):
+                self.jogo.sair()
         else:
             self.menu.tratar_evento(evento)
 

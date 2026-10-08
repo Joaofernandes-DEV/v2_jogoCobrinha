@@ -12,11 +12,12 @@ from cobrinha.dominio.duelo import PartidaDuelo
 from cobrinha.dominio.grade import Direcao, Posicao
 from cobrinha.estados import navegacao
 from cobrinha.estados.contagem import EstadoContagem
-from cobrinha.estados.duelo import DICA_DOS_CONTROLES, EstadoDuelo
+from cobrinha.estados.duelo import EstadoDuelo
 from cobrinha.estados.fim_do_duelo import EstadoFimDoDuelo
 from cobrinha.estados.jogando import DURACAO_MORTE, EstadoJogando
 from cobrinha.estados.menu_principal import EstadoMenuPrincipal
 from cobrinha.estados.pausa import EstadoPausa
+from cobrinha.estados.quem_joga import EstadoQuemJoga
 
 P = Posicao
 
@@ -52,16 +53,18 @@ def um_passo(duelo: EstadoDuelo) -> None:
 # --- Menu e contagem ---
 
 
-def test_menu_duelo_abre_contagem_com_os_controles(jogo):
+def test_menu_duelo_abre_quem_joga_e_depois_a_contagem_com_os_controles(jogo):
     navegacao.abrir_menu(jogo)
     desenhar_tudo(jogo)
     descer_ate(jogo, "DUELO")
     enviar(jogo, pygame.K_RETURN)
+    assert isinstance(jogo.estado_atual, EstadoQuemJoga)
+    enviar(jogo, pygame.K_d, pygame.K_UP, pygame.K_RETURN)  # WASD entra, setas entram, Enter
     contagem = jogo.estado_atual
     assert isinstance(contagem, EstadoContagem)
     assert contagem.titulo == "DUELO"
     assert contagem.subtitulo == "Campo aberto"
-    assert contagem.dica == DICA_DOS_CONTROLES
+    assert contagem.dica == "J1: WASD   J2: SETAS"
     duelo = jogo.pilha[0]
     assert isinstance(duelo, EstadoDuelo)
     assert len(duelo.partida.jogadores) == 2
@@ -74,7 +77,7 @@ def test_duelo_usa_o_mapa_do_nivel_escolhido(jogo):
     descer_ate(jogo, "NÍVEL")
     enviar(jogo, pygame.K_LEFT)  # circula para o nível 3
     descer_ate(jogo, "DUELO")
-    enviar(jogo, pygame.K_RETURN)
+    enviar(jogo, pygame.K_RETURN, pygame.K_w, pygame.K_LEFT, pygame.K_RETURN)
     assert jogo.pilha[0].partida.nivel.numero == 3
     assert jogo.pilha[0].partida.obstaculos
 

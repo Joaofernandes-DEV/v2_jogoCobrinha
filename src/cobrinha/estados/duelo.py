@@ -1,11 +1,14 @@
-"""Tela do Duelo (V3): cada jogador controla a própria cobra, no mesmo teclado.
+"""Tela do Duelo (V3): cada jogador controla a própria cobra.
 
-Nos modos de 1 jogador, setas e WASD movem a mesma cobra; aqui eles se separam:
-WASD é do jogador 1 e as setas são do jogador 2.
+Cada jogador tem a sua entrada (WASD, setas ou um controle; ver `entradas.py`), escolhida
+na tela "Quem joga?". O controle de cada jogador acende na cor da cobra dele e só vibra
+com o que acontece com ele. Se o controle de um jogador desconectar, o duelo para até ele
+ser reconectado.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 import pygame
@@ -18,15 +21,16 @@ from cobrinha.config import (
     PELES,
     PONTOS_FRUTA_DOURADA,
     TAMANHO_CELULA,
+    Cor,
     Paleta,
     PeleCobra,
     TamanhoFonte,
 )
-from cobrinha.controle import Vibracao
+from cobrinha.controle import Vibracao, controle_desconectado
 from cobrinha.dominio.duelo import PartidaDuelo
-from cobrinha.dominio.grade import Direcao
 from cobrinha.dominio.niveis import obter_nivel
 from cobrinha.dominio.partida import Evento
+from cobrinha.entradas import TECLADO_DIREITO, TECLADO_ESQUERDO, Entrada
 from cobrinha.estados import navegacao
 from cobrinha.estados.base import EstadoDePartida
 from cobrinha.estados.jogando import (
@@ -44,22 +48,12 @@ from cobrinha.ui.pecas import Sprites
 if TYPE_CHECKING:
     from cobrinha.jogo import Jogo
 
-# Teclas de cada jogador, na ordem J1, J2.
-TECLAS_DOS_JOGADORES = (
-    {
-        pygame.K_w: Direcao.CIMA,
-        pygame.K_s: Direcao.BAIXO,
-        pygame.K_a: Direcao.ESQUERDA,
-        pygame.K_d: Direcao.DIREITA,
-    },
-    {
-        pygame.K_UP: Direcao.CIMA,
-        pygame.K_DOWN: Direcao.BAIXO,
-        pygame.K_LEFT: Direcao.ESQUERDA,
-        pygame.K_RIGHT: Direcao.DIREITA,
-    },
-)
-DICA_DOS_CONTROLES = "J1: WASD   J2: SETAS"
+# Sem a tela "Quem joga?" (ex.: nos testes), o duelo é no teclado: J1 no WASD, J2 nas setas.
+ENTRADAS_PADRAO = (TECLADO_ESQUERDO, TECLADO_DIREITO)
+# Luz do controle de quem foi eliminado (como o "FORA" do HUD).
+COR_ELIMINADO = Paleta.CINZA
+# Luz dos controles conectados que não estão no duelo (diferente de todas as cobras).
+COR_FORA_DO_DUELO = Paleta.BRANCO
 
 SOM_DO_EVENTO = {
     Evento.COMEU: Som.COMER,
@@ -67,10 +61,12 @@ SOM_DO_EVENTO = {
     Evento.BATEU: Som.BATER,
     Evento.VENCEU: Som.VITORIA,
 }
+# Só o controle de quem comeu, bateu ou venceu vibra.
 VIBRACAO_DO_EVENTO = {
     Evento.COMEU: Vibracao.FRACA,
     Evento.COMEU_DOURADA: Vibracao.MEDIA,
     Evento.BATEU: Vibracao.FORTE,
+    Evento.VENCEU: Vibracao.MEDIA,
 }
 PONTOS_DO_EVENTO = {Evento.COMEU: 1, Evento.COMEU_DOURADA: PONTOS_FRUTA_DOURADA}
 
@@ -84,12 +80,20 @@ def pele_do_jogador(indice: int) -> PeleCobra:
 
 
 class EstadoDuelo(EstadoDePartida):
-    def __init__(self, jogo: Jogo, numero_nivel: int = 1, partida: PartidaDuelo | None = None):
+    def __init__(
+        self,
+        jogo: Jogo,
+        numero_nivel: int = 1,
+        entradas: Sequence[Entrada] = ENTRADAS_PADRAO,
+        partida: PartidaDuelo | None = None,
+    ):
         super().__init__(jogo)
+        # Entrada de cada jogador, na ordem J1, J2... (muda se um controle for religado).
+        self.entradas = list(entradas)
         self.partida = (
             partida
             if partida is not None
-            else PartidaDuelo(nivel=obter_nivel(numero_nivel), rng=jogo.rng)
+            else PartidaDuelo(len(self.entradas), nivel=obter_nivel(numero_nivel), rng=jogo.rng)
         )
         self.sprites = Sprites()
         self.fundo_campo = criar_fundo_campo()
@@ -105,21 +109,61 @@ class EstadoDuelo(EstadoDePartida):
     def numero_nivel(self) -> int:
         return self.partida.nivel.numero
 
+    @property
+    def jogadores_sem_controle(self) -> list[int]:
+        """Jogadores ainda vivos cujo controle não está mais conectado."""
+        if not self.partida.em_andamento:
+            return []
+        conectados = self.jogo.controles.ids_conectados
+        return [
+            indice
+            for indice, entrada in enumerate(self.entradas)
+            if entrada.e_controle
+            and entrada.controle_id not in conectados
+            and self.partida.jogadores[indice].vivo
+        ]
+
+    def religar(self, indice: int, controle_id: int) -> None:
+        """O jogador `indice` passa a jogar com o controle `controle_id` (reconectado)."""
+        self.entradas[indice] = Entrada.controle(controle_id)
+
     def tratar_evento(self, evento: pygame.Event) -> None:
         if self.tempo_ate_encerrar is not None:
             return  # animação de fim em andamento
         if evento.type == pygame.WINDOWFOCUSLOST:
-            navegacao.pausar(self.jogo, self)
+            if controle_desconectado(evento) is None:
+                navegacao.pausar(self.jogo, self)  # a janela perdeu o foco
+            elif self.jogadores_sem_controle:
+                navegacao.pedir_controle(self.jogo, self)
+            # Saiu o controle de quem não está jogando: o duelo segue.
         elif evento.type == pygame.KEYDOWN:
             if evento.key in TECLAS_PAUSA:
                 navegacao.pausar(self.jogo, self)
                 return
-            for indice, teclas in enumerate(TECLAS_DOS_JOGADORES[: len(self.partida.jogadores)]):
-                if evento.key in teclas:
-                    self.partida.virar(indice, teclas[evento.key])
+            for indice, entrada in enumerate(self.entradas):
+                direcao = entrada.direcao(evento)
+                if direcao is not None:
+                    self.partida.virar(indice, direcao)
+
+    @property
+    def cor_do_controle(self) -> Cor:
+        return COR_FORA_DO_DUELO
+
+    @property
+    def luzes_dos_controles(self) -> dict[int, Cor]:
+        """O controle de cada jogador na cor da cobra dele; cinza depois de eliminado."""
+        return {
+            entrada.controle_id: (
+                pele_do_jogador(indice).destaque
+                if self.partida.jogadores[indice].vivo
+                else COR_ELIMINADO
+            )
+            for indice, entrada in enumerate(self.entradas)
+            if entrada.controle_id is not None
+        }
 
     def reiniciar(self) -> None:
-        navegacao.iniciar_duelo(self.jogo, self.numero_nivel)
+        navegacao.iniciar_duelo(self.jogo, self.numero_nivel, self.entradas)
 
     def abandonar(self) -> None:
         navegacao.abrir_menu(self.jogo)
@@ -136,6 +180,10 @@ class EstadoDuelo(EstadoDePartida):
             if self.tempo_ate_encerrar <= 0:
                 navegacao.encerrar_duelo(self.jogo, self)
             return
+        if self.jogadores_sem_controle:
+            # Ex.: o controle saiu durante a pausa ou a contagem.
+            navegacao.pedir_controle(self.jogo, self)
+            return
 
         for acontecimento in self.partida.atualizar(dt):
             evento, indice = acontecimento.evento, acontecimento.jogador
@@ -143,8 +191,8 @@ class EstadoDuelo(EstadoDePartida):
                 self.jogo.audio.parar_musica()
             if evento in SOM_DO_EVENTO:
                 self.jogo.audio.tocar(SOM_DO_EVENTO[evento])
-            if evento in VIBRACAO_DO_EVENTO:
-                self.jogo.controles.vibrar(VIBRACAO_DO_EVENTO[evento])
+            if evento in VIBRACAO_DO_EVENTO and indice is not None:
+                self._vibrar(VIBRACAO_DO_EVENTO[evento], indice)
             if evento is Evento.BATEU and self.jogo.opcoes.efeitos_visuais:
                 self.piscando[indice] = DURACAO_MORTE
             if evento in PONTOS_DO_EVENTO:
@@ -153,6 +201,11 @@ class EstadoDuelo(EstadoDePartida):
         if self.partida.encerrada:
             efeitos = self.jogo.opcoes.efeitos_visuais
             self.tempo_ate_encerrar = DURACAO_MORTE if efeitos else DURACAO_MORTE_SEM_EFEITOS
+
+    def _vibrar(self, vibracao: Vibracao, indice: int) -> None:
+        entrada = self.entradas[indice]
+        if entrada.controle_id is not None:
+            self.jogo.controles.vibrar(vibracao, entrada.controle_id)
 
     def _pontos_flutuantes(self, indice: int, pontos: int) -> None:
         if not self.jogo.opcoes.efeitos_visuais:

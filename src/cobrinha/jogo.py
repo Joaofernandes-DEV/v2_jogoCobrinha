@@ -16,6 +16,7 @@ from cobrinha.config import (
     FREQUENCIA_AUDIO,
     LARGURA_JANELA,
     TITULO,
+    Cor,
     Paleta,
 )
 from cobrinha.controle import Controles
@@ -112,8 +113,12 @@ class Jogo:
             return
         self.estado_atual.atualizar(dt)
         if self.estado_atual is not None:
-            # A luz do controle acompanha a tela do topo (ex.: azul na câmera lenta).
-            self.controles.definir_luz(self.estado_atual.cor_do_controle)
+            # A luz do controle acompanha a tela do topo (ex.: azul na câmera lenta); as
+            # telas da pilha podem dar uma cor própria a cada controle (ex.: no Duelo).
+            luzes: dict[int, Cor] = {}
+            for estado in self.pilha:
+                luzes.update(estado.luzes_dos_controles)
+            self.controles.definir_luzes(self.estado_atual.cor_do_controle, luzes)
         self.opacidade_fade = max(0.0, self.opacidade_fade - dt / DURACAO_FADE)
 
     def _processar_eventos(self) -> None:

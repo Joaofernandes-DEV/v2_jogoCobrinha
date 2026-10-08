@@ -244,3 +244,75 @@ def test_cada_quadro_acende_a_luz_da_tela_atual(jogo, controles):
     navegacao.abrir_menu(jogo)
     jogo._atualizar_quadro(0.01)
     assert falso.cores[-1] == Paleta.VERDE_CLARO
+
+
+# Vários controles (Duelo)
+
+
+def test_teclas_virtuais_dizem_de_qual_controle_vieram(jogo):
+    from cobrinha.controle import id_do_controle
+
+    controles = jogo.controles
+    (tecla,) = controles.traduzir(botao(pygame.CONTROLLER_BUTTON_A))
+    assert id_do_controle(tecla) == ID
+    (seta,) = controles.traduzir(eixo(pygame.CONTROLLER_AXIS_LEFTX, -0.9))
+    assert id_do_controle(seta) == ID
+    assert id_do_controle(pygame.Event(pygame.KEYDOWN, key=pygame.K_a)) is None
+
+
+def test_desconexao_diz_qual_controle_saiu(controles):
+    from cobrinha.controle import controle_desconectado
+
+    controles, _ = controles
+    assert controles.ids_conectados == (ID,)
+    (aviso,) = controles.traduzir(pygame.Event(pygame.CONTROLLERDEVICEREMOVED, instance_id=ID))
+    assert controle_desconectado(aviso) == ID
+    assert controle_desconectado(pygame.Event(pygame.WINDOWFOCUSLOST)) is None
+    assert controles.ids_conectados == ()
+
+
+def test_vibrar_um_controle_so(jogo):
+    um, outro = ControleFalso(), ControleFalso()
+    jogo.controles.conectar(1, um)
+    jogo.controles.conectar(2, outro)
+    jogo.controles.vibrar(Vibracao.FRACA, controle_id=2)
+    jogo.controles.vibrar(Vibracao.FORTE, controle_id=99)  # desconectado: nada acontece
+    assert um.vibracoes == []
+    assert outro.vibracoes == [Vibracao.FRACA.value]
+
+
+def test_cada_controle_pode_ter_a_propria_cor(jogo):
+    um, outro = ControleFalso(), ControleFalso()
+    jogo.controles.conectar(1, um)
+    jogo.controles.conectar(2, outro)
+    jogo.controles.definir_luzes(Paleta.VERDE_CLARO, {2: Paleta.AZUL_CLARO})
+    jogo.controles.definir_luzes(Paleta.VERDE_CLARO, {2: Paleta.AZUL_CLARO})  # não repete
+    jogo.controles.definir_luzes(Paleta.VERDE_CLARO, {2: Paleta.CINZA})
+    assert um.cores == [Paleta.VERDE_CLARO]
+    assert outro.cores == [Paleta.AZUL_CLARO, Paleta.CINZA]
+    terceiro = ControleFalso()
+    jogo.controles.conectar(3, terceiro)  # chega depois: recebe a cor geral
+    assert terceiro.cores == [Paleta.VERDE_CLARO]
+
+
+def test_quadro_junta_as_cores_de_toda_a_pilha(jogo, controles):
+    """A tela de baixo (ex.: o Duelo) mantém as cores dos controles por baixo da pausa."""
+    from cobrinha.estados.base import Estado
+
+    _, falso = controles
+
+    class TelaComLuz(Estado):
+        luzes_dos_controles = {ID: Paleta.AMARELO}
+
+        def tratar_evento(self, evento):
+            pass
+
+        def desenhar(self, superficie):
+            pass
+
+    class TelaPorCima(TelaComLuz):
+        luzes_dos_controles = {}
+
+    jogo.pilha = [TelaComLuz(jogo), TelaPorCima(jogo)]
+    jogo._atualizar_quadro(0.01)
+    assert falso.cores[-1] == Paleta.AMARELO

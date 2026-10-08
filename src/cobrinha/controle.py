@@ -1,8 +1,10 @@
 """Controle de videogame (V3): DualSense do PS5 e outros reconhecidos pelo SDL.
 
-Os botões viram "teclas virtuais" (eventos KEYDOWN marcados com `controle=True`), então
-todas as telas funcionam com o controle sem tratar nada de novo. O controle também
-vibra nos eventos da partida e muda a cor da luz conforme o estado do jogo.
+Os botões viram "teclas virtuais" (eventos KEYDOWN marcados com `controle=True` e com o
+`controle_id` de quem apertou), então todas as telas funcionam com o controle sem tratar
+nada de novo. O controle também vibra nos eventos da partida e muda a cor da luz conforme
+o estado do jogo. No Duelo, cada controle é de um jogador: vibra só com o que acontece com
+ele e acende na cor da cobra dele.
 
 Se o computador não tiver suporte a controles, o jogo segue só com teclado e mouse.
 """
@@ -58,12 +60,30 @@ class ControleFisico(Protocol):
     def quit(self) -> None: ...
 
 
-def tecla_virtual(tecla: int) -> pygame.Event:
-    return pygame.Event(pygame.KEYDOWN, key=tecla, mod=0, unicode="", scancode=0, controle=True)
+def tecla_virtual(tecla: int, controle_id: int | None = None) -> pygame.Event:
+    return pygame.Event(
+        pygame.KEYDOWN,
+        key=tecla,
+        mod=0,
+        unicode="",
+        scancode=0,
+        controle=True,
+        controle_id=controle_id,
+    )
 
 
 def veio_do_controle(evento: pygame.Event) -> bool:
     return bool(getattr(evento, "controle", False))
+
+
+def id_do_controle(evento: pygame.Event) -> int | None:
+    """`instance_id` do controle que gerou a tecla virtual (None se veio do teclado)."""
+    return getattr(evento, "controle_id", None)
+
+
+def controle_desconectado(evento: pygame.Event) -> int | None:
+    """`instance_id` do controle que saiu, se o evento for o aviso de desconexão."""
+    return getattr(evento, "controle_desconectado", None)
 
 
 class Controles:
@@ -73,7 +93,10 @@ class Controles:
         self._conectados: dict[int, ControleFisico] = {}
         # Direção do analógico já enviada, por (controle, eixo): -1, 0 ou +1.
         self._eixos: dict[tuple[int, int], int] = {}
-        self._cor_atual: Cor | None = None
+        # Luz: cor geral, cores próprias de alguns controles e a última cor enviada a cada um.
+        self._cor_padrao: Cor | None = None
+        self._cores_por_controle: dict[int, Cor] = {}
+        self._cores_enviadas: dict[int, Cor] = {}
         try:
             sdl_controller.init()
             self.disponivel = True
@@ -84,10 +107,14 @@ class Controles:
     def conectados(self) -> int:
         return len(self._conectados)
 
+    @property
+    def ids_conectados(self) -> tuple[int, ...]:
+        return tuple(self._conectados)
+
     def conectar(self, instance_id: int, controle: ControleFisico) -> None:
         self._conectados[instance_id] = controle
-        if self._cor_atual is not None:
-            controle.set_led(self._cor_atual)
+        if self._cor_padrao is not None:
+            self._acender(instance_id, controle)
 
     def traduzir(self, evento: pygame.Event) -> list[pygame.Event]:
         """Converte um evento do controle nos eventos que as telas entendem.
@@ -101,32 +128,53 @@ class Controles:
             removido = self._conectados.pop(evento.instance_id, None)
             if removido is None:
                 return []
-            # Controle desconectado no meio do jogo: pausa como ao trocar de janela.
-            return [pygame.Event(pygame.WINDOWFOCUSLOST)]
+            self._cores_enviadas.pop(evento.instance_id, None)
+            # Controle desconectado no meio do jogo: pausa como ao trocar de janela. O
+            # evento diz qual saiu, para o Duelo saber se era o de um jogador.
+            return [pygame.Event(pygame.WINDOWFOCUSLOST, controle_desconectado=evento.instance_id)]
         if evento.type == pygame.CONTROLLERBUTTONDOWN:
             tecla = TECLA_DO_BOTAO.get(evento.button)
-            return [tecla_virtual(tecla)] if tecla is not None else []
+            return [tecla_virtual(tecla, evento.instance_id)] if tecla is not None else []
         if evento.type == pygame.CONTROLLERAXISMOTION:
             return self._traduzir_eixo(evento)
         return [evento]
 
-    def vibrar(self, vibracao: Vibracao) -> None:
+    def vibrar(self, vibracao: Vibracao, controle_id: int | None = None) -> None:
+        """Vibra todos os controles, ou só o `controle_id` (Duelo)."""
         grave, agudo, duracao = vibracao.value
-        for controle in self._conectados.values():
+        if controle_id is None:
+            alvos = list(self._conectados.values())
+        else:
+            alvos = [self._conectados[controle_id]] if controle_id in self._conectados else []
+        for controle in alvos:
             controle.rumble(grave, agudo, duracao)
 
     def definir_luz(self, cor: Cor) -> None:
-        """Muda a luz dos controles (só quando a cor muda, para não sobrecarregar)."""
-        if cor == self._cor_atual:
-            return
-        self._cor_atual = cor
-        for controle in self._conectados.values():
-            controle.set_led(cor)
+        """Muda a luz de todos os controles para a mesma cor."""
+        self.definir_luzes(cor, {})
+
+    def definir_luzes(self, padrao: Cor, por_controle: dict[int, Cor]) -> None:
+        """Cada controle acende na cor própria (`por_controle`) ou na `padrao`.
+
+        Só envia a cor ao controle quando ela muda, para não sobrecarregar.
+        """
+        self._cor_padrao = padrao
+        self._cores_por_controle = dict(por_controle)
+        for instance_id, controle in self._conectados.items():
+            self._acender(instance_id, controle)
 
     def encerrar(self) -> None:
         for controle in self._conectados.values():
             controle.quit()
         self._conectados.clear()
+        self._cores_enviadas.clear()
+
+    def _acender(self, instance_id: int, controle: ControleFisico) -> None:
+        cor = self._cores_por_controle.get(instance_id, self._cor_padrao)
+        if cor is None or self._cores_enviadas.get(instance_id) == cor:
+            return
+        self._cores_enviadas[instance_id] = cor
+        controle.set_led(cor)
 
     def _adicionar(self, device_index: int) -> None:
         try:
@@ -151,4 +199,4 @@ class Controles:
             return []  # continua inclinado para o mesmo lado: não repete
         self._eixos[chave] = sentido
         negativa, positiva = TECLAS_DO_EIXO[evento.axis]
-        return [tecla_virtual(positiva if sentido > 0 else negativa)]
+        return [tecla_virtual(positiva if sentido > 0 else negativa, evento.instance_id)]

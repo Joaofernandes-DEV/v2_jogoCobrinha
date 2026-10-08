@@ -57,7 +57,7 @@ class EstadoMenuPrincipal(Estado):
         self.menu = Menu(
             [
                 ItemMenu("JOGAR", acao=self._jogar),
-                ItemMenu("DUELO (2 JOGADORES)", acao=self._duelar),
+                ItemMenu("DUELO (2 A 4 JOGADORES)", acao=self._duelar),
                 ItemMenu(self._rotulo_nivel, acao=self._jogar, ajustar=self._mudar_nivel),
                 ItemMenu(self._rotulo_modo, acao=self._alternar_modo, ajustar=self._ajustar_modo),
                 ItemMenu("RECORDES", acao=lambda: navegacao.abrir_recordes(jogo)),
@@ -97,7 +97,7 @@ class EstadoMenuPrincipal(Estado):
 
     def _duelar(self) -> None:
         # O nível escolhido define o mapa e a velocidade do duelo.
-        navegacao.iniciar_duelo(self.jogo, self.nivel_escolhido)
+        navegacao.abrir_quem_joga(self.jogo, self.nivel_escolhido)
 
     def tratar_evento(self, evento: pygame.Event) -> None:
         if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:

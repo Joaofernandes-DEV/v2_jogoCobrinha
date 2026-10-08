@@ -5,8 +5,10 @@
                                  │
                                  ├─ meta do nível ──► Nível concluído ─► Contagem (próximo nível)
                                  └─ bateu/venceu ───► Fim de partida ──► Contagem | Menu
-    Menu ──Duelo──► Contagem ─► Duelo ──Esc/P/perdeu foco──► Pausa ─► Contagem ─► Duelo
-                                 └─ sobrou 1 (ou nenhum) ─► Fim do duelo ──► Contagem | Menu
+    Menu ──Duelo──► Quem joga? ─► Contagem ─► Duelo ──Esc/P/perdeu foco──► Pausa ─► Contagem
+                                               │
+                                               ├─ saiu o controle de alguém ─► Reconecte ─► Contagem
+                                               └─ sobrou 1 ou 0 ─► Fim do duelo ─► Contagem | Menu
 
 As telas importam este módulo, e ele importa as telas dentro das funções.
 Isso evita importações circulares e deixa o fluxo inteiro num lugar só.
@@ -23,6 +25,9 @@ from cobrinha.dominio.niveis import obter_nivel
 from cobrinha.dominio.partida import Partida, Situacao
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from cobrinha.entradas import Entrada
     from cobrinha.estados.base import EstadoDePartida
     from cobrinha.estados.duelo import EstadoDuelo
     from cobrinha.estados.jogando import EstadoJogando
@@ -111,12 +116,26 @@ def abandonar_partida(jogo: Jogo, jogando: EstadoJogando) -> None:
     abrir_menu(jogo)
 
 
-def iniciar_duelo(jogo: Jogo, numero_nivel: int = 1) -> None:
-    """Começa um duelo no mapa e na velocidade do nível escolhido. Não entra nos recordes."""
-    from cobrinha.estados.contagem import EstadoContagem
-    from cobrinha.estados.duelo import DICA_DOS_CONTROLES, EstadoDuelo
+def abrir_quem_joga(jogo: Jogo, numero_nivel: int = 1) -> None:
+    """Tela em que cada pessoa entra no duelo pelo teclado ou pelo controle."""
+    from cobrinha.estados.quem_joga import EstadoQuemJoga
 
-    duelo = EstadoDuelo(jogo, numero_nivel)
+    jogo.trocar_estado(EstadoQuemJoga(jogo, numero_nivel))
+
+
+def iniciar_duelo(
+    jogo: Jogo, numero_nivel: int = 1, entradas: Sequence[Entrada] | None = None
+) -> None:
+    """Começa um duelo no mapa e na velocidade do nível escolhido. Não entra nos recordes.
+
+    `entradas` diz com o que cada jogador joga (padrão: J1 no WASD e J2 nas setas).
+    """
+    from cobrinha.entradas import dica_dos_controles
+    from cobrinha.estados.contagem import EstadoContagem
+    from cobrinha.estados.duelo import ENTRADAS_PADRAO, EstadoDuelo
+
+    entradas = tuple(entradas or ENTRADAS_PADRAO)
+    duelo = EstadoDuelo(jogo, numero_nivel, entradas)
     jogo.trocar_estado(duelo)
     jogo.empilhar(
         EstadoContagem(
@@ -124,9 +143,24 @@ def iniciar_duelo(jogo: Jogo, numero_nivel: int = 1) -> None:
             duelo,
             titulo="DUELO",
             subtitulo=duelo.partida.nivel.nome,
-            dica=DICA_DOS_CONTROLES,
+            dica=dica_dos_controles(entradas),
         )
     )
+
+
+def pedir_controle(jogo: Jogo, duelo: EstadoDuelo) -> None:
+    """O controle de um jogador desconectou: o duelo espera ele voltar."""
+    from cobrinha.estados.controle_desconectado import EstadoControleDesconectado
+
+    jogo.empilhar(EstadoControleDesconectado(jogo, duelo))
+
+
+def controle_religado(jogo: Jogo, duelo: EstadoDuelo) -> None:
+    """Todos os jogadores têm controle de novo: volta ao duelo com a contagem 3-2-1."""
+    from cobrinha.estados.contagem import EstadoContagem
+
+    jogo.desempilhar()
+    jogo.empilhar(EstadoContagem(jogo, duelo))
 
 
 def encerrar_duelo(jogo: Jogo, duelo: EstadoDuelo) -> None:

@@ -14,7 +14,7 @@ from cobrinha.ui.menu import BOTAO_ESQUERDO, TECLAS_CONFIRMAR
 from cobrinha.ui.painel import criar_veu, desenhar_linhas
 
 if TYPE_CHECKING:
-    from cobrinha.estados.jogando import EstadoJogando
+    from cobrinha.estados.base import EstadoDePartida
     from cobrinha.jogo import Jogo
 
 SEQUENCIA = ("3", "2", "1", "JÁ!")
@@ -26,7 +26,7 @@ class EstadoContagem(Estado):
     def __init__(
         self,
         jogo: Jogo,
-        jogando: EstadoJogando,
+        jogando: EstadoDePartida,
         titulo: str | None = None,
         subtitulo: str | None = None,
         dica: str | None = None,

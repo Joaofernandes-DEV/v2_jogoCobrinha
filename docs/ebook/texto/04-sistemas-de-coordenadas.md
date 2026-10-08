@@ -18,7 +18,7 @@ A decisão E2 do briefing estabelece que a lógica do jogo nunca trabalha em pix
 
 As medidas da janela, por sua vez, derivam da grade, e não o contrário. O @cod:config-grade mostra como a configuração define primeiro a célula, as colunas e as linhas, e calcula a largura e a altura da janela a partir delas.
 
-::: codigo #config-grade src/cobrinha/config.py 13-21
+::: codigo #config-grade 270f2fc:src/cobrinha/config.py 13-21
 Tamanho da janela derivado da grade (`config.py`)
 :::
 

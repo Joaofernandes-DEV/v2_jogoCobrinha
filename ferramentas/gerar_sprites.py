@@ -10,6 +10,9 @@ Orientação das peças-base (o jogo gera as outras direções por rotação de 
 - corpo_reto.png: liga ESQUERDA e DIREITA;
 - corpo_curva.png: liga ESQUERDA e BAIXO;
 - cauda.png: liga à DIREITA, com a ponta para a esquerda.
+
+As 4 peças da cobra saem em cada pele de `PELES` (config.py): a verde, original, sem
+sufixo, e as cores do Duelo com sufixo (ex.: cabeca_azul.png). Todas usam só a paleta.
 """
 
 import math
@@ -25,7 +28,7 @@ import pygame  # noqa: E402
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 
-from cobrinha.config import TAMANHO_CELULA, Cor, Paleta  # noqa: E402
+from cobrinha.config import PELES, TAMANHO_CELULA, Cor, Paleta, PeleCobra  # noqa: E402
 
 DESTINO = RAIZ / "src" / "cobrinha" / "assets" / "imagens"
 T = TAMANHO_CELULA
@@ -35,7 +38,10 @@ BORDA_CORPO = 4
 ESPESSURA = 17
 
 
-def cor_do_corpo(profundidade: int, ao_longo: float | None) -> Cor:
+VERDE = PELES[0]
+
+
+def cor_do_corpo(profundidade: int, ao_longo: float | None, pele: PeleCobra = VERDE) -> Cor:
     """Cor de um pixel do corpo a partir da posição na seção transversal.
 
     `profundidade` vai de 0 a 16 de uma borda à outra; `ao_longo` é a posição no
@@ -44,14 +50,14 @@ def cor_do_corpo(profundidade: int, ao_longo: float | None) -> Cor:
     if profundidade in (0, ESPESSURA - 1):
         return Paleta.PRETO
     if profundidade in (1, ESPESSURA - 2):
-        return Paleta.VERDE_ESCURO
+        return pele.escura
     distancia_meio = abs(profundidade - ESPESSURA // 2)
     escama = ao_longo is not None and (round(ao_longo) + distancia_meio) % 8 == 0
     if escama and 3 <= profundidade <= ESPESSURA - 4:
-        return Paleta.VERDE_ESCURO
+        return pele.escura
     if distancia_meio <= 1:
-        return Paleta.VERDE_CLARO
-    return Paleta.VERDE
+        return pele.clara
+    return pele.media
 
 
 def nova_superficie() -> pygame.Surface:
@@ -79,15 +85,15 @@ def contornar(superficie: pygame.Surface, dentro: Callable[[int, int], bool], ab
                     break
 
 
-def corpo_reto() -> pygame.Surface:
+def corpo_reto(pele: PeleCobra = VERDE) -> pygame.Surface:
     superficie = nova_superficie()
     for y in range(BORDA_CORPO, BORDA_CORPO + ESPESSURA):
         for x in range(T):
-            superficie.set_at((x, y), cor_do_corpo(y - BORDA_CORPO, x))
+            superficie.set_at((x, y), cor_do_corpo(y - BORDA_CORPO, x, pele))
     return superficie
 
 
-def corpo_curva() -> pygame.Surface:
+def corpo_curva(pele: PeleCobra = VERDE) -> pygame.Surface:
     """Quarto de anel centrado no canto inferior esquerdo da célula.
 
     Sem escamas: dobradas no arco, elas ficavam distorcidas; as faixas de cor bastam.
@@ -100,11 +106,11 @@ def corpo_curva() -> pygame.Surface:
             profundidade = math.floor(distancia - BORDA_CORPO)
             if not 0 <= profundidade < ESPESSURA:
                 continue
-            superficie.set_at((x, y), cor_do_corpo(profundidade, None))
+            superficie.set_at((x, y), cor_do_corpo(profundidade, None, pele))
     return superficie
 
 
-def cabeca() -> pygame.Surface:
+def cabeca(pele: PeleCobra = VERDE) -> pygame.Surface:
     superficie = nova_superficie()
     meio_y = BORDA_CORPO + ESPESSURA / 2  # 12,5
 
@@ -120,9 +126,9 @@ def cabeca() -> pygame.Surface:
         for x in range(T):
             if dentro(x, y):
                 profundidade = y - BORDA_CORPO
-                cor = cor_do_corpo(profundidade, x) if x < 8 else Paleta.VERDE
+                cor = cor_do_corpo(profundidade, x, pele) if x < 8 else pele.media
                 if x >= 8 and abs(profundidade - ESPESSURA // 2) <= 1:
-                    cor = Paleta.VERDE_CLARO
+                    cor = pele.clara
                 superficie.set_at((x, y), cor)
     contornar(superficie, dentro, abertos={"esq"})
 
@@ -134,8 +140,8 @@ def cabeca() -> pygame.Surface:
         superficie.set_at((17, olho_y + 1), Paleta.PRETO)
         superficie.set_at((17, olho_y + 2 if olho_y == 6 else olho_y), Paleta.PRETO)
     # Narinas.
-    superficie.set_at((21, 10), Paleta.VERDE_ESCURO)
-    superficie.set_at((21, 14), Paleta.VERDE_ESCURO)
+    superficie.set_at((21, 10), pele.escura)
+    superficie.set_at((21, 14), pele.escura)
     # Língua bifurcada saindo da ponta.
     superficie.set_at((23, 12), Paleta.VERMELHO)
     superficie.set_at((24, 11), Paleta.VERMELHO)
@@ -143,7 +149,7 @@ def cabeca() -> pygame.Surface:
     return superficie
 
 
-def cauda() -> pygame.Surface:
+def cauda(pele: PeleCobra = VERDE) -> pygame.Surface:
     superficie = nova_superficie()
     meio_y = BORDA_CORPO + ESPESSURA / 2
 
@@ -155,7 +161,7 @@ def cauda() -> pygame.Surface:
     for y in range(T):
         for x in range(T):
             if dentro(x, y):
-                superficie.set_at((x, y), cor_do_corpo(y - BORDA_CORPO, x))
+                superficie.set_at((x, y), cor_do_corpo(y - BORDA_CORPO, x, pele))
     contornar(superficie, dentro, abertos={"dir"})
     return superficie
 
@@ -298,11 +304,19 @@ def power_encolher() -> pygame.Surface:
     return superficie
 
 
-SPRITES: dict[str, Callable[[], pygame.Surface]] = {
+PECAS_DA_COBRA: dict[str, Callable[[PeleCobra], pygame.Surface]] = {
     "cabeca": cabeca,
     "corpo_reto": corpo_reto,
     "corpo_curva": corpo_curva,
     "cauda": cauda,
+}
+
+SPRITES: dict[str, Callable[[], pygame.Surface]] = {
+    **{
+        f"{nome}{pele.sufixo}": (lambda gerar=gerar, pele=pele: gerar(pele))
+        for pele in PELES
+        for nome, gerar in PECAS_DA_COBRA.items()
+    },
     "comida": comida,
     "comida_dourada": comida_dourada,
     "parede": parede,

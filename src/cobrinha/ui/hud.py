@@ -1,7 +1,8 @@
 """Faixa de HUD no topo da janela (I2): pontos, nível com barra de progresso e recorde.
 
 Na V3, também mostra os power-ups ativos com os segundos restantes e, no modo contra o
-tempo, o relógio no lugar da barra de progresso.
+tempo, o relógio no lugar da barra de progresso. O Duelo tem um HUD próprio, com os
+pontos de cada jogador na cor da cobra dele.
 """
 
 import math
@@ -25,6 +26,8 @@ Y_ROTULO = 3
 Y_VALOR = 21
 LARGURA_BARRA = 180
 ALTURA_BARRA = 10
+# Duelo: J1 e J3 ficam à esquerda, J2 e J4 à direita; cada par afastado por esta distância.
+RECUO_SEGUNDO_JOGADOR = 140
 
 
 @dataclass(frozen=True)
@@ -42,11 +45,25 @@ class DadosHud:
     tempo: float | None = None
 
 
+@dataclass(frozen=True)
+class PlacarJogador:
+    """Um jogador no HUD do Duelo."""
+
+    nome: str  # ex.: "JOGADOR 1"
+    pontos: int
+    cor: Cor  # cor de destaque da cobra
+    vivo: bool = True
+
+
+@dataclass(frozen=True)
+class DadosHudDuelo:
+    jogadores: tuple[PlacarJogador, ...]
+    nome_nivel: str
+    mudo: bool = False
+
+
 def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
-    superficie.fill(Paleta.CINZA_ESCURO, (0, 0, LARGURA_JANELA, ALTURA_HUD))
-    superficie.fill(
-        Paleta.PRETO, (0, ALTURA_HUD - ESPESSURA_BORDA, LARGURA_JANELA, ESPESSURA_BORDA)
-    )
+    _desenhar_faixa(superficie)
     _desenhar_contador(superficie, "PONTOS", dados.pontos, Paleta.BRANCO, esquerda=True)
     _desenhar_contador(superficie, "RECORDE", dados.recorde, Paleta.CINZA_CLARO, esquerda=False)
     _desenhar_nivel(superficie, dados)
@@ -62,15 +79,56 @@ def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
         superficie.blit(imagem, imagem.get_rect(topright=(LARGURA_JANELA - 160, Y_ROTULO)))
 
 
+def desenhar_hud_duelo(superficie: pygame.Surface, dados: DadosHudDuelo) -> None:
+    """Pontos de cada jogador na cor da cobra (cinza e "FORA" se eliminado) e o mapa no meio."""
+    _desenhar_faixa(superficie)
+    for indice, jogador in enumerate(dados.jogadores):
+        valor: int | str = jogador.pontos if jogador.vivo else "FORA"
+        cor = jogador.cor if jogador.vivo else Paleta.CINZA
+        _desenhar_contador(
+            superficie,
+            jogador.nome,
+            valor,
+            cor,
+            esquerda=indice % 2 == 0,
+            cor_rotulo=cor,
+            recuo=(indice // 2) * RECUO_SEGUNDO_JOGADOR,
+        )
+    centro = LARGURA_JANELA // 2
+    titulo = texto.renderizar("DUELO", TamanhoFonte.PEQUENO, Paleta.AMARELO)
+    superficie.blit(titulo, titulo.get_rect(midtop=(centro, 1)))
+    nivel = texto.renderizar(dados.nome_nivel.upper(), TamanhoFonte.MINIMO, Paleta.AZUL_CLARO)
+    superficie.blit(nivel, nivel.get_rect(midtop=(centro, Y_VALOR + 4)))
+    if dados.mudo:
+        imagem = texto.renderizar("MUDO (M)", TamanhoFonte.MINIMO, Paleta.VERMELHO)
+        superficie.blit(imagem, imagem.get_rect(topleft=(centro + 50, Y_ROTULO)))
+
+
+def _desenhar_faixa(superficie: pygame.Surface) -> None:
+    superficie.fill(Paleta.CINZA_ESCURO, (0, 0, LARGURA_JANELA, ALTURA_HUD))
+    superficie.fill(
+        Paleta.PRETO, (0, ALTURA_HUD - ESPESSURA_BORDA, LARGURA_JANELA, ESPESSURA_BORDA)
+    )
+
+
 def _desenhar_contador(
-    superficie: pygame.Surface, rotulo: str, valor: int, cor: Cor, esquerda: bool
+    superficie: pygame.Surface,
+    rotulo: str,
+    valor: int | str,
+    cor: Cor,
+    esquerda: bool,
+    cor_rotulo: Cor = Paleta.CINZA_CLARO,
+    recuo: int = 0,
 ) -> None:
-    imagem_rotulo = texto.renderizar(rotulo, TamanhoFonte.MINIMO, Paleta.CINZA_CLARO)
-    imagem_valor = texto.renderizar(f"{valor:04d}", TamanhoFonte.PEQUENO, cor)
+    """Rótulo pequeno em cima e valor embaixo, encostados na borda (`recuo` px para dentro)."""
+    imagem_rotulo = texto.renderizar(rotulo, TamanhoFonte.MINIMO, cor_rotulo)
+    conteudo = f"{valor:04d}" if isinstance(valor, int) else valor
+    imagem_valor = texto.renderizar(conteudo, TamanhoFonte.PEQUENO, cor)
     if esquerda:
-        posicoes = {"topleft": (MARGEM, Y_ROTULO)}, {"topleft": (MARGEM, Y_VALOR)}
+        x = MARGEM + recuo
+        posicoes = {"topleft": (x, Y_ROTULO)}, {"topleft": (x, Y_VALOR)}
     else:
-        borda = LARGURA_JANELA - MARGEM
+        borda = LARGURA_JANELA - MARGEM - recuo
         posicoes = {"topright": (borda, Y_ROTULO)}, {"topright": (borda, Y_VALOR)}
     superficie.blit(imagem_rotulo, imagem_rotulo.get_rect(**posicoes[0]))
     superficie.blit(imagem_valor, imagem_valor.get_rect(**posicoes[1]))

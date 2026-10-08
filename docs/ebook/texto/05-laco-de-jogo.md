@@ -34,7 +34,7 @@ Fiedler (2004) discute as alternativas para avançar uma simulação no tempo e 
 
 O @cod:atualizar-partida é a implementação dessa ideia no domínio do jogo, sem nenhuma dependência do pygame.
 
-::: codigo #atualizar-partida src/cobrinha/dominio/partida.py 141-159
+::: codigo #atualizar-partida 270f2fc:src/cobrinha/dominio/partida.py 141-159
 Passo de tempo fixo com acumulador (`Partida.atualizar`)
 :::
 
@@ -64,7 +64,7 @@ As linhas 150 e 151 resolvem isso limitando o acumulador a três intervalos (`MA
 
 Como a lógica só conhece o intervalo do passo, mudar a velocidade da cobra é só mudar `passos_por_segundo`. O @cod:velocidade mostra que três regras de jogabilidade (velocidade do nível, aceleração a cada comida e o power-up de câmera lenta) se reduzem a uma conta.
 
-::: codigo #velocidade src/cobrinha/dominio/partida.py 112-123
+::: codigo #velocidade 270f2fc:src/cobrinha/dominio/partida.py 112-123
 Velocidade da cobra: nível, aceleração e câmera lenta (`Partida.passos_por_segundo`)
 :::
 

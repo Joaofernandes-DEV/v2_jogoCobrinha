@@ -22,7 +22,7 @@ Reescrita completa do [Jogo da Cobrinha (V1)](https://github.com/Joaofernandes-D
 
 ## Novidades da V3
 
-A V3 (`v3.0.0` e `v3.1.0`) continua a partir da V2, com o mesmo nome e o mesmo movimento célula a célula. O executável da [última release](https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/latest) já traz as novidades abaixo.
+A V3 (`v3.0.0` a `v3.2.0`) continua a partir da V2, com o mesmo nome e o mesmo movimento célula a célula. O executável da [última release](https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/latest) já traz as novidades abaixo.
 
 **Power-ups:** às vezes um aparece depois de comer. Ele fica no campo por 7 segundos (pisca antes de sumir) e, ao ser pego, não dá pontos nem faz crescer, só aplica o efeito.
 
@@ -37,6 +37,8 @@ A V3 (`v3.0.0` e `v3.1.0`) continua a partir da V2, com o mesmo nome e o mesmo m
 - Sprites e som dos power-ups são gerados por código, como o resto dos assets (`ferramentas/gerar_sprites.py` e `ferramentas/gerar_sons.py`).
 
 **Modo Contra o tempo:** feito pelo colaborador João Pedro Sinhorini Silva. Corrida de pontos contra um relógio de 60 s, em que cada maçã devolve segundos. Os power-ups também valem nesse modo. Veja as regras em [Como jogar](#como-jogar).
+
+**Controle de PS5:** dá para jogar com o DualSense (USB ou Bluetooth), que vibra nos acontecimentos da partida e muda a cor da luz conforme o jogo. Veja os botões em [Controle de PS5 (DualSense)](#controle-de-ps5-dualsense).
 
 ## Rodar pelo código-fonte
 
@@ -138,7 +140,7 @@ python ferramentas/empacotar.py       # dist/Cobrinha.exe, já testado ao final
 python ferramentas/gravar_demo.py     # docs/demo.gif, jogado por um piloto automático (com power-ups)
 ```
 
-**Publicar uma versão:** basta criar e enviar uma tag (ex.: `git tag v3.1.1 && git push origin v3.1.1`). O workflow `release.yml` roda os testes no Windows, gera e testa o executável e cria a release com ele anexado.
+**Publicar uma versão:** basta criar e enviar uma tag (ex.: `git tag v3.2.1 && git push origin v3.2.1`). O workflow `release.yml` roda os testes no Windows, gera e testa o executável e cria a release com ele anexado.
 
 O GitHub Actions roda lint e testes a cada push (Linux com Python 3.11–3.13 e Windows com 3.11).
 

@@ -512,3 +512,17 @@ Modelo:
 - Ideia do João para a V3: jogar com o controle do PS5. Não precisou de dependência nova: o pygame-ce 2.5.8 (SDL 2.32) já reconhece o DualSense e oferece vibração (`rumble`) e luz (`set_led`).
 - **Teste real:** o João testou com o DualSense e funcionou tudo: direcional, analógico, botões, vibração e luz.
 - **Executável:** gerado localmente com `ferramentas/empacotar.py`, passou no teste de fumaça (confirma que o módulo `pygame._sdl2.controller` entra no `.exe`).
+
+### 2026-10-08 16:50 — Preparação da release v3.2.0
+
+**Feito:**
+- Versão do pacote: `3.1.0` → **`3.2.0`** em `pyproject.toml` e `src/cobrinha/__init__.py`.
+- Criadas as notas da release, `docs/notas-v3.2.0.md`: como jogar, a tabela de botões do DualSense, a vibração e a luz.
+- README: a seção "Novidades da V3" cita as versões de `v3.0.0` a `v3.2.0` e apresenta o controle de PS5, com link para a tabela de botões. O exemplo de "Publicar uma versão" agora usa `v3.2.1`.
+
+**Arquivos:** `pyproject.toml`, `src/cobrinha/__init__.py`, `docs/notas-v3.2.0.md` (novo), `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu o `.exe` novo com o suporte ao controle de PS5 (PR #13).
+- O número escolhido foi **3.2.0**: o controle é uma funcionalidade nova e não muda nada do que já existia. A v3.1.0 continua publicada.
+- Depois do merge, a tag `v3.2.0` dispara o workflow **Release**. O resultado fica registrado na próxima entrada.

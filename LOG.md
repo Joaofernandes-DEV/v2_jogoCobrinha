@@ -477,3 +477,17 @@ Modelo:
 - `metadados.toml` agora aceita uma lista de autores (`autores`) e o rótulo do professor (`rotulo_professor`).
 - Os scripts e o `docs/ebook/README.md` continuam documentando como regenerar o PDF, para quem mantém o repositório; isso só não aparece mais no texto do ebook.
 - Nos capítulos, "o autor" que se referia às decisões da V2 e da V3 virou "João Vitor", para não confundir com a autoria do ebook.
+
+### 2026-10-08 13:45 — Roteiro e prompt do anúncio em motion design
+
+**Feito:**
+- Criado `docs/roteiro-motion.md` com o roteiro de 40 s do anúncio (11 cenas), a linha do tempo e o prompt completo para pedir o motion design em outra sessão do Claude.
+- O prompt aponta para os assets da V2 (sprites, fonte, sons, paleta) e para as telas da V1 em `Py_JogoDaCobrinha/`, usadas só na cena 2.
+- Os números do anúncio vieram do repositório (versão 3.1.0): 3 níveis, maçã dourada de 5 s, modo sem bordas, 3 power-ups, modo Contra o tempo e 240+ testes (244 na última execução).
+
+**Arquivos:** `docs/roteiro-motion.md` (novo), `LOG.md`.
+
+**Motivo / observações:**
+- Pedido do João: um anúncio em motion design, sem narração, feito em outra sessão. O roteiro fica versionado para a sessão nova ler direto.
+- O prompt manda não usar `creditos.png` da V1 nem nomes do grupo da V1, que fez o projeto em grupo.
+- Nenhum código, sprite ou som mudou. `ruff check`, `ruff format --check` e `pytest` passaram (244 testes).

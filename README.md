@@ -40,6 +40,8 @@ A V3 (`v3.0.0` a `v3.2.0`) continua a partir da V2, com o mesmo nome e o mesmo m
 
 **Controle de PS5:** dá para jogar com o DualSense (USB ou Bluetooth), que vibra nos acontecimentos da partida e muda a cor da luz conforme o jogo. Veja os botões em [Controle de PS5 (DualSense)](#controle-de-ps5-dualsense).
 
+**Modo Duelo (em desenvolvimento, ainda não está no executável):** duas pessoas no mesmo teclado, cada uma com a sua cobra (verde e azul), no mesmo campo. Vence quem sobrar por último. Veja as regras em [Como jogar](#como-jogar). Nas próximas etapas, cada controle conectado vira mais um jogador (até 4) e haverá rodadas com placar.
+
 ## Rodar pelo código-fonte
 
 Pré-requisito: [Python 3.11+](https://www.python.org/downloads/).
@@ -62,6 +64,7 @@ python -m cobrinha
 | Tecla | Ação |
 |-------|------|
 | Setas ou `W` `A` `S` `D` | Mover a cobra; navegar nos menus |
+| `W` `A` `S` `D` / setas, no Duelo | Mover a cobra do jogador 1 / do jogador 2 |
 | `←` `→` | Escolher o nível inicial no menu |
 | `Enter` / `Espaço` / clique | Confirmar; pular a contagem 3-2-1 |
 | Mouse | Escolher e clicar nas opções dos menus |
@@ -86,6 +89,7 @@ Conecte o controle por cabo USB ou Bluetooth, antes ou depois de abrir o jogo. O
 - **Vibração:** curta ao comer, média na maçã dourada, nos power-ups e ao concluir o nível, e forte ao bater ou quando o tempo acaba.
 - **Luz do controle:** verde jogando, azul na câmera lenta, amarela com pontos em dobro e vermelha ao bater ou quando o relógio do Contra o tempo está acabando.
 - Se o controle desconectar no meio da partida, o jogo pausa.
+- No Duelo, por enquanto, o direcional do controle move o jogador 2, como as setas.
 - No menu principal, o ◯ não fecha o jogo (para sair, use a opção SAIR).
 
 ### Como jogar
@@ -102,6 +106,7 @@ Coma a quantidade de comidas da meta (barra no HUD) para concluir o nível. Os p
 - **Maçã dourada:** às vezes aparece depois de comer. Vale **+5 pontos**, faz crescer, não conta para a meta e **some em 5 segundos** (pisca antes de sumir).
 - **Modos de jogo** (escolha no menu, com `←` `→`): **Clássico**, em que bater na borda perde; **Sem bordas**, em que a cobra atravessa a borda e sai do outro lado (pedras e o próprio corpo continuam valendo); e **Contra o tempo**, descrito abaixo.
 - **Contra o tempo:** uma corrida de pontos no nível escolhido. O relógio começa em **60 s** e não há meta de comidas, então o nível não acaba ao comer. Cada maçã dá **+3 s** e a maçã dourada dá **+5 s** (o relógio nunca passa de 99 s). Abaixo de 10 s o relógio fica vermelho. Quando o tempo acaba, a partida termina em "Tempo esgotado!" e os pontos entram no ranking do modo; bater na borda, nas pedras ou no próprio corpo também encerra.
+- **Duelo:** escolha DUELO no menu. O jogador 1 (cobra verde) usa `W` `A` `S` `D` e o jogador 2 (cobra azul) usa as setas. O mapa e a velocidade são os do nível escolhido em "Nível inicial". As duas cobras andam ao mesmo tempo, e cada maçã faz crescer e acelera o jogo para todos. Bater na borda, numa pedra, em si mesmo ou na outra cobra elimina, e a cobra eliminada pisca e some do campo. Se as duas cabeças entram na mesma célula, ou trocam de lugar, as duas são eliminadas. Vence quem sobrar; se todos forem eliminados no mesmo passo, é empate. O duelo não entra nos recordes.
 - **Power-ups (V3):** câmera lenta, pontos em dobro e encolher. Veja a tabela em [Novidades da V3](#novidades-da-v3).
 - **Recordes:** os 5 melhores de cada modo ficam salvos, e os níveis alcançados ficam liberados no menu.
 - **Opções:** volume dos efeitos e da música, tela cheia e efeitos visuais (desligue para tirar o pisca-pisca e os textos de pontos).
@@ -129,7 +134,7 @@ pytest                  # testes (rodam sem abrir janela)
 Sprites e sons são gerados por código. Para recriá-los (o resultado é sempre o mesmo):
 
 ```bash
-python ferramentas/gerar_sprites.py   # PNGs 25 × 25 em src/cobrinha/assets/imagens/
+python ferramentas/gerar_sprites.py   # PNGs 25 × 25 (com a cobra em 4 cores) em src/cobrinha/assets/imagens/
 python ferramentas/gerar_sons.py      # WAVs em src/cobrinha/assets/sons/
 ```
 
@@ -162,10 +167,11 @@ src/cobrinha/
 │   ├── niveis.py    #   níveis como dados (velocidade, meta e mapa de pedras)
 │   ├── progresso.py #   ranking por modo e níveis liberados
 │   ├── power_ups.py #   tipos de power-up e duração dos efeitos
-│   └── partida.py   #   passo fixo, modos, colisões, fruta dourada, vitória e derrota
+│   ├── partida.py   #   passo fixo, modos, colisões, fruta dourada, vitória e derrota
+│   └── duelo.py     #   várias cobras no mesmo passo, colisões entre elas e vencedor
 ├── opcoes.py        # preferências do jogador
 ├── persistencia.py  # leitura/gravação do JSON de dados
-├── estados/         # telas: menu, recordes, opções, créditos, contagem, jogo, pausa, fim
+├── estados/         # telas: menu, recordes, opções, créditos, contagem, jogo, duelo, pausa, fim
 │   └── navegacao.py #   mapa de todas as trocas de tela
 └── ui/              # HUD, campo, sprites, menu, painéis, efeitos e texto
 ferramentas/         # geradores de sprites e sons, empacotador e gravador do GIF

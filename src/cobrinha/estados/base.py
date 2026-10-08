@@ -28,6 +28,15 @@ class Estado(ABC):
         """Cor da luz do controle enquanto esta tela está no topo (V3)."""
         return Paleta.VERDE_CLARO
 
+    @property
+    def luzes_dos_controles(self) -> dict[int, Cor]:
+        """Cor própria de alguns controles (`instance_id` → cor), por cima de `cor_do_controle`.
+
+        Vale enquanto a tela estiver na pilha, mesmo coberta (ex.: o Duelo debaixo da pausa
+        mantém cada controle na cor do jogador).
+        """
+        return {}
+
     def atualizar(self, dt: float) -> None:  # noqa: B027 - opcional nas subclasses
         """Avança a lógica da tela. `dt` é o tempo do quadro, em segundos."""
 

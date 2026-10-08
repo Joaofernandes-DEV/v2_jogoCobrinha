@@ -12,7 +12,7 @@ Cada tela guarda um relógio próprio, somando o `dt` recebido em `atualizar` (p
 
 A maçã, a maçã dourada e os power-ups não ficam parados: sobem e descem levemente, chamando a atenção do jogador. O @cod:flutuar mostra como.
 
-::: codigo #flutuar src/cobrinha/ui/pecas.py 173-178
+::: codigo #flutuar 270f2fc:src/cobrinha/ui/pecas.py 173-178
 Itens flutuando com um seno arredondado (`_desenhar_flutuando`)
 :::
 
@@ -29,7 +29,7 @@ O pisca-pisca é a animação mais antiga dos jogos e uma forma eficiente de diz
 
 Os itens temporários (maçã dourada e power-ups) piscam no último 1,5 s antes de sumir, para avisar o jogador de que o tempo está acabando (@cod:piscar).
 
-::: codigo #piscar src/cobrinha/ui/pecas.py 151-163
+::: codigo #piscar 270f2fc:src/cobrinha/ui/pecas.py 151-163
 Itens temporários piscando antes de sumir (`_desenhar_temporario`)
 :::
 

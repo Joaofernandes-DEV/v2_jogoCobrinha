@@ -27,7 +27,7 @@ Como dizer a um programa "desenhe uma maçã"? A resposta do gerador é descreve
 
 Esse é o princípio das **curvas implícitas**, apresentadas por Marschner e Shirley (2021): uma curva definida por uma equação *f*(*x*, *y*) = 0, que divide o plano em pontos com *f* < 0 (dentro) e *f* > 0 (fora). Um círculo de raio *r* e centro (*c*<sub>x</sub>, *c*<sub>y</sub>) é o conjunto dos pontos em que a distância ao centro é igual a *r*; seu interior, os pontos em que essa distância é menor. O @cod:maca mostra exatamente isso no desenho da maçã.
 
-::: codigo #maca ferramentas/gerar_sprites.py 163-177
+::: codigo #maca 270f2fc:ferramentas/gerar_sprites.py 163-177
 Corpo e sombra da maçã por uma função de distância (`comida`)
 :::
 
@@ -41,7 +41,7 @@ O segundo é a sombra da linha 175. A condição (*x* − *c*<sub>x</sub>) + (*y
 
 A peça mais interessante é a curva do corpo da cobra, que liga dois lados vizinhos da célula. O @cod:curva desenha um **quarto de anel**: os pixels cuja distância ao canto inferior esquerdo da célula fica entre 4 e 21 px.
 
-::: codigo #curva ferramentas/gerar_sprites.py 90-104
+::: codigo #curva 270f2fc:ferramentas/gerar_sprites.py 90-104
 A curva do corpo como um quarto de anel (`corpo_curva`)
 :::
 
@@ -59,7 +59,7 @@ O ganho dessa formulação é que o corpo reto e a curva usam **a mesma função
 
 A função `cor_do_corpo`, no @cod:cor-do-corpo, transforma a profundidade em cor. É um sombreamento em faixas: contorno preto nas bordas, verde-escuro logo dentro, verde no corpo e verde-claro no centro, que dá a impressão de um corpo cilíndrico iluminado de frente.
 
-::: codigo #cor-do-corpo ferramentas/gerar_sprites.py 38-54
+::: codigo #cor-do-corpo 270f2fc:ferramentas/gerar_sprites.py 38-54
 Cor de um pixel do corpo em função da profundidade (`cor_do_corpo`)
 :::
 
@@ -69,7 +69,7 @@ As escamas em "V" do corpo reto (linha 49) usam a posição ao longo do corpo: u
 
 O contorno preto das formas é calculado, e não desenhado à mão. A função `contornar`, no @cod:contorno, pinta de preto todo pixel da forma que tem pelo menos um **vizinho de 4** (esquerda, direita, acima ou abaixo) fora da forma.
 
-::: codigo #contorno ferramentas/gerar_sprites.py 63-79
+::: codigo #contorno 270f2fc:ferramentas/gerar_sprites.py 63-79
 Contorno calculado pela vizinhança de 4 (`contornar`)
 :::
 

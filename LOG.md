@@ -571,3 +571,37 @@ Modelo:
 - **Ebook:** o `test_ebook.py` falhou porque o ebook cita o código por número de linha, e esta etapa muda arquivos citados. As 20 citações desses arquivos foram fixadas no commit em que o PDF foi gerado (`270f2fc`), e o PDF não mudou. Citações de outros arquivos que já estavam desatualizadas desde o PR do controle (ex.: `jogo.py`) ficaram como estavam, porque o ebook vai sair do repositório.
 - Nesta etapa, o direcional do controle ainda vira "setas" e por isso move o jogador 2 (avisado no README). A vibração ainda vale para todos os controles e a luz não muda no duelo; as duas coisas ficam individuais na etapa 2.
 - **Verificado localmente:** ruff sem apontamentos, 368 testes, capturas de todas as telas novas (menu, contagem, duelo no labirinto, eliminação, vitória, empate e HUD com 4 jogadores) e o jogo testado pelo João.
+
+### 2026-10-08 18:06 — Modo Duelo, etapa 2: controles, luzes e tela "Quem joga?"
+
+**Feito:**
+- **Tela "Quem joga?"** (`estados/quem_joga.py`, nova), aberta pelo item **DUELO (2 A 4 JOGADORES)** do menu. São 4 vagas (verde, azul, amarela e vermelha), preenchidas na ordem de chegada:
+  - WASD entra pelo lado esquerdo do teclado e as setas pelo direito (no máximo 2 no teclado);
+  - cada controle entra com ✕; ✕ de quem já entrou começa, e ◯ tira o controle da vaga;
+  - Enter começa com 2 a 4 jogadores, e Esc volta ao menu. A tela avisa "FALTA 1 JOGADOR".
+- **Entradas** (`entradas.py`, novo): `Entrada` diz de onde vêm os comandos de cada jogador (teclado esquerdo, teclado direito ou um controle pelo `instance_id`). No duelo, o direcional de um controle move só a cobra dele e não vira mais as "setas" do teclado.
+- **Controle** (`controle.py`):
+  - as teclas virtuais levam o `controle_id`;
+  - `vibrar(..., controle_id)` vibra um controle só;
+  - `definir_luzes(padrao, por_controle)` dá uma cor a cada controle e só reenvia a cor quando ela muda;
+  - o aviso de desconexão diz qual controle saiu (`controle_desconectado`).
+- **Luzes:** cada tela pode dar cores próprias aos controles (`Estado.luzes_dos_controles`). O `Jogo` junta as cores de toda a pilha, então o duelo mantém as cores por baixo da pausa, da contagem e da tela de fim. No duelo:
+  - o controle de cada jogador fica na cor da cobra dele, e cinza depois de eliminado;
+  - os controles que não jogam ficam brancos.
+- **Vibração individual:** só vibra o controle de quem comeu (fraca), pegou a maçã dourada (média), foi eliminado (forte) ou venceu (média).
+- **Controle desconectado** (`estados/controle_desconectado.py`, nova): se sair o controle de um jogador vivo, o duelo para e mostra "JOGADOR 2: reconecte o controle e aperte X". O primeiro controle livre que apertar ✕ passa a ser dele, e o duelo volta com a contagem 3-2-1. Esc ou P abrem a pausa, para quem quiser desistir. Se o controle sair durante a pausa, o aviso aparece quando o duelo volta.
+- "Jogar de novo" e "Reiniciar" mantêm os mesmos jogadores; a contagem mostra quem joga com o quê (ex.: "J1: WASD   J2: CONTROLE   J3: SETAS").
+- README: tela "Quem joga?", luz e vibração no duelo, reconexão e `entradas.py` na estrutura.
+- Testes de 368 para **405**: novos `tests/test_entradas.py`, `tests/test_quem_joga.py` e `tests/test_duelo_controles.py` (controles e teclado no mesmo duelo, duelo de 4, vibração e luz por jogador, desconexão e religação); acréscimos em `tests/test_controle.py` (id nas teclas, vibração e luz por controle, cores de toda a pilha). `tests/auxiliares.py` ganhou um controle falso com vários `instance_id`.
+
+**Arquivos:** `src/cobrinha/controle.py`, `src/cobrinha/entradas.py` (novo), `src/cobrinha/estados/base.py`, `src/cobrinha/jogo.py`, `src/cobrinha/estados/duelo.py`, `src/cobrinha/estados/controle_desconectado.py` (novo), `src/cobrinha/estados/quem_joga.py` (novo), `src/cobrinha/estados/fim_do_duelo.py`, `src/cobrinha/estados/navegacao.py`, `src/cobrinha/estados/menu_principal.py`, `tests/auxiliares.py`, `tests/test_controle.py`, `tests/test_entradas.py` (novo), `tests/test_quem_joga.py` (novo), `tests/test_duelo_controles.py` (novo), `tests/test_estados_duelo.py`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Segunda das 3 etapas do modo Duelo pedidas pelo João. Ele deixou as decisões de design desta etapa comigo.
+- **Religação em vez de esperar o mesmo controle:** o SDL dá um `instance_id` novo ao controle que reconecta, então o vínculo antigo não sobrevive. Por isso o jogador sem controle fica com o primeiro controle livre que apertar ✕.
+- **Branco para quem não joga:** a cor do J1 (verde-claro) era igual à cor geral dos controles, e não daria para ver qual controle está no duelo.
+- Desconectar o controle de quem não está jogando, ou de quem já foi eliminado, não para o duelo. Nos modos de 1 jogador, qualquer desconexão continua pausando, como antes.
+- Os testes de tela da etapa 1 que entravam no duelo direto pelo menu agora passam pela tela "Quem joga?".
+- Para conferir que os testes novos pegam erros, quebrei de propósito duas regras (vibração indo para todos e o direcional do controle movendo quem joga nas setas): 5 testes falharam. Depois desfiz a quebra.
+- **Verificado localmente:** ruff sem apontamentos, 405 testes, capturas das telas novas (menu, "Quem joga?" com 1 e 4 jogadores, contagem com 4 e aviso de controle desconectado) e o jogo aberto para o João testar antes dos commits.
+- Próximo passo: **etapa 3** (power-ups disputados, placar até 3 vitórias e a variante com relógio).

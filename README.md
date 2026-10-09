@@ -190,7 +190,6 @@ tests/               # pytest
 |---------|----------|
 | [briefing_v2.md](briefing_v2.md) | Diagnóstico da V1, decisões e plano de melhorias em fases |
 | [LOG.md](LOG.md) | Diário de bordo com todas as alterações, por data e horário |
-| [docs/ebook/](docs/ebook/) | Ebook didático (PDF, ABNT) sobre os conceitos de Computação Gráfica aplicados no jogo |
 
 ## Tecnologias
 

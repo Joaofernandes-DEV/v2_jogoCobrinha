@@ -674,3 +674,20 @@ Modelo:
 **Motivo / observações:**
 - O João pediu uma versão nova com o modo Duelo (PRs #16, #17 e #18).
 - O teste automático não usa controles de verdade, vários jogadores nem o áudio. Vale abrir o executável publicado e jogar um duelo com o teclado e o DualSense.
+
+### 2026-10-09 09:41 — Ebook e roteiro do anúncio saem do repositório
+
+**Feito:**
+- `docs/ebook/` (56 arquivos: textos, figuras, scripts e o PDF) e `docs/roteiro-motion.md` deixaram de ser versionados (`git rm --cached`, um commit por arquivo). As cópias locais continuam na pasta do João.
+- `.gitignore`: passa a ignorar `docs/ebook/` e `docs/roteiro-motion.md`, e também `apresentacao/` e `docs/motion/`, que já eram só locais.
+- `tests/test_ebook.py` saiu do repositório: ele lê `docs/ebook/` e quebraria o CI sem a pasta. Uma cópia ficou dentro da pasta local do ebook (`docs/ebook/test_ebook.py`, com o caminho da raiz ajustado), e o README local do ebook foi atualizado para rodar com `pytest docs/ebook` e instalar `markdown` e `pillow` direto.
+- Saiu o extra `[ebook]` do `pyproject.toml`, que só servia para gerar o PDF.
+- README: o ebook saiu da tabela "Documentos do projeto".
+
+**Arquivos:** `docs/ebook/` (56 arquivos, só do repositório), `docs/roteiro-motion.md` (só do repositório), `tests/test_ebook.py` (removido), `.gitignore`, `pyproject.toml`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Pedido do João, combinado para depois do modo Duelo: o ebook e o roteiro do anúncio são materiais dele, que não precisam ficar públicos no GitHub.
+- Os arquivos continuam no histórico do Git (commits anteriores e as tags até `v3.3.0`); a mudança só para de versioná-los daqui em diante. As entradas antigas do LOG sobre o ebook e o roteiro ficaram como estão, porque registram o que aconteceu.
+- **Cuidado ao atualizar a cópia local depois do merge:** trazer para uma pasta em que os arquivos ainda são versionados um commit que os tira do repositório faz o Git apagá-los do disco. Isso aconteceu ao preparar esta branch, e a pasta foi restaurada de uma cópia de segurança. Antes do `git pull`, copie `docs/ebook/` e `docs/roteiro-motion.md` para fora do repositório; ou, depois, traga de volta o que está no histórico com `git restore --source=v3.3.0 --worktree -- docs/ebook docs/roteiro-motion.md` (o `build/`, o `test_ebook.py` e o ajuste no README local do ebook não estão no histórico).
+- Testes: 441 (antes 445; saem os 4 do `test_ebook.py`).

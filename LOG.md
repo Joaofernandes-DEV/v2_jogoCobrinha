@@ -643,3 +643,17 @@ Modelo:
 - Para conferir que os testes novos pegam erros, quebrei de propósito duas regras (a cobra lenta andando sempre e o placar sem registrar vitórias): 9 testes falharam. Depois desfiz a quebra.
 - **Verificado localmente:** ruff sem apontamentos, 445 testes, capturas das telas novas ("Quem joga?" com o modo, contagem, HUD com relógio, vitórias e efeitos, placar da rodada e campeão) e o jogo aberto para o João testar antes dos commits.
 - Com esta etapa, o modo Duelo pedido está completo. Ele ainda não foi publicado em release.
+
+### 2026-10-09 09:31 — Preparação da release v3.3.0
+
+**Feito:**
+- Versão do pacote: `3.2.0` → **`3.3.0`** em `pyproject.toml` e `src/cobrinha/__init__.py`.
+- Criadas as notas da release, `docs/notas-v3.3.0.md`: como jogar e o modo Duelo (tela "Quem joga?", regras, rodadas até 3 vitórias, modos, power-ups disputados e controles).
+- README: a seção "Novidades da V3" cita as versões de `v3.0.0` a `v3.3.0`, e o modo Duelo deixou de estar "em desenvolvimento". O exemplo de "Publicar uma versão" agora usa `v3.3.1`.
+
+**Arquivos:** `pyproject.toml`, `src/cobrinha/__init__.py`, `docs/notas-v3.3.0.md` (novo), `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu uma versão nova depois do merge da etapa 3 do modo Duelo (PRs #16, #17 e #18).
+- O número escolhido foi **3.3.0**: o Duelo é uma funcionalidade nova e não muda nada do que já existia, inclusive os `dados.json` salvos. A v3.2.0 continua publicada.
+- Depois do merge, a tag `v3.3.0` dispara o workflow **Release**. O resultado fica registrado na próxima entrada.

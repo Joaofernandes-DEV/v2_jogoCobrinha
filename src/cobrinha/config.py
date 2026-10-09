@@ -63,6 +63,9 @@ TAMANHO_RANKING: Final = 5
 # Duelo (V3): de 2 a 4 cobras no mesmo campo; vence quem sobrar por último.
 MAXIMO_JOGADORES: Final = 4
 COMIDAS_NO_DUELO: Final = 2  # maçãs no campo ao mesmo tempo
+VITORIAS_PARA_VENCER: Final = 3  # rodadas que um jogador precisa ganhar para ser campeão
+# Variante com relógio (modo Contra o tempo): sem bônus por maçã, para a rodada não se arrastar.
+TEMPO_DUELO_COM_RELOGIO: Final = 60.0
 
 
 class TamanhoFonte:

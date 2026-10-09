@@ -27,6 +27,8 @@ from cobrinha.dominio.partida import Partida, Situacao
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from cobrinha.dominio.duelo import Placar
+    from cobrinha.dominio.partida import Modo
     from cobrinha.entradas import Entrada
     from cobrinha.estados.base import EstadoDePartida
     from cobrinha.estados.duelo import EstadoDuelo
@@ -124,28 +126,40 @@ def abrir_quem_joga(jogo: Jogo, numero_nivel: int = 1) -> None:
 
 
 def iniciar_duelo(
-    jogo: Jogo, numero_nivel: int = 1, entradas: Sequence[Entrada] | None = None
+    jogo: Jogo,
+    numero_nivel: int = 1,
+    entradas: Sequence[Entrada] | None = None,
+    modo: Modo | None = None,
+    placar: Placar | None = None,
 ) -> None:
-    """Começa um duelo no mapa e na velocidade do nível escolhido. Não entra nos recordes.
+    """Começa uma rodada de duelo no mapa e na velocidade do nível escolhido.
 
-    `entradas` diz com o que cada jogador joga (padrão: J1 no WASD e J2 nas setas).
+    `entradas` diz com o que cada jogador joga (padrão: J1 no WASD e J2 nas setas); `modo`
+    vem das opções do menu; sem `placar`, começa uma disputa nova. Não entra nos recordes.
     """
     from cobrinha.entradas import dica_dos_controles
     from cobrinha.estados.contagem import EstadoContagem
     from cobrinha.estados.duelo import ENTRADAS_PADRAO, EstadoDuelo
 
     entradas = tuple(entradas or ENTRADAS_PADRAO)
-    duelo = EstadoDuelo(jogo, numero_nivel, entradas)
+    modo = modo or jogo.opcoes.modo_de_jogo
+    duelo = EstadoDuelo(jogo, numero_nivel, entradas, modo=modo, placar=placar)
     jogo.trocar_estado(duelo)
     jogo.empilhar(
         EstadoContagem(
             jogo,
             duelo,
-            titulo="DUELO",
-            subtitulo=duelo.partida.nivel.nome,
+            titulo=f"RODADA {duelo.placar.rodada}",
+            subtitulo=f"{duelo.partida.nivel.nome}   {modo.value}",
             dica=dica_dos_controles(entradas),
         )
     )
+
+
+def proxima_rodada(jogo: Jogo, duelo: EstadoDuelo) -> None:
+    """Mesmos jogadores, mapa e modo; o placar continua."""
+    duelo.placar.nova_rodada()
+    iniciar_duelo(jogo, duelo.numero_nivel, duelo.entradas, duelo.partida.modo, duelo.placar)
 
 
 def pedir_controle(jogo: Jogo, duelo: EstadoDuelo) -> None:

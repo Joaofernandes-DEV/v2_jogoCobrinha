@@ -62,8 +62,8 @@ def test_menu_duelo_abre_quem_joga_e_depois_a_contagem_com_os_controles(jogo):
     enviar(jogo, pygame.K_d, pygame.K_UP, pygame.K_RETURN)  # WASD entra, setas entram, Enter
     contagem = jogo.estado_atual
     assert isinstance(contagem, EstadoContagem)
-    assert contagem.titulo == "DUELO"
-    assert contagem.subtitulo == "Campo aberto"
+    assert contagem.titulo == "RODADA 1"
+    assert contagem.subtitulo == "Campo aberto   Clássico"
     assert contagem.dica == "J1: WASD   J2: SETAS"
     duelo = jogo.pilha[0]
     assert isinstance(duelo, EstadoDuelo)

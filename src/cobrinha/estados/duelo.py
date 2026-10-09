@@ -4,6 +4,10 @@ Cada jogador tem a sua entrada (WASD, setas ou um controle; ver `entradas.py`), 
 na tela "Quem joga?". O controle de cada jogador acende na cor da cobra dele e só vibra
 com o que acontece com ele. Se o controle de um jogador desconectar, o duelo para até ele
 ser reconectado.
+
+Cada tela de duelo é uma rodada; o `Placar` passa de uma rodada para a outra até alguém
+fazer 3 vitórias. O item MODO do menu vale também aqui (Clássico, Sem bordas ou a variante
+com relógio, Contra o tempo).
 """
 
 from __future__ import annotations
@@ -27,9 +31,9 @@ from cobrinha.config import (
     TamanhoFonte,
 )
 from cobrinha.controle import Vibracao, controle_desconectado
-from cobrinha.dominio.duelo import PartidaDuelo
+from cobrinha.dominio.duelo import PartidaDuelo, Placar
 from cobrinha.dominio.niveis import obter_nivel
-from cobrinha.dominio.partida import Evento
+from cobrinha.dominio.partida import Evento, Modo
 from cobrinha.entradas import TECLADO_DIREITO, TECLADO_ESQUERDO, Entrada
 from cobrinha.estados import navegacao
 from cobrinha.estados.base import EstadoDePartida
@@ -37,7 +41,9 @@ from cobrinha.estados.jogando import (
     DURACAO_MORTE,
     DURACAO_MORTE_SEM_EFEITOS,
     PISCADAS_POR_SEGUNDO,
+    ROTULO_DO_POWER_UP,
     TECLAS_PAUSA,
+    TEXTO_AO_PEGAR,
 )
 from cobrinha.ui import texto
 from cobrinha.ui.campo import celula_para_pixel, criar_fundo_campo
@@ -58,16 +64,21 @@ COR_FORA_DO_DUELO = Paleta.BRANCO
 SOM_DO_EVENTO = {
     Evento.COMEU: Som.COMER,
     Evento.COMEU_DOURADA: Som.BONUS,
+    Evento.PEGOU_POWER_UP: Som.POWER_UP,
     Evento.BATEU: Som.BATER,
     Evento.VENCEU: Som.VITORIA,
+    Evento.TEMPO_ESGOTADO: Som.NIVEL,
 }
-# Só o controle de quem comeu, bateu ou venceu vibra.
+# Só o controle de quem comeu, pegou um power-up, bateu ou venceu vibra (os atingidos por um
+# power-up vibram fraco).
 VIBRACAO_DO_EVENTO = {
     Evento.COMEU: Vibracao.FRACA,
     Evento.COMEU_DOURADA: Vibracao.MEDIA,
+    Evento.PEGOU_POWER_UP: Vibracao.MEDIA,
     Evento.BATEU: Vibracao.FORTE,
     Evento.VENCEU: Vibracao.MEDIA,
 }
+VIBRACAO_DO_ALVO = Vibracao.FRACA
 PONTOS_DO_EVENTO = {Evento.COMEU: 1, Evento.COMEU_DOURADA: PONTOS_FRUTA_DOURADA}
 
 
@@ -86,6 +97,8 @@ class EstadoDuelo(EstadoDePartida):
         numero_nivel: int = 1,
         entradas: Sequence[Entrada] = ENTRADAS_PADRAO,
         partida: PartidaDuelo | None = None,
+        modo: Modo = Modo.CLASSICO,
+        placar: Placar | None = None,
     ):
         super().__init__(jogo)
         # Entrada de cada jogador, na ordem J1, J2... (muda se um controle for religado).
@@ -93,8 +106,12 @@ class EstadoDuelo(EstadoDePartida):
         self.partida = (
             partida
             if partida is not None
-            else PartidaDuelo(len(self.entradas), nivel=obter_nivel(numero_nivel), rng=jogo.rng)
+            else PartidaDuelo(
+                len(self.entradas), nivel=obter_nivel(numero_nivel), rng=jogo.rng, modo=modo
+            )
         )
+        # Vitórias até aqui; a primeira rodada começa um placar novo.
+        self.placar = placar if placar is not None else Placar(len(self.entradas))
         self.sprites = Sprites()
         self.fundo_campo = criar_fundo_campo()
         self.sprites.desenhar_obstaculos(self.fundo_campo, self.partida.obstaculos, topo=0)
@@ -163,7 +180,8 @@ class EstadoDuelo(EstadoDePartida):
         }
 
     def reiniciar(self) -> None:
-        navegacao.iniciar_duelo(self.jogo, self.numero_nivel, self.entradas)
+        """REINICIAR na pausa recomeça a disputa, com o placar zerado."""
+        navegacao.iniciar_duelo(self.jogo, self.numero_nivel, self.entradas, self.partida.modo)
 
     def abandonar(self) -> None:
         navegacao.abrir_menu(self.jogo)
@@ -191,14 +209,23 @@ class EstadoDuelo(EstadoDePartida):
                 self.jogo.audio.parar_musica()
             if evento in SOM_DO_EVENTO:
                 self.jogo.audio.tocar(SOM_DO_EVENTO[evento])
-            if evento in VIBRACAO_DO_EVENTO and indice is not None:
+            if indice is None:
+                continue
+            if evento in VIBRACAO_DO_EVENTO:
                 self._vibrar(VIBRACAO_DO_EVENTO[evento], indice)
             if evento is Evento.BATEU and self.jogo.opcoes.efeitos_visuais:
                 self.piscando[indice] = DURACAO_MORTE
+            jogador = self.partida.jogadores[indice]
             if evento in PONTOS_DO_EVENTO:
-                self._pontos_flutuantes(indice, PONTOS_DO_EVENTO[evento])
+                pontos = PONTOS_DO_EVENTO[evento] * jogador.multiplicador_pontos
+                self._texto_flutuante(indice, f"+{pontos}")
+            if evento is Evento.PEGOU_POWER_UP and acontecimento.power_up is not None:
+                self._texto_flutuante(indice, TEXTO_AO_PEGAR[acontecimento.power_up])
+                for alvo in acontecimento.alvos:
+                    self._vibrar(VIBRACAO_DO_ALVO, alvo)
 
         if self.partida.encerrada:
+            self.placar.registrar(self.partida.vencedor)
             efeitos = self.jogo.opcoes.efeitos_visuais
             self.tempo_ate_encerrar = DURACAO_MORTE if efeitos else DURACAO_MORTE_SEM_EFEITOS
 
@@ -207,13 +234,14 @@ class EstadoDuelo(EstadoDePartida):
         if entrada.controle_id is not None:
             self.jogo.controles.vibrar(vibracao, entrada.controle_id)
 
-    def _pontos_flutuantes(self, indice: int, pontos: int) -> None:
+    def _texto_flutuante(self, indice: int, conteudo: str) -> None:
+        """Texto que sobe da cabeça do jogador, na cor da cobra dele (ex.: "+1", "LENTO!")."""
         if not self.jogo.opcoes.efeitos_visuais:
             return
         x, y = celula_para_pixel(self.partida.jogadores[indice].cobra.cabeca)
         meio = TAMANHO_CELULA // 2
         cor = pele_do_jogador(indice).destaque
-        self.efeitos.texto_flutuante(f"+{pontos}", cor, (x + meio, y + meio))
+        self.efeitos.texto_flutuante(conteudo, cor, (x + meio, y + meio))
 
     def cobra_visivel(self, indice: int) -> bool:
         """Cobra viva aparece sempre; a eliminada pisca e depois some do campo."""
@@ -232,11 +260,18 @@ class EstadoDuelo(EstadoDePartida):
                     jogador.pontos,
                     pele_do_jogador(jogador.indice).destaque,
                     jogador.vivo,
+                    vitorias=self.placar.vitorias[jogador.indice],
+                    efeitos=tuple(
+                        (ROTULO_DO_POWER_UP[tipo], restante)
+                        for tipo, restante in jogador.efeitos.items()
+                    ),
                 )
                 for jogador in partida.jogadores
             ),
             nome_nivel=partida.nivel.nome,
             mudo=self.jogo.audio.mudo,
+            rodada=self.placar.rodada,
+            tempo=partida.tempo_restante,
         )
         desenhar_hud_duelo(superficie, dados)
         superficie.blit(self.fundo_campo, (0, ALTURA_HUD))
@@ -249,6 +284,8 @@ class EstadoDuelo(EstadoDePartida):
                 self.tempo,
                 partida.fruta_dourada.tempo_restante,
             )
+        if partida.power_up is not None:
+            self.sprites.desenhar_power_up(superficie, partida.power_up, self.tempo)
         for jogador in partida.jogadores:
             if self.cobra_visivel(jogador.indice):
                 pele = pele_do_jogador(jogador.indice)

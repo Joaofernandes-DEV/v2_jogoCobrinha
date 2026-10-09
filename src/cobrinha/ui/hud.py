@@ -2,7 +2,8 @@
 
 Na V3, também mostra os power-ups ativos com os segundos restantes e, no modo contra o
 tempo, o relógio no lugar da barra de progresso. O Duelo tem um HUD próprio, com os
-pontos de cada jogador na cor da cobra dele.
+pontos, as vitórias e os efeitos de cada jogador na cor da cobra dele, a rodada e, na
+variante com relógio, o tempo.
 """
 
 import math
@@ -14,6 +15,7 @@ from cobrinha.config import (
     ALTURA_HUD,
     LARGURA_JANELA,
     TEMPO_ALERTA,
+    VITORIAS_PARA_VENCER,
     Cor,
     Paleta,
     TamanhoFonte,
@@ -28,6 +30,9 @@ LARGURA_BARRA = 180
 ALTURA_BARRA = 10
 # Duelo: J1 e J3 ficam à esquerda, J2 e J4 à direita; cada par afastado por esta distância.
 RECUO_SEGUNDO_JOGADOR = 140
+# Quadradinhos das vitórias (a fonte não tem ■ e □, então são desenhados).
+LADO_MARCADOR = 7
+ESPACO_MARCADOR = 3
 
 
 @dataclass(frozen=True)
@@ -53,6 +58,9 @@ class PlacarJogador:
     pontos: int
     cor: Cor  # cor de destaque da cobra
     vivo: bool = True
+    vitorias: int = 0
+    # (rótulo curto, segundos restantes) dos efeitos sobre o jogador (ex.: "LENTO").
+    efeitos: tuple[tuple[str, float], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -60,6 +68,9 @@ class DadosHudDuelo:
     jogadores: tuple[PlacarJogador, ...]
     nome_nivel: str
     mudo: bool = False
+    rodada: int = 1
+    # Segundos restantes na variante com relógio; None sem relógio.
+    tempo: float | None = None
 
 
 def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
@@ -80,28 +91,75 @@ def desenhar_hud(superficie: pygame.Surface, dados: DadosHud) -> None:
 
 
 def desenhar_hud_duelo(superficie: pygame.Surface, dados: DadosHudDuelo) -> None:
-    """Pontos de cada jogador na cor da cobra (cinza e "FORA" se eliminado) e o mapa no meio."""
+    """Cada jogador na cor da cobra (cinza e "FORA" se eliminado), com os quadradinhos das
+    vitórias e os efeitos; no meio, a rodada e o mapa (ou o relógio)."""
     _desenhar_faixa(superficie)
     for indice, jogador in enumerate(dados.jogadores):
         valor: int | str = jogador.pontos if jogador.vivo else "FORA"
         cor = jogador.cor if jogador.vivo else Paleta.CINZA
-        _desenhar_contador(
+        esquerda = indice % 2 == 0
+        rotulo, numero = _desenhar_contador(
             superficie,
             jogador.nome,
             valor,
             cor,
-            esquerda=indice % 2 == 0,
+            esquerda=esquerda,
             cor_rotulo=cor,
             recuo=(indice // 2) * RECUO_SEGUNDO_JOGADOR,
         )
+        x = rotulo.right + 6 if esquerda else rotulo.left - 6
+        desenhar_vitorias(superficie, jogador.vitorias, jogador.cor, x, rotulo.centery, esquerda)
+        if jogador.efeitos:
+            resumo = " ".join(f"{nome} {math.ceil(resto)}" for nome, resto in jogador.efeitos)
+            imagem = texto.renderizar(resumo, TamanhoFonte.MINIMO, Paleta.AMARELO)
+            if esquerda:
+                lugar = imagem.get_rect(topleft=(numero.right + 6, Y_VALOR + 3))
+            else:
+                lugar = imagem.get_rect(topright=(numero.left - 6, Y_VALOR + 3))
+            superficie.blit(imagem, lugar)
     centro = LARGURA_JANELA // 2
-    titulo = texto.renderizar("DUELO", TamanhoFonte.PEQUENO, Paleta.AMARELO)
+    titulo = texto.renderizar(f"RODADA {dados.rodada}", TamanhoFonte.PEQUENO, Paleta.AMARELO)
     superficie.blit(titulo, titulo.get_rect(midtop=(centro, 1)))
-    nivel = texto.renderizar(dados.nome_nivel.upper(), TamanhoFonte.MINIMO, Paleta.AZUL_CLARO)
-    superficie.blit(nivel, nivel.get_rect(midtop=(centro, Y_VALOR + 4)))
+    if dados.tempo is not None:
+        cor = Paleta.VERMELHO if dados.tempo <= TEMPO_ALERTA else Paleta.BRANCO
+        relogio = texto.renderizar(f"TEMPO {math.ceil(dados.tempo):02d}", TamanhoFonte.PEQUENO, cor)
+        superficie.blit(relogio, relogio.get_rect(midtop=(centro, 25)))
+    else:
+        nivel = texto.renderizar(dados.nome_nivel.upper(), TamanhoFonte.MINIMO, Paleta.AZUL_CLARO)
+        superficie.blit(nivel, nivel.get_rect(midtop=(centro, Y_VALOR + 4)))
     if dados.mudo:
         imagem = texto.renderizar("MUDO (M)", TamanhoFonte.MINIMO, Paleta.VERMELHO)
         superficie.blit(imagem, imagem.get_rect(topleft=(centro + 50, Y_ROTULO)))
+
+
+def desenhar_vitorias(
+    superficie: pygame.Surface,
+    vitorias: int,
+    cor: Cor,
+    x: int,
+    centro_y: int,
+    para_direita: bool,
+    lado: int = LADO_MARCADOR,
+) -> pygame.Rect:
+    """Quadradinhos das vitórias (cheios na cor do jogador, vazios em cinza), a partir de `x`.
+
+    `para_direita` = os quadradinhos seguem de `x` para a direita; senão, terminam em `x`.
+    Devolve a área ocupada.
+    """
+    espaco = max(ESPACO_MARCADOR, lado // 3)
+    largura = VITORIAS_PARA_VENCER * lado + (VITORIAS_PARA_VENCER - 1) * espaco
+    area = pygame.Rect(0, 0, largura, lado)
+    if para_direita:
+        area.midleft = (x, centro_y)
+    else:
+        area.midright = (x, centro_y)
+    for numero in range(VITORIAS_PARA_VENCER):
+        quadrado = pygame.Rect(area.left + numero * (lado + espaco), area.top, lado, lado)
+        if numero < vitorias:
+            superficie.fill(cor, quadrado)
+        else:
+            pygame.draw.rect(superficie, Paleta.CINZA, quadrado, width=max(1, lado // 7))
+    return area
 
 
 def _desenhar_faixa(superficie: pygame.Surface) -> None:
@@ -119,8 +177,11 @@ def _desenhar_contador(
     esquerda: bool,
     cor_rotulo: Cor = Paleta.CINZA_CLARO,
     recuo: int = 0,
-) -> None:
-    """Rótulo pequeno em cima e valor embaixo, encostados na borda (`recuo` px para dentro)."""
+) -> tuple[pygame.Rect, pygame.Rect]:
+    """Rótulo pequeno em cima e valor embaixo, encostados na borda (`recuo` px para dentro).
+
+    Devolve as áreas do rótulo e do valor.
+    """
     imagem_rotulo = texto.renderizar(rotulo, TamanhoFonte.MINIMO, cor_rotulo)
     conteudo = f"{valor:04d}" if isinstance(valor, int) else valor
     imagem_valor = texto.renderizar(conteudo, TamanhoFonte.PEQUENO, cor)
@@ -130,8 +191,11 @@ def _desenhar_contador(
     else:
         borda = LARGURA_JANELA - MARGEM - recuo
         posicoes = {"topright": (borda, Y_ROTULO)}, {"topright": (borda, Y_VALOR)}
-    superficie.blit(imagem_rotulo, imagem_rotulo.get_rect(**posicoes[0]))
-    superficie.blit(imagem_valor, imagem_valor.get_rect(**posicoes[1]))
+    area_rotulo = imagem_rotulo.get_rect(**posicoes[0])
+    area_valor = imagem_valor.get_rect(**posicoes[1])
+    superficie.blit(imagem_rotulo, area_rotulo)
+    superficie.blit(imagem_valor, area_valor)
+    return area_rotulo, area_valor
 
 
 def _desenhar_nivel(superficie: pygame.Surface, dados: DadosHud) -> None:

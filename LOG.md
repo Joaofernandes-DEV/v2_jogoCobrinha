@@ -605,3 +605,41 @@ Modelo:
 - Para conferir que os testes novos pegam erros, quebrei de propósito duas regras (vibração indo para todos e o direcional do controle movendo quem joga nas setas): 5 testes falharam. Depois desfiz a quebra.
 - **Verificado localmente:** ruff sem apontamentos, 405 testes, capturas das telas novas (menu, "Quem joga?" com 1 e 4 jogadores, contagem com 4 e aviso de controle desconectado) e o jogo aberto para o João testar antes dos commits.
 - Próximo passo: **etapa 3** (power-ups disputados, placar até 3 vitórias e a variante com relógio).
+
+### 2026-10-08 23:21 — Modo Duelo, etapa 3: power-ups disputados, rodadas e relógio
+
+**Feito:**
+- **Rodadas até 3 vitórias:**
+  - novo `Placar` no domínio (`vitorias`, `rodada`, `registrar`, `nova_rodada` e `campeao`), com `VITORIAS_PARA_VENCER = 3` no `config.py`; empate não dá vitória a ninguém;
+  - a tela de fim virou a tela de placar: "JOGADOR 2 VENCEU A RODADA!" ou "EMPATE!", os pontos e os quadradinhos das vitórias de cada um, e PRÓXIMA RODADA;
+  - com 3 vitórias, a tela anuncia "JOGADOR n É O CAMPEÃO!", e JOGAR DE NOVO começa outra disputa com os mesmos jogadores;
+  - o HUD mostra "RODADA n" e os quadradinhos ao lado de cada nome. A contagem mostra a rodada, o mapa e o modo;
+  - "Reiniciar", na pausa, recomeça a disputa com o placar zerado.
+- **O duelo segue o MODO do menu:**
+  - **Clássico:** a borda elimina;
+  - **Sem bordas:** a cobra atravessa a borda;
+  - **Contra o tempo:** é a variante com relógio.
+- **Variante com relógio:** 60 s por rodada (`TEMPO_DUELO_COM_RELOGIO`, sem bônus por maçã), no centro do HUD e vermelho a partir de 10 s.
+  - Vence quem tiver mais pontos quando o tempo acabar; pontos iguais são empate.
+  - Quem é eliminado sai do campo, mas os pontos dele continuam valendo.
+  - A rodada acaba antes se não sobrar ninguém, ou se o último vivo já estiver na frente; se ele estiver atrás, continua até passar à frente, bater ou o tempo acabar.
+- **Power-ups disputados**, sorteados como nos outros modos (8% depois de cada maçã, um por vez, somem em 7 s):
+  - **câmera lenta:** os adversários vivos andam na metade da velocidade por 5 s, e quem pegou fica livre da lentidão (quem estava lento e pega inverte o efeito);
+  - **cogumelo:** corta 3 segmentos da cauda dos adversários, sem deixá-los menores que 3;
+  - **pontos em dobro:** por 8 s, só para quem pegou, e só aparecem com relógio, porque sem relógio os pontos não decidem a rodada.
+- **Cobra lenta:** ela anda um passo sim, um passo não. No passo em que fica parada, o corpo inteiro dela, inclusive a cauda, é obstáculo. As curvas apertadas ficam guardadas até ela andar.
+- **Interface dos power-ups:** som de power-up; o controle de quem pegou vibra médio e o dos atingidos vibra fraco; sobe o texto do efeito ("LENTO!", "-3", "X2!") na cor de quem pegou; o HUD mostra "LENTO 4" ou "X2 7" embaixo de cada nome. O texto de pontos mostra o valor dobrado ("+2").
+- **Quem joga?** mostra o mapa, o modo e a regra ("Campo aberto   Contra o tempo   campeão: 3 vitórias").
+- README: rodadas, modos e power-ups do duelo em "Como jogar", e a novidade atualizada.
+- Testes de 405 para **445**: novos `tests/test_duelo_disputa.py` (power-ups, cobra lenta e colisões com ela parada, sem bordas, relógio, fim antecipado, placar e duelos aleatórios com muitos itens em todos os modos) e `tests/test_duelo_rodadas.py` (placar entre as rodadas, campeão, jogar de novo, reiniciar, modos do menu, relógio e power-ups na tela).
+
+**Arquivos:** `src/cobrinha/config.py`, `src/cobrinha/dominio/duelo.py`, `src/cobrinha/ui/hud.py`, `src/cobrinha/estados/duelo.py`, `src/cobrinha/estados/fim_do_duelo.py`, `src/cobrinha/estados/navegacao.py`, `src/cobrinha/estados/quem_joga.py`, `tests/test_duelo_disputa.py` (novo), `tests/test_duelo_rodadas.py` (novo), `tests/test_estados_duelo.py`, `README.md`, `LOG.md`.
+
+**Motivo / observações:**
+- Terceira e última etapa do modo Duelo pedida pelo João. O equilíbrio dos power-ups e o duelo seguindo o MODO do menu foram confirmados por ele antes da implementação.
+- Relógio sem bônus por maçã: no Contra o tempo de 1 jogador, comer devolve segundos; numa disputa, isso arrastaria a rodada.
+- A VT323 não tem os símbolos ■ e □, então os quadradinhos das vitórias são desenhados como retângulos (`desenhar_vitorias`, no `hud.py`).
+- O título da contagem passou de "DUELO" para "RODADA n", e o teste da etapa 1 que conferia o título foi ajustado.
+- Para conferir que os testes novos pegam erros, quebrei de propósito duas regras (a cobra lenta andando sempre e o placar sem registrar vitórias): 9 testes falharam. Depois desfiz a quebra.
+- **Verificado localmente:** ruff sem apontamentos, 445 testes, capturas das telas novas ("Quem joga?" com o modo, contagem, HUD com relógio, vitórias e efeitos, placar da rodada e campeão) e o jogo aberto para o João testar antes dos commits.
+- Com esta etapa, o modo Duelo pedido está completo. Ele ainda não foi publicado em release.

@@ -20,6 +20,7 @@ from cobrinha.config import (
     LARGURA_JANELA,
     MAXIMO_JOGADORES,
     TAMANHO_CELULA,
+    VITORIAS_PARA_VENCER,
     Cor,
     Paleta,
     TamanhoFonte,
@@ -133,7 +134,10 @@ class EstadoQuemJoga(Estado):
             [
                 ("QUEM JOGA?", TamanhoFonte.TITULO, Paleta.BRANCO),
                 (
-                    f"DUELO   {obter_nivel(self.numero_nivel).nome}",
+                    # O modo vem do menu principal, como o mapa.
+                    f"{obter_nivel(self.numero_nivel).nome}   "
+                    f"{self.jogo.opcoes.modo_de_jogo.value}   "
+                    f"campeão: {VITORIAS_PARA_VENCER} vitórias",
                     TamanhoFonte.PEQUENO,
                     Paleta.VERDE_CLARO,
                 ),

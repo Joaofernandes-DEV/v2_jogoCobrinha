@@ -25,3 +25,7 @@ dados/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Materiais do João que ficam só na máquina dele (fora do GitHub)
+docs/ebook/
+docs/roteiro-motion.md

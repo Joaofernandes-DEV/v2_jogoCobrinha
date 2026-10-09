@@ -657,3 +657,20 @@ Modelo:
 - O João pediu uma versão nova depois do merge da etapa 3 do modo Duelo (PRs #16, #17 e #18).
 - O número escolhido foi **3.3.0**: o Duelo é uma funcionalidade nova e não muda nada do que já existia, inclusive os `dados.json` salvos. A v3.2.0 continua publicada.
 - Depois do merge, a tag `v3.3.0` dispara o workflow **Release**. O resultado fica registrado na próxima entrada.
+
+### 2026-10-09 09:39 — Release v3.3.0 publicada
+
+**Feito:**
+- Tag `v3.3.0` criada sobre o commit `5a45877` (merge do PR #19), depois de o CI ficar verde nos 4 ambientes.
+- O workflow **Release** rodou no Windows do GitHub e todas as etapas passaram: dependências → testes → executável gerado e testado → release publicada.
+- **Release:** <https://github.com/Joaofernandes-DEV/v2_jogoCobrinha/releases/tag/v3.3.0>, com o anexo `Cobrinha.exe` (16,2 MB, sha256 `25060596…efb30f1`) e as notas de `docs/notas-v3.3.0.md`. Ela não é rascunho nem pré-lançamento e virou a **Latest**. A v3.2.0, a v3.1.0, a v3.0.0 e a v2.0.0 continuam publicadas.
+- **Conferência independente:**
+  - baixei o `Cobrinha.exe` publicado e o sha256 bate com o da release;
+  - rodei com `--fechar-em 2 --nivel 2` (driver de vídeo `dummy` e pasta de dados temporária): saiu com código 0 e gravou o `dados.json`;
+  - o executável contém os módulos do Duelo (`dominio.duelo`, `entradas`, `estados.quem_joga`, `estados.duelo`, `estados.fim_do_duelo` e `estados.controle_desconectado`) e os sprites da cobra nas 4 cores.
+
+**Arquivos:** `LOG.md`.
+
+**Motivo / observações:**
+- O João pediu uma versão nova com o modo Duelo (PRs #16, #17 e #18).
+- O teste automático não usa controles de verdade, vários jogadores nem o áudio. Vale abrir o executável publicado e jogar um duelo com o teclado e o DualSense.
